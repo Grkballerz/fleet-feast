@@ -1,0 +1,504 @@
+// Fleet Feast Database Schema
+// Database: PostgreSQL 15+
+// ORM: Prisma 5.x
+// Generated: 2025-12-03
+// Author: Dana_Database
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum UserRole {
+  CUSTOMER
+  VENDOR
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
+  DELETED
+}
+
+enum VendorStatus {
+  PENDING       // Application submitted, awaiting review
+  APPROVED      // Admin approved, can accept bookings
+  REJECTED      // Application rejected
+  SUSPENDED     // Temporarily suspended
+  DEACTIVATED   // Vendor chose to deactivate
+}
+
+enum DocumentType {
+  BUSINESS_LICENSE
+  HEALTH_PERMIT
+  INSURANCE
+  TAX_ID
+  VEHICLE_REGISTRATION
+  OTHER
+}
+
+enum BookingStatus {
+  PENDING          // Customer submitted, awaiting vendor response
+  ACCEPTED         // Vendor accepted, awaiting payment
+  PAYMENT_FAILED   // Payment authorization failed
+  CONFIRMED        // Payment authorized, booking confirmed
+  COMPLETED        // Event occurred, in 7-day dispute window
+  CANCELLED        // Cancelled by customer or vendor
+  DISPUTED         // Dispute raised
+  REFUNDED         // Payment refunded
+}
+
+enum PaymentStatus {
+  PENDING          // Initial state
+  AUTHORIZED       // Stripe PaymentIntent created, funds held
+  CAPTURED         // Payment captured (event occurred)
+  RELEASED         // Funds transferred to vendor (after 7 days)
+  REFUNDED         // Payment refunded to customer
+  FAILED           // Payment failed
+}
+
+enum MessageSeverity {
+  NONE
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum ViolationType {
+  CONTACT_INFO_SHARING   // Phone, email in messages
+  CIRCUMVENTION_ATTEMPT  // Trying to bypass platform
+  HARASSMENT             // Abusive messages
+  SPAM                   // Unsolicited messages
+  FRAUD                  // Fraudulent activity
+  OTHER
+}
+
+enum DisputeStatus {
+  OPEN              // Dispute raised, under review
+  INVESTIGATING     // Platform investigating
+  RESOLVED_REFUND   // Resolved in favor of customer
+  RESOLVED_RELEASE  // Resolved in favor of vendor
+  ESCALATED         // Escalated to admin
+  CLOSED            // Closed without action
+}
+
+enum TokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+enum CuisineType {
+  AMERICAN
+  MEXICAN
+  ITALIAN
+  ASIAN
+  BBQ
+  SEAFOOD
+  VEGETARIAN
+  VEGAN
+  DESSERTS
+  COFFEE
+  OTHER
+}
+
+enum PriceRange {
+  BUDGET      // $ - Under $15/person
+  MODERATE    // $$ - $15-25/person
+  PREMIUM     // $$$ - $25-40/person
+  LUXURY      // $$$$ - Over $40/person
+}
+
+enum EventType {
+  CORPORATE
+  WEDDING
+  BIRTHDAY
+  FESTIVAL
+  PRIVATE_PARTY
+  OTHER
+}
+
+// ============================================================================
+// CORE ENTITIES
+// ============================================================================
+
+model User {
+  id            String      @id @default(uuid())
+  email         String      @unique
+  passwordHash  String      @map("password_hash")
+  role          UserRole    @default(CUSTOMER)
+  status        UserStatus  @default(ACTIVE)
+
+  // Timestamps
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+  deletedAt     DateTime?   @map("deleted_at") // Soft delete
+
+  // Relations
+  vendor              Vendor?
+  bookingsAsCustomer  Booking[]         @relation("CustomerBookings")
+  bookingsAsVendor    Booking[]         @relation("VendorBookings")
+  sentMessages        Message[]         @relation("SentMessages")
+  reviewsGiven        Review[]          @relation("ReviewsGiven")
+  reviewsReceived     Review[]          @relation("ReviewsReceived")
+  violations          Violation[]
+  disputesInitiated   Dispute[]
+  verificationTokens  VerificationToken[]
+
+  @@index([email])
+  @@index([role, status])
+  @@index([deletedAt]) // Soft delete queries
+  @@map("users")
+}
+
+model Vendor {
+  id            String         @id @default(uuid())
+  userId        String         @unique @map("user_id")
+
+  // Business Information
+  businessName  String         @map("business_name")
+  cuisineType   CuisineType    @map("cuisine_type")
+  description   String?        @db.Text
+  priceRange    PriceRange     @map("price_range")
+
+  // Capacity
+  capacityMin   Int            @map("capacity_min")  // Minimum guest count
+  capacityMax   Int            @map("capacity_max")  // Maximum guest count
+
+  // Service Area
+  serviceArea   String?        @map("service_area")  // e.g., "Manhattan, Brooklyn"
+  location      String?        // Stored as "lat,lng" for proximity searches
+
+  // Stripe Connect
+  stripeAccountId String?      @unique @map("stripe_account_id")
+  stripeConnected Boolean      @default(false) @map("stripe_connected")
+
+  // Status & Approval
+  status        VendorStatus   @default(PENDING)
+  approvedAt    DateTime?      @map("approved_at")
+  approvedBy    String?        @map("approved_by") // Admin user ID
+  rejectionReason String?      @map("rejection_reason") @db.Text
+
+  // Timestamps
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+  deletedAt     DateTime?      @map("deleted_at") // Soft delete
+
+  // Relations
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documents     VendorDocument[]
+  menu          VendorMenu?
+  availability  Availability[]
+  bookings      Booking[]
+
+  @@index([userId])
+  @@index([cuisineType, status, approvedAt]) // Vendor search optimization
+  @@index([status])
+  @@index([stripeAccountId])
+  @@map("vendors")
+}
+
+model VendorDocument {
+  id            String       @id @default(uuid())
+  vendorId      String       @map("vendor_id")
+
+  // Document Details
+  type          DocumentType
+  fileName      String       @map("file_name")
+  fileUrl       String       @map("file_url")      // S3 key or URL
+  fileSize      Int?         @map("file_size")     // Bytes
+
+  // Verification
+  verified      Boolean      @default(false)
+  verifiedAt    DateTime?    @map("verified_at")
+  verifiedBy    String?      @map("verified_by")   // Admin user ID
+  rejectionReason String?    @map("rejection_reason") @db.Text
+
+  // Timestamps
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+  deletedAt     DateTime?    @map("deleted_at")
+
+  // Relations
+  vendor        Vendor       @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@index([vendorId, type])
+  @@index([verified])
+  @@map("vendor_documents")
+}
+
+model VendorMenu {
+  id            String       @id @default(uuid())
+  vendorId      String       @unique @map("vendor_id")
+
+  // Menu Data (flexible JSON structure)
+  items         Json         // Array of { name, description, price, dietary_tags }
+  pricingModel  String       @map("pricing_model")  // "per_person", "flat_rate", "custom"
+
+  // Timestamps
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+
+  // Relations
+  vendor        Vendor       @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@index([vendorId])
+  @@map("vendor_menus")
+}
+
+model Availability {
+  id            String       @id @default(uuid())
+  vendorId      String       @map("vendor_id")
+
+  // Availability Date
+  date          DateTime     @db.Date
+  isAvailable   Boolean      @default(true) @map("is_available")
+  notes         String?      @db.Text  // Optional notes (e.g., "Only available after 6pm")
+
+  // Timestamps
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+
+  // Relations
+  vendor        Vendor       @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@unique([vendorId, date])
+  @@index([vendorId, date])
+  @@index([date, isAvailable])
+  @@map("availability")
+}
+
+model Booking {
+  id            String         @id @default(uuid())
+
+  // Parties
+  customerId    String         @map("customer_id")
+  vendorId      String         @map("vendor_id")
+
+  // Event Details
+  eventDate     DateTime       @map("event_date") @db.Date
+  eventTime     String         @map("event_time")  // Stored as "HH:MM" (e.g., "18:00")
+  eventType     EventType      @map("event_type")
+  location      String         @db.Text           // Full address
+  guestCount    Int            @map("guest_count")
+  specialRequests String?      @map("special_requests") @db.Text
+
+  // Financial
+  totalAmount   Decimal        @map("total_amount") @db.Decimal(10, 2)
+  platformFee   Decimal        @map("platform_fee") @db.Decimal(10, 2)  // 15% default, 10% for loyalty
+  vendorPayout  Decimal        @map("vendor_payout") @db.Decimal(10, 2) // totalAmount - platformFee
+
+  // Status
+  status        BookingStatus  @default(PENDING)
+
+  // Cancellation
+  cancelledAt   DateTime?      @map("cancelled_at")
+  cancelledBy   String?        @map("cancelled_by")     // User ID who cancelled
+  cancellationReason String?   @map("cancellation_reason") @db.Text
+  refundAmount  Decimal?       @map("refund_amount") @db.Decimal(10, 2)
+
+  // Vendor Response
+  acceptedAt    DateTime?      @map("accepted_at")
+  respondedAt   DateTime?      @map("responded_at")
+
+  // Timestamps
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  // Relations
+  customer      User           @relation("CustomerBookings", fields: [customerId], references: [id], onDelete: Restrict)
+  vendor        User           @relation("VendorBookings", fields: [vendorId], references: [id], onDelete: Restrict)
+  vendorProfile Vendor         @relation(fields: [vendorId], references: [userId], onDelete: Restrict, map: "bookings_vendor_profile_fkey")
+  payment       Payment?
+  messages      Message[]
+  review        Review?
+  dispute       Dispute?
+
+  @@index([customerId, createdAt(sort: Desc)])
+  @@index([vendorId, eventDate(sort: Desc)])
+  @@index([status])
+  @@index([eventDate])
+  @@map("bookings")
+}
+
+model Payment {
+  id                String         @id @default(uuid())
+  bookingId         String         @unique @map("booking_id")
+
+  // Stripe Integration
+  stripePaymentIntentId String?   @unique @map("stripe_payment_intent_id")
+  stripeTransferId      String?   @unique @map("stripe_transfer_id")
+
+  // Amount
+  amount            Decimal        @db.Decimal(10, 2)
+
+  // Status & Lifecycle
+  status            PaymentStatus  @default(PENDING)
+  authorizedAt      DateTime?      @map("authorized_at")
+  capturedAt        DateTime?      @map("captured_at")
+  releasedAt        DateTime?      @map("released_at")    // Transferred to vendor
+  refundedAt        DateTime?      @map("refunded_at")
+
+  // Timestamps
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime       @updatedAt @map("updated_at")
+
+  // Relations
+  booking           Booking        @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+
+  @@index([bookingId])
+  @@index([status, capturedAt]) // For escrow release cron job
+  @@index([stripePaymentIntentId])
+  @@map("payments")
+}
+
+model Message {
+  id            String          @id @default(uuid())
+  bookingId     String          @map("booking_id")
+  senderId      String          @map("sender_id")
+
+  // Message Content
+  content       String          @db.Text
+
+  // Anti-Circumvention
+  flagged       Boolean         @default(false)
+  flagReason    String?         @map("flag_reason")
+  flagSeverity  MessageSeverity @default(NONE) @map("flag_severity")
+  reviewedAt    DateTime?       @map("reviewed_at")
+  reviewedBy    String?         @map("reviewed_by")  // Admin user ID
+
+  // Timestamps
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+  deletedAt     DateTime?       @map("deleted_at")
+
+  // Relations
+  booking       Booking         @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  sender        User            @relation("SentMessages", fields: [senderId], references: [id], onDelete: Restrict)
+
+  @@index([bookingId, createdAt(sort: Asc)])
+  @@index([senderId, createdAt(sort: Desc)])
+  @@index([flagged, reviewedAt])  // Admin review queue
+  @@map("messages")
+}
+
+model Review {
+  id            String       @id @default(uuid())
+  bookingId     String       @unique @map("booking_id")
+
+  // Parties
+  reviewerId    String       @map("reviewer_id")      // User who wrote review
+  revieweeId    String       @map("reviewee_id")      // User being reviewed
+
+  // Review Content
+  rating        Int          // 1-5 stars
+  content       String?      @db.Text
+
+  // Moderation
+  flagged       Boolean      @default(false)
+  hidden        Boolean      @default(false)          // Hidden by admin
+
+  // Timestamps
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+  deletedAt     DateTime?    @map("deleted_at")
+
+  // Relations
+  booking       Booking      @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  reviewer      User         @relation("ReviewsGiven", fields: [reviewerId], references: [id], onDelete: Restrict)
+  reviewee      User         @relation("ReviewsReceived", fields: [revieweeId], references: [id], onDelete: Restrict)
+
+  @@index([bookingId])
+  @@index([revieweeId, createdAt(sort: Desc)])  // Get reviews for a user
+  @@index([rating])
+  @@map("reviews")
+}
+
+model Violation {
+  id            String         @id @default(uuid())
+  userId        String         @map("user_id")
+
+  // Violation Details
+  type          ViolationType
+  description   String         @db.Text
+  severity      MessageSeverity
+
+  // Context
+  relatedMessageId String?     @map("related_message_id")  // If from message flagging
+  relatedBookingId String?     @map("related_booking_id")
+
+  // Action Taken
+  actionTaken   String?        @map("action_taken")  // "warning", "suspension", "ban"
+  actionDuration Int?          @map("action_duration") // Days (for suspension)
+
+  // Resolution
+  resolvedAt    DateTime?      @map("resolved_at")
+  resolvedBy    String?        @map("resolved_by")   // Admin user ID
+  notes         String?        @db.Text
+
+  // Timestamps
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  // Relations
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([type, resolvedAt])
+  @@map("violations")
+}
+
+model Dispute {
+  id            String         @id @default(uuid())
+  bookingId     String         @unique @map("booking_id")
+  initiatorId   String         @map("initiator_id")  // Customer or Vendor who raised dispute
+
+  // Dispute Details
+  reason        String         @db.Text
+  evidence      Json?          // Array of URLs to uploaded evidence files
+
+  // Status & Resolution
+  status        DisputeStatus  @default(OPEN)
+  resolution    String?        @db.Text              // Admin's resolution notes
+  resolvedAt    DateTime?      @map("resolved_at")
+  resolvedBy    String?        @map("resolved_by")   // Admin user ID
+
+  // Timestamps
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  // Relations
+  booking       Booking        @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  initiator     User           @relation(fields: [initiatorId], references: [id], onDelete: Restrict)
+
+  @@index([bookingId])
+  @@index([status, createdAt(sort: Asc)])
+  @@index([initiatorId])
+  @@map("disputes")
+}
+
+model VerificationToken {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  token     String    @unique
+  type      TokenType
+  expiresAt DateTime  @map("expires_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("verification_tokens")
+}

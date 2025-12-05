@@ -1,0 +1,2505 @@
+openapi: 3.0.3
+info:
+  title: Fleet Feast API
+  description: |
+    RESTful API for Fleet Feast food truck marketplace platform.
+
+    ## Overview
+    Fleet Feast connects customers with food truck vendors for private events. The API supports:
+    - User authentication and authorization with role-based access control
+    - Vendor application, approval, and profile management
+    - Food truck search and discovery with filters
+    - Booking requests, acceptance, and cancellation
+    - Escrow payments via Stripe Connect
+    - In-app messaging with anti-circumvention monitoring
+    - Review and rating system
+    - Admin moderation and analytics
+
+    ## Authentication
+    All protected endpoints require authentication via JWT token stored in HTTP-only secure cookie.
+    The token is set after successful login via `/api/auth/login` endpoint.
+
+    ## Rate Limiting
+    - **Authenticated users**: 100 requests per minute
+    - **Unauthenticated users**: 20 requests per minute
+
+    Rate limit information is included in response headers:
+    - `X-RateLimit-Limit`: Total requests allowed per window
+    - `X-RateLimit-Remaining`: Requests remaining in current window
+    - `X-RateLimit-Reset`: Unix timestamp when limit resets
+
+    ## Pagination
+    List endpoints use cursor-based pagination for performance:
+    - `cursor`: Opaque cursor string for next page
+    - `limit`: Number of items per page (default: 20, max: 100)
+
+    ## Error Handling
+    All errors follow standard format with `code`, `message`, and optional `details`.
+    See full error code reference in `/docs/api/error-codes.md`.
+
+  version: 1.0.0
+  contact:
+    name: Fleet Feast API Support
+    email: api@fleetfeast.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.fleetfeast.com
+    description: Production server
+  - url: https://staging.fleetfeast.com
+    description: Staging server
+  - url: http://localhost:3000
+    description: Local development server
+
+tags:
+  - name: Authentication
+    description: User authentication and session management
+  - name: Users
+    description: User profile management
+  - name: Vendors
+    description: Vendor application, approval, and profile management
+  - name: Search
+    description: Food truck search and discovery
+  - name: Bookings
+    description: Booking request, acceptance, and management
+  - name: Payments
+    description: Payment authorization, capture, and escrow release
+  - name: Messages
+    description: In-app messaging between customers and vendors
+  - name: Reviews
+    description: Rating and review system
+  - name: Admin
+    description: Administrative functions and moderation
+
+paths:
+  # ============================================================================
+  # AUTHENTICATION
+  # ============================================================================
+  /api/auth/register:
+    post:
+      tags: [Authentication]
+      summary: Register new user account
+      description: Create a new customer or vendor account. Email verification required before full access.
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          userId:
+                            type: string
+                            format: uuid
+                          email:
+                            type: string
+                            format: email
+                          role:
+                            $ref: '#/components/schemas/UserRole'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+
+  /api/auth/login:
+    post:
+      tags: [Authentication]
+      summary: Login user
+      description: Authenticate user and create session. Sets HTTP-only secure cookie with JWT token.
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          headers:
+            Set-Cookie:
+              description: Session token cookie
+              schema:
+                type: string
+                example: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; Path=/; HttpOnly; Secure; SameSite=Strict
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+
+  /api/auth/logout:
+    post:
+      tags: [Authentication]
+      summary: Logout user
+      description: Invalidate session and clear authentication cookie
+      operationId: logoutUser
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/auth/verify-email:
+    post:
+      tags: [Authentication]
+      summary: Verify email address
+      description: Verify user email with token sent to email address
+      operationId: verifyEmail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token:
+                  type: string
+                  description: Email verification token
+      responses:
+        '200':
+          description: Email verified successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/auth/reset-password:
+    post:
+      tags: [Authentication]
+      summary: Request password reset
+      description: Send password reset email to user
+      operationId: requestPasswordReset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '200':
+          description: Password reset email sent (always returns 200 to prevent email enumeration)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+
+  /api/auth/reset-password/confirm:
+    post:
+      tags: [Authentication]
+      summary: Confirm password reset
+      description: Reset password with token from reset email
+      operationId: confirmPasswordReset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, newPassword]
+              properties:
+                token:
+                  type: string
+                newPassword:
+                  type: string
+                  minLength: 8
+      responses:
+        '200':
+          description: Password reset successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ============================================================================
+  # USERS
+  # ============================================================================
+  /api/users/me:
+    get:
+      tags: [Users]
+      summary: Get current user profile
+      description: Retrieve authenticated user's profile information
+      operationId: getCurrentUser
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    patch:
+      tags: [Users]
+      summary: Update current user profile
+      description: Update authenticated user's profile information
+      operationId: updateCurrentUser
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: User profile updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ============================================================================
+  # VENDORS
+  # ============================================================================
+  /api/vendors:
+    post:
+      tags: [Vendors]
+      summary: Submit vendor application
+      description: Apply to become a vendor on the platform. Requires user to have CUSTOMER role initially.
+      operationId: applyAsVendor
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VendorApplicationRequest'
+      responses:
+        '201':
+          description: Vendor application submitted successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Vendor'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/vendors/{vendorId}:
+    get:
+      tags: [Vendors]
+      summary: Get vendor profile
+      description: Retrieve public vendor profile (no authentication required for approved vendors)
+      operationId: getVendor
+      parameters:
+        - name: vendorId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Vendor profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Vendor'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags: [Vendors]
+      summary: Update vendor profile
+      description: Update own vendor profile (vendor only)
+      operationId: updateVendor
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: vendorId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateVendorRequest'
+      responses:
+        '200':
+          description: Vendor profile updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Vendor'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/vendors/{vendorId}/documents:
+    post:
+      tags: [Vendors]
+      summary: Upload vendor verification document
+      description: Upload business license, health permit, insurance, or other verification document
+      operationId: uploadVendorDocument
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: vendorId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadDocumentRequest'
+      responses:
+        '201':
+          description: Document uploaded successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/VendorDocument'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    get:
+      tags: [Vendors]
+      summary: List vendor documents
+      description: Get all documents for a vendor (vendor owner or admin only)
+      operationId: listVendorDocuments
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: vendorId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Documents retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/VendorDocument'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/vendors/{vendorId}/menu:
+    get:
+      tags: [Vendors]
+      summary: Get vendor menu
+      description: Retrieve vendor's menu items and pricing
+      operationId: getVendorMenu
+      parameters:
+        - name: vendorId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Menu retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/VendorMenu'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags: [Vendors]
+      summary: Update vendor menu
+      description: Update complete menu (replaces existing menu)
+      operationId: updateVendorMenu
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: vendorId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMenuRequest'
+      responses:
+        '200':
+          description: Menu updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/VendorMenu'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/vendors/{vendorId}/availability:
+    get:
+      tags: [Vendors]
+      summary: Get vendor availability
+      description: Check vendor availability for specific date range
+      operationId: getVendorAvailability
+      parameters:
+        - name: vendorId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: startDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Availability retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Availability'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+    post:
+      tags: [Vendors]
+      summary: Set vendor availability
+      description: Set availability for specific dates (vendor only)
+      operationId: setVendorAvailability
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: vendorId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetAvailabilityRequest'
+      responses:
+        '201':
+          description: Availability set successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Availability'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ============================================================================
+  # SEARCH
+  # ============================================================================
+  /api/search/vendors:
+    get:
+      tags: [Search]
+      summary: Search food trucks
+      description: |
+        Search for food trucks with filters. Results are cached for 5 minutes.
+        Supports full-text search, cuisine filtering, price range, and guest count.
+      operationId: searchVendors
+      parameters:
+        - name: query
+          in: query
+          description: Search query for vendor name, cuisine, or description
+          schema:
+            type: string
+        - name: cuisineType
+          in: query
+          description: Filter by cuisine type
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/CuisineType'
+        - name: priceRange
+          in: query
+          description: Filter by price range
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/PriceRange'
+        - name: minCapacity
+          in: query
+          description: Minimum guest capacity
+          schema:
+            type: integer
+            minimum: 1
+        - name: maxCapacity
+          in: query
+          description: Maximum guest capacity
+          schema:
+            type: integer
+            minimum: 1
+        - name: eventDate
+          in: query
+          description: Check availability for specific date
+          schema:
+            type: string
+            format: date
+        - name: cursor
+          in: query
+          description: Cursor for pagination
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Number of results per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Search results retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          vendors:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/VendorSearchResult'
+                          pagination:
+                            $ref: '#/components/schemas/CursorPagination'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  # ============================================================================
+  # BOOKINGS
+  # ============================================================================
+  /api/bookings:
+    get:
+      tags: [Bookings]
+      summary: List user bookings
+      description: Get all bookings for authenticated user (customer or vendor)
+      operationId: listBookings
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: status
+          in: query
+          description: Filter by booking status
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/BookingStatus'
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Bookings retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          bookings:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Booking'
+                          pagination:
+                            $ref: '#/components/schemas/CursorPagination'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [Bookings]
+      summary: Create booking request
+      description: Submit booking request to vendor. Vendor has 48 hours to respond.
+      operationId: createBooking
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookingRequest'
+      responses:
+        '201':
+          description: Booking request created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Booking'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/bookings/{bookingId}:
+    get:
+      tags: [Bookings]
+      summary: Get booking details
+      description: Retrieve booking details (customer, vendor, or admin only)
+      operationId: getBooking
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Booking retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Booking'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags: [Bookings]
+      summary: Update booking
+      description: Update booking details (limited fields, status-dependent)
+      operationId: updateBooking
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBookingRequest'
+      responses:
+        '200':
+          description: Booking updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Booking'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/bookings/{bookingId}/accept:
+    post:
+      tags: [Bookings]
+      summary: Accept booking request
+      description: Vendor accepts booking request. Triggers payment authorization flow.
+      operationId: acceptBooking
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Booking accepted successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          booking:
+                            $ref: '#/components/schemas/Booking'
+                          paymentClientSecret:
+                            type: string
+                            description: Stripe PaymentIntent client secret for customer payment
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/bookings/{bookingId}/decline:
+    post:
+      tags: [Bookings]
+      summary: Decline booking request
+      description: Vendor declines booking request with reason
+      operationId: declineBooking
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  description: Reason for declining
+      responses:
+        '200':
+          description: Booking declined successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Booking'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/bookings/{bookingId}/cancel:
+    post:
+      tags: [Bookings]
+      summary: Cancel booking
+      description: |
+        Cancel booking with automatic refund based on cancellation policy:
+        - More than 72 hours before event: 100% refund
+        - 24-72 hours before event: 50% refund
+        - Less than 24 hours: No refund
+      operationId: cancelBooking
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason:
+                  type: string
+                  description: Reason for cancellation
+      responses:
+        '200':
+          description: Booking cancelled successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          booking:
+                            $ref: '#/components/schemas/Booking'
+                          refundAmount:
+                            type: number
+                            format: double
+                            description: Amount refunded to customer
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ============================================================================
+  # PAYMENTS
+  # ============================================================================
+  /api/payments/authorize:
+    post:
+      tags: [Payments]
+      summary: Authorize payment
+      description: |
+        Create Stripe PaymentIntent and authorize payment for booking.
+        Called automatically after vendor accepts booking.
+        Returns client secret for Stripe Elements frontend integration.
+      operationId: authorizePayment
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [bookingId]
+              properties:
+                bookingId:
+                  type: string
+                  format: uuid
+      responses:
+        '201':
+          description: Payment authorized successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          payment:
+                            $ref: '#/components/schemas/Payment'
+                          clientSecret:
+                            type: string
+                            description: Stripe PaymentIntent client secret
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/payments/webhook:
+    post:
+      tags: [Payments]
+      summary: Stripe webhook handler
+      description: |
+        Handle Stripe webhook events for payment lifecycle:
+        - payment_intent.succeeded
+        - payment_intent.payment_failed
+        - transfer.created
+        - charge.dispute.created
+      operationId: handleStripeWebhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Stripe webhook event
+      responses:
+        '200':
+          description: Webhook processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  received:
+                    type: boolean
+        '400':
+          description: Invalid webhook signature or payload
+
+  # ============================================================================
+  # MESSAGES
+  # ============================================================================
+  /api/messages:
+    get:
+      tags: [Messages]
+      summary: List messages for booking
+      description: Get all messages for a specific booking
+      operationId: listMessages
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: bookingId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: Messages retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          messages:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Message'
+                          pagination:
+                            $ref: '#/components/schemas/CursorPagination'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    post:
+      tags: [Messages]
+      summary: Send message
+      description: |
+        Send message to vendor or customer about booking.
+        Messages are automatically scanned for contact information (phone, email).
+        Violations result in warnings or account suspension.
+      operationId: sendMessage
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [bookingId, content]
+              properties:
+                bookingId:
+                  type: string
+                  format: uuid
+                content:
+                  type: string
+                  maxLength: 2000
+      responses:
+        '201':
+          description: Message sent successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Message'
+        '400':
+          description: Message blocked due to policy violation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      error:
+                        type: object
+                        properties:
+                          code:
+                            type: string
+                            enum: [MESSAGE_BLOCKED]
+                          message:
+                            type: string
+                          violationType:
+                            type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+
+  /api/messages/{messageId}/flag:
+    post:
+      tags: [Messages]
+      summary: Flag message for review
+      description: Report message for admin review (inappropriate content, spam, etc.)
+      operationId: flagMessage
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: messageId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason:
+                  type: string
+                  description: Reason for flagging
+      responses:
+        '200':
+          description: Message flagged successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ============================================================================
+  # REVIEWS
+  # ============================================================================
+  /api/reviews:
+    get:
+      tags: [Reviews]
+      summary: List reviews
+      description: Get reviews for a specific user (vendor or customer)
+      operationId: listReviews
+      parameters:
+        - name: userId
+          in: query
+          description: User ID to get reviews for
+          schema:
+            type: string
+            format: uuid
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Reviews retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          reviews:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Review'
+                          pagination:
+                            $ref: '#/components/schemas/CursorPagination'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+    post:
+      tags: [Reviews]
+      summary: Create review
+      description: |
+        Create review for completed booking.
+        Reviews can only be created after event date + 7 day dispute window.
+        Both customer and vendor can review each other.
+      operationId: createReview
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReviewRequest'
+      responses:
+        '201':
+          description: Review created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Review'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/reviews/{reviewId}:
+    patch:
+      tags: [Reviews]
+      summary: Update review
+      description: Update own review (within 7 days of creation)
+      operationId: updateReview
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: reviewId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateReviewRequest'
+      responses:
+        '200':
+          description: Review updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Review'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags: [Reviews]
+      summary: Delete review
+      description: Delete own review (soft delete)
+      operationId: deleteReview
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: reviewId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Review deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ============================================================================
+  # ADMIN
+  # ============================================================================
+  /api/admin/vendors/pending:
+    get:
+      tags: [Admin]
+      summary: List pending vendor applications
+      description: Get all vendor applications awaiting approval (admin only)
+      operationId: listPendingVendors
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Pending vendors retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          vendors:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Vendor'
+                          pagination:
+                            $ref: '#/components/schemas/CursorPagination'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/admin/vendors/{vendorId}/approve:
+    post:
+      tags: [Admin]
+      summary: Approve vendor application
+      description: Approve vendor application and trigger Stripe Connect onboarding (admin only)
+      operationId: approveVendor
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: vendorId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Vendor approved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          vendor:
+                            $ref: '#/components/schemas/Vendor'
+                          stripeOnboardingUrl:
+                            type: string
+                            description: Stripe Connect onboarding URL sent to vendor
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/admin/vendors/{vendorId}/reject:
+    post:
+      tags: [Admin]
+      summary: Reject vendor application
+      description: Reject vendor application with reason (admin only)
+      operationId: rejectVendor
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: vendorId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason:
+                  type: string
+                  description: Reason for rejection
+      responses:
+        '200':
+          description: Vendor rejected successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Vendor'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/admin/disputes:
+    get:
+      tags: [Admin]
+      summary: List disputes
+      description: Get all disputes filtered by status (admin only)
+      operationId: listDisputes
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/DisputeStatus'
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Disputes retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          disputes:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Dispute'
+                          pagination:
+                            $ref: '#/components/schemas/CursorPagination'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/admin/disputes/{disputeId}/resolve:
+    post:
+      tags: [Admin]
+      summary: Resolve dispute
+      description: Resolve dispute and trigger refund or release payment (admin only)
+      operationId: resolveDispute
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: disputeId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [resolution, outcome]
+              properties:
+                resolution:
+                  type: string
+                  description: Admin's resolution notes
+                outcome:
+                  type: string
+                  enum: [REFUND, RELEASE]
+                  description: Whether to refund customer or release payment to vendor
+      responses:
+        '200':
+          description: Dispute resolved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Dispute'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/admin/violations:
+    get:
+      tags: [Admin]
+      summary: List violations
+      description: Get all user violations filtered by status (admin only)
+      operationId: listViolations
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: userId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: resolved
+          in: query
+          schema:
+            type: boolean
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Violations retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          violations:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Violation'
+                          pagination:
+                            $ref: '#/components/schemas/CursorPagination'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+# ==============================================================================
+# COMPONENTS
+# ==============================================================================
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: token
+      description: JWT token stored in HTTP-only secure cookie
+
+  schemas:
+    # ============================================================================
+    # COMMON SCHEMAS
+    # ============================================================================
+    ApiResponse:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: object
+
+    CursorPagination:
+      type: object
+      properties:
+        nextCursor:
+          type: string
+          nullable: true
+        prevCursor:
+          type: string
+          nullable: true
+        hasMore:
+          type: boolean
+        totalCount:
+          type: integer
+
+    # ============================================================================
+    # ENUMS
+    # ============================================================================
+    UserRole:
+      type: string
+      enum: [CUSTOMER, VENDOR, ADMIN]
+
+    UserStatus:
+      type: string
+      enum: [ACTIVE, SUSPENDED, BANNED, DELETED]
+
+    VendorStatus:
+      type: string
+      enum: [PENDING, APPROVED, REJECTED, SUSPENDED, DEACTIVATED]
+
+    CuisineType:
+      type: string
+      enum: [AMERICAN, MEXICAN, ITALIAN, ASIAN, BBQ, SEAFOOD, VEGETARIAN, VEGAN, DESSERTS, COFFEE, OTHER]
+
+    PriceRange:
+      type: string
+      enum: [BUDGET, MODERATE, PREMIUM, LUXURY]
+
+    EventType:
+      type: string
+      enum: [CORPORATE, WEDDING, BIRTHDAY, FESTIVAL, PRIVATE_PARTY, OTHER]
+
+    BookingStatus:
+      type: string
+      enum: [PENDING, ACCEPTED, PAYMENT_FAILED, CONFIRMED, COMPLETED, CANCELLED, DISPUTED, REFUNDED]
+
+    PaymentStatus:
+      type: string
+      enum: [PENDING, AUTHORIZED, CAPTURED, RELEASED, REFUNDED, FAILED]
+
+    DisputeStatus:
+      type: string
+      enum: [OPEN, INVESTIGATING, RESOLVED_REFUND, RESOLVED_RELEASE, ESCALATED, CLOSED]
+
+    DocumentType:
+      type: string
+      enum: [BUSINESS_LICENSE, HEALTH_PERMIT, INSURANCE, TAX_ID, VEHICLE_REGISTRATION, OTHER]
+
+    # ============================================================================
+    # USER SCHEMAS
+    # ============================================================================
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        role:
+          $ref: '#/components/schemas/UserRole'
+        status:
+          $ref: '#/components/schemas/UserStatus'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    RegisterRequest:
+      type: object
+      required: [email, password, role]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        role:
+          $ref: '#/components/schemas/UserRole'
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+
+    # ============================================================================
+    # VENDOR SCHEMAS
+    # ============================================================================
+    Vendor:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        businessName:
+          type: string
+        cuisineType:
+          $ref: '#/components/schemas/CuisineType'
+        description:
+          type: string
+        priceRange:
+          $ref: '#/components/schemas/PriceRange'
+        capacityMin:
+          type: integer
+        capacityMax:
+          type: integer
+        serviceArea:
+          type: string
+        location:
+          type: string
+          description: Stored as "lat,lng"
+        stripeAccountId:
+          type: string
+        stripeConnected:
+          type: boolean
+        status:
+          $ref: '#/components/schemas/VendorStatus'
+        approvedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    VendorApplicationRequest:
+      type: object
+      required: [businessName, cuisineType, priceRange, capacityMin, capacityMax]
+      properties:
+        businessName:
+          type: string
+        cuisineType:
+          $ref: '#/components/schemas/CuisineType'
+        description:
+          type: string
+        priceRange:
+          $ref: '#/components/schemas/PriceRange'
+        capacityMin:
+          type: integer
+          minimum: 10
+        capacityMax:
+          type: integer
+          maximum: 1000
+        serviceArea:
+          type: string
+        location:
+          type: string
+
+    UpdateVendorRequest:
+      type: object
+      properties:
+        businessName:
+          type: string
+        description:
+          type: string
+        priceRange:
+          $ref: '#/components/schemas/PriceRange'
+        capacityMin:
+          type: integer
+        capacityMax:
+          type: integer
+        serviceArea:
+          type: string
+        location:
+          type: string
+
+    VendorSearchResult:
+      allOf:
+        - $ref: '#/components/schemas/Vendor'
+        - type: object
+          properties:
+            averageRating:
+              type: number
+              format: double
+            reviewCount:
+              type: integer
+            isAvailable:
+              type: boolean
+              description: Available on queried event date
+
+    VendorDocument:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        vendorId:
+          type: string
+          format: uuid
+        type:
+          $ref: '#/components/schemas/DocumentType'
+        fileName:
+          type: string
+        fileUrl:
+          type: string
+        fileSize:
+          type: integer
+        verified:
+          type: boolean
+        verifiedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    UploadDocumentRequest:
+      type: object
+      required: [type, fileName, fileUrl]
+      properties:
+        type:
+          $ref: '#/components/schemas/DocumentType'
+        fileName:
+          type: string
+        fileUrl:
+          type: string
+          description: S3 key after presigned URL upload
+
+    VendorMenu:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        vendorId:
+          type: string
+          format: uuid
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+              price:
+                type: number
+                format: double
+              dietaryTags:
+                type: array
+                items:
+                  type: string
+                  enum: [vegetarian, vegan, gluten-free, dairy-free, nut-free]
+        pricingModel:
+          type: string
+          enum: [per_person, flat_rate, custom]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    UpdateMenuRequest:
+      type: object
+      required: [items, pricingModel]
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            required: [name, price]
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+              price:
+                type: number
+                format: double
+                minimum: 0
+              dietaryTags:
+                type: array
+                items:
+                  type: string
+        pricingModel:
+          type: string
+          enum: [per_person, flat_rate, custom]
+
+    Availability:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        vendorId:
+          type: string
+          format: uuid
+        date:
+          type: string
+          format: date
+        isAvailable:
+          type: boolean
+        notes:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    SetAvailabilityRequest:
+      type: object
+      required: [dates]
+      properties:
+        dates:
+          type: array
+          items:
+            type: object
+            required: [date, isAvailable]
+            properties:
+              date:
+                type: string
+                format: date
+              isAvailable:
+                type: boolean
+              notes:
+                type: string
+
+    # ============================================================================
+    # BOOKING SCHEMAS
+    # ============================================================================
+    Booking:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        customerId:
+          type: string
+          format: uuid
+        vendorId:
+          type: string
+          format: uuid
+        eventDate:
+          type: string
+          format: date
+        eventTime:
+          type: string
+          pattern: '^([01]\d|2[0-3]):([0-5]\d)$'
+        eventType:
+          $ref: '#/components/schemas/EventType'
+        location:
+          type: string
+        guestCount:
+          type: integer
+        specialRequests:
+          type: string
+        totalAmount:
+          type: number
+          format: double
+        platformFee:
+          type: number
+          format: double
+        vendorPayout:
+          type: number
+          format: double
+        status:
+          $ref: '#/components/schemas/BookingStatus'
+        acceptedAt:
+          type: string
+          format: date-time
+        cancelledAt:
+          type: string
+          format: date-time
+        cancellationReason:
+          type: string
+        refundAmount:
+          type: number
+          format: double
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateBookingRequest:
+      type: object
+      required: [vendorId, eventDate, eventTime, eventType, location, guestCount, totalAmount]
+      properties:
+        vendorId:
+          type: string
+          format: uuid
+        eventDate:
+          type: string
+          format: date
+        eventTime:
+          type: string
+          pattern: '^([01]\d|2[0-3]):([0-5]\d)$'
+        eventType:
+          $ref: '#/components/schemas/EventType'
+        location:
+          type: string
+        guestCount:
+          type: integer
+          minimum: 10
+          maximum: 1000
+        specialRequests:
+          type: string
+          maxLength: 1000
+        totalAmount:
+          type: number
+          format: double
+          minimum: 100
+
+    UpdateBookingRequest:
+      type: object
+      properties:
+        eventTime:
+          type: string
+        location:
+          type: string
+        guestCount:
+          type: integer
+        specialRequests:
+          type: string
+
+    # ============================================================================
+    # PAYMENT SCHEMAS
+    # ============================================================================
+    Payment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        bookingId:
+          type: string
+          format: uuid
+        stripePaymentIntentId:
+          type: string
+        stripeTransferId:
+          type: string
+        amount:
+          type: number
+          format: double
+        status:
+          $ref: '#/components/schemas/PaymentStatus'
+        authorizedAt:
+          type: string
+          format: date-time
+        capturedAt:
+          type: string
+          format: date-time
+        releasedAt:
+          type: string
+          format: date-time
+        refundedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    # ============================================================================
+    # MESSAGE SCHEMAS
+    # ============================================================================
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        bookingId:
+          type: string
+          format: uuid
+        senderId:
+          type: string
+          format: uuid
+        content:
+          type: string
+        flagged:
+          type: boolean
+        flagReason:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    # ============================================================================
+    # REVIEW SCHEMAS
+    # ============================================================================
+    Review:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        bookingId:
+          type: string
+          format: uuid
+        reviewerId:
+          type: string
+          format: uuid
+        revieweeId:
+          type: string
+          format: uuid
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        content:
+          type: string
+        flagged:
+          type: boolean
+        hidden:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateReviewRequest:
+      type: object
+      required: [bookingId, rating]
+      properties:
+        bookingId:
+          type: string
+          format: uuid
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        content:
+          type: string
+          maxLength: 2000
+
+    UpdateReviewRequest:
+      type: object
+      properties:
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        content:
+          type: string
+          maxLength: 2000
+
+    # ============================================================================
+    # ADMIN SCHEMAS
+    # ============================================================================
+    Dispute:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        bookingId:
+          type: string
+          format: uuid
+        initiatorId:
+          type: string
+          format: uuid
+        reason:
+          type: string
+        evidence:
+          type: array
+          items:
+            type: string
+        status:
+          $ref: '#/components/schemas/DisputeStatus'
+        resolution:
+          type: string
+        resolvedAt:
+          type: string
+          format: date-time
+        resolvedBy:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+
+    Violation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [CONTACT_INFO_SHARING, CIRCUMVENTION_ATTEMPT, HARASSMENT, SPAM, FRAUD, OTHER]
+        description:
+          type: string
+        severity:
+          type: string
+          enum: [NONE, LOW, MEDIUM, HIGH]
+        actionTaken:
+          type: string
+          enum: [warning, suspension, ban]
+        actionDuration:
+          type: integer
+          description: Days for suspension
+        resolvedAt:
+          type: string
+          format: date-time
+        resolvedBy:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+
+  # ==============================================================================
+  # RESPONSE TEMPLATES
+  # ==============================================================================
+  responses:
+    BadRequest:
+      description: Bad request - invalid parameters or request body
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ApiResponse'
+              - type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum: [VALIDATION_ERROR, INVALID_INPUT]
+                      message:
+                        type: string
+                      details:
+                        type: object
+
+    Unauthorized:
+      description: Unauthorized - authentication required or invalid token
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ApiResponse'
+              - type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum: [UNAUTHORIZED, INVALID_TOKEN, TOKEN_EXPIRED]
+                      message:
+                        type: string
+
+    Forbidden:
+      description: Forbidden - insufficient permissions
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ApiResponse'
+              - type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum: [FORBIDDEN, INSUFFICIENT_PERMISSIONS]
+                      message:
+                        type: string
+
+    NotFound:
+      description: Not found - resource does not exist
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ApiResponse'
+              - type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum: [NOT_FOUND]
+                      message:
+                        type: string
+
+    Conflict:
+      description: Conflict - resource already exists or operation conflicts with current state
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ApiResponse'
+              - type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum: [CONFLICT, DUPLICATE_RESOURCE, INVALID_STATE_TRANSITION]
+                      message:
+                        type: string
+
+    RateLimitExceeded:
+      description: Rate limit exceeded - too many requests
+      headers:
+        X-RateLimit-Limit:
+          schema:
+            type: integer
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+        X-RateLimit-Reset:
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ApiResponse'
+              - type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum: [RATE_LIMIT_EXCEEDED]
+                      message:
+                        type: string
+                      details:
+                        type: object
+                        properties:
+                          retryAfter:
+                            type: integer
+                            description: Seconds until rate limit resets

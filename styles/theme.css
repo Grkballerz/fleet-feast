@@ -1,0 +1,506 @@
+/* ============================================
+   FLEET FEAST THEME SYSTEM
+   Component-level token definitions and theme utilities
+   ============================================ */
+
+/* ============================================
+   COMPONENT TOKEN DEFINITIONS
+   ============================================ */
+
+:root {
+  /* Button Component Tokens */
+  --button-radius: var(--radius-lg);
+  --button-padding-x: 1.5rem;
+  --button-padding-y: 0.75rem;
+  --button-font-weight: var(--font-weight-medium);
+  --button-transition: var(--transition-normal);
+
+  /* Card Component Tokens */
+  --card-radius: var(--radius-lg);
+  --card-padding: 1.5rem;
+  --card-shadow: var(--shadow-sm);
+  --card-shadow-hover: var(--shadow-md);
+  --card-border-width: 1px;
+
+  /* Input Component Tokens */
+  --input-radius: var(--radius-lg);
+  --input-padding-x: 1rem;
+  --input-padding-y: 0.625rem;
+  --input-border-width: 1px;
+  --input-transition: var(--transition-normal);
+
+  /* Navigation Tokens */
+  --nav-height: 4rem;
+  --nav-padding: 1rem;
+  --nav-shadow: var(--shadow);
+
+  /* Modal/Dialog Tokens */
+  --modal-radius: var(--radius-xl);
+  --modal-padding: 2rem;
+  --modal-shadow: var(--shadow-2xl);
+  --modal-backdrop: rgba(0, 0, 0, 0.5);
+
+  /* Toast/Notification Tokens */
+  --toast-radius: var(--radius-lg);
+  --toast-padding: 1rem;
+  --toast-shadow: var(--shadow-lg);
+
+  /* Dropdown/Menu Tokens */
+  --dropdown-radius: var(--radius-lg);
+  --dropdown-padding: 0.5rem;
+  --dropdown-shadow: var(--shadow-lg);
+  --dropdown-item-radius: var(--radius);
+
+  /* Badge Tokens */
+  --badge-radius: var(--radius-full);
+  --badge-padding-x: 0.75rem;
+  --badge-padding-y: 0.25rem;
+  --badge-font-size: 0.875rem;
+
+  /* Avatar Tokens */
+  --avatar-radius: var(--radius-full);
+  --avatar-size-sm: 2rem;
+  --avatar-size-md: 3rem;
+  --avatar-size-lg: 4rem;
+  --avatar-size-xl: 6rem;
+
+  /* Spacing Presets for Layouts */
+  --section-spacing-y: 5rem;
+  --content-spacing-y: 3rem;
+  --element-spacing: 1.5rem;
+
+  /* Z-Index Scale */
+  --z-base: 0;
+  --z-dropdown: 1000;
+  --z-sticky: 1100;
+  --z-fixed: 1200;
+  --z-modal-backdrop: 1300;
+  --z-modal: 1400;
+  --z-popover: 1500;
+  --z-tooltip: 1600;
+  --z-toast: 1700;
+}
+
+/* ============================================
+   ANIMATION KEYFRAMES
+   Additional custom animations beyond Tailwind
+   ============================================ */
+
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-left {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-right {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(185, 28, 28, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(185, 28, 28, 0.8);
+  }
+}
+
+@keyframes progress {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+/* ============================================
+   ANIMATION UTILITY CLASSES
+   ============================================ */
+
+.animate-bounce-in {
+  animation: bounce-in 0.3s ease-out;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+.animate-slide-down {
+  animation: slide-down 0.3s ease-out;
+}
+
+.animate-slide-left {
+  animation: slide-left 0.3s ease-out;
+}
+
+.animate-slide-right {
+  animation: slide-right 0.3s ease-out;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 3s linear infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+/* ============================================
+   COMPONENT PATTERNS
+   Pre-built component patterns for common UI elements
+   ============================================ */
+
+/* Loading Spinner */
+.spinner {
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid rgba(185, 28, 28, 0.2);
+  border-top-color: #B91C1C;
+  border-radius: 50%;
+  animation: spin-slow 0.8s linear infinite;
+}
+
+.spinner-sm {
+  width: 1rem;
+  height: 1rem;
+  border-width: 1.5px;
+}
+
+.spinner-lg {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-width: 3px;
+}
+
+/* Progress Bar */
+.progress-bar {
+  position: relative;
+  height: 0.5rem;
+  background-color: #E5E7EB;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: #B91C1C;
+  border-radius: var(--radius-full);
+  transition: width var(--transition-slow);
+}
+
+.progress-bar-striped .progress-bar-fill {
+  background-image: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.2) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.2) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 1rem 1rem;
+  animation: progress 1s linear infinite;
+}
+
+/* Tooltip */
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-0.5rem);
+  padding: 0.5rem 0.75rem;
+  background-color: #111827;
+  color: #FFFFFF;
+  font-size: 0.875rem;
+  border-radius: var(--radius);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-normal), transform var(--transition-normal);
+  z-index: var(--z-tooltip);
+}
+
+.tooltip::after {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 0.25rem solid transparent;
+  border-top-color: #111827;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-normal);
+  z-index: var(--z-tooltip);
+}
+
+.tooltip:hover::before,
+.tooltip:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-0.25rem);
+}
+
+/* Avatar Group */
+.avatar-group {
+  display: flex;
+  align-items: center;
+}
+
+.avatar-group .avatar {
+  margin-left: -0.5rem;
+  border: 2px solid #FFFFFF;
+  transition: transform var(--transition-fast);
+}
+
+.avatar-group .avatar:first-child {
+  margin-left: 0;
+}
+
+.avatar-group .avatar:hover {
+  transform: translateY(-0.25rem);
+  z-index: 10;
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: #6B7280;
+}
+
+.empty-state-icon {
+  width: 4rem;
+  height: 4rem;
+  margin-bottom: 1rem;
+  color: #D1D5DB;
+}
+
+.empty-state-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+.empty-state-description {
+  font-size: 0.875rem;
+  max-width: 28rem;
+}
+
+/* ============================================
+   RESPONSIVE BREAKPOINT HELPERS
+   ============================================ */
+
+/* Show/Hide Utilities per Breakpoint */
+.show-on-mobile {
+  display: block;
+}
+
+.hide-on-mobile {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .show-on-mobile {
+    display: none;
+  }
+
+  .hide-on-mobile {
+    display: block;
+  }
+
+  .show-on-tablet {
+    display: block;
+  }
+
+  .hide-on-tablet {
+    display: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .show-on-desktop {
+    display: block;
+  }
+
+  .hide-on-desktop {
+    display: none;
+  }
+}
+
+/* ============================================
+   ACCESSIBILITY HELPERS
+   ============================================ */
+
+/* Screen Reader Only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.sr-only-focusable:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: inherit;
+  margin: inherit;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* Skip Link (for keyboard navigation) */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  padding: 1rem;
+  background-color: #B91C1C;
+  color: #FFFFFF;
+  font-weight: 500;
+  text-decoration: none;
+  z-index: var(--z-tooltip);
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* ============================================
+   DARK MODE OVERRIDES
+   (Foundation for future implementation)
+   ============================================ */
+
+.dark {
+  /* Component-specific dark mode adjustments */
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --card-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+  --modal-backdrop: rgba(0, 0, 0, 0.7);
+}
+
+.dark .spinner {
+  border-color: rgba(239, 68, 68, 0.3);
+  border-top-color: #EF4444;
+}
+
+.dark .progress-bar {
+  background-color: #374151;
+}
+
+.dark .progress-bar-fill {
+  background-color: #EF4444;
+}
+
+.dark .tooltip::before {
+  background-color: #F9FAFB;
+  color: #111827;
+}
+
+.dark .tooltip::after {
+  border-top-color: #F9FAFB;
+}
+
+.dark .empty-state-icon {
+  color: #4B5563;
+}
+
+/* ============================================
+   UTILITY MIXINS (For future CSS-in-JS use)
+   These are documented patterns, not executable CSS
+   ============================================ */
+
+/*
+  Focus Ring Mixin:
+  outline: none;
+  ring: 2px solid var(--ring);
+  ring-offset: 2px;
+  transition: box-shadow var(--transition-fast);
+
+  Button Hover Mixin:
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+
+  Card Hover Mixin:
+  transform: scale(1.01);
+  box-shadow: var(--shadow-lg);
+
+  Transition All Mixin:
+  transition: all var(--transition-normal);
+*/
