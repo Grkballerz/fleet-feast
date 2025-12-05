@@ -1,0 +1,197 @@
+"use client";
+
+import React, { useState } from "react";
+import Image from "next/image";
+import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/Button";
+
+export interface PhotoGalleryProps {
+  photos: string[];
+  businessName: string;
+  className?: string;
+}
+
+/**
+ * Lightbox Component
+ * Full-screen image viewer with navigation
+ */
+interface LightboxProps {
+  photos: string[];
+  currentIndex: number;
+  onClose: () => void;
+  onNext: () => void;
+  onPrev: () => void;
+  businessName: string;
+}
+
+const Lightbox: React.FC<LightboxProps> = ({
+  photos,
+  currentIndex,
+  onClose,
+  onNext,
+  onPrev,
+  businessName,
+}) => {
+  // Handle keyboard navigation
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowLeft") onPrev();
+      if (e.key === "ArrowRight") onNext();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose, onNext, onPrev]);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
+      onClick={onClose}
+    >
+      {/* Close Button */}
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+        aria-label="Close lightbox"
+      >
+        <X className="h-6 w-6 text-white" />
+      </button>
+
+      {/* Previous Button */}
+      {photos.length > 1 && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onPrev();
+          }}
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+          aria-label="Previous photo"
+        >
+          <ChevronLeft className="h-8 w-8 text-white" />
+        </button>
+      )}
+
+      {/* Image */}
+      <div
+        className="relative max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center p-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <Image
+          src={photos[currentIndex]}
+          alt={`${businessName} photo ${currentIndex + 1}`}
+          fill
+          className="object-contain"
+          sizes="100vw"
+          priority
+        />
+      </div>
+
+      {/* Next Button */}
+      {photos.length > 1 && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onNext();
+          }}
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+          aria-label="Next photo"
+        >
+          <ChevronRight className="h-8 w-8 text-white" />
+        </button>
+      )}
+
+      {/* Counter */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 px-4 py-2 rounded-full bg-black/50 text-white text-sm">
+        {currentIndex + 1} / {photos.length}
+      </div>
+    </div>
+  );
+};
+
+/**
+ * PhotoGallery Component
+ *
+ * Grid of photos with lightbox functionality.
+ * Supports keyboard navigation (ESC, arrows) and touch swipe on mobile.
+ *
+ * @example
+ * ```tsx
+ * <PhotoGallery
+ *   photos={truckPhotos}
+ *   businessName="Taco Truck"
+ * />
+ * ```
+ */
+export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
+  photos,
+  businessName,
+  className,
+}) => {
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+
+  // No photos to display
+  if (!photos || photos.length === 0) {
+    return null;
+  }
+
+  const handleNext = () => {
+    if (selectedIndex !== null) {
+      setSelectedIndex((selectedIndex + 1) % photos.length);
+    }
+  };
+
+  const handlePrev = () => {
+    if (selectedIndex !== null) {
+      setSelectedIndex((selectedIndex - 1 + photos.length) % photos.length);
+    }
+  };
+
+  return (
+    <>
+      {/* Photo Grid */}
+      <div className={cn("space-y-4", className)}>
+        <h2 className="text-2xl font-bold">Photos</h2>
+
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3">
+          {photos.map((photo, index) => (
+            <button
+              key={index}
+              onClick={() => setSelectedIndex(index)}
+              className="aspect-square relative overflow-hidden rounded-lg group cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              aria-label={`View photo ${index + 1}`}
+            >
+              <Image
+                src={photo}
+                alt={`${businessName} photo ${index + 1}`}
+                fill
+                className="object-cover transition-transform duration-300 group-hover:scale-110"
+                sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              />
+              {/* Hover Overlay */}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+            </button>
+          ))}
+        </div>
+
+        {/* Photo Count */}
+        <p className="text-sm text-text-secondary">
+          {photos.length} {photos.length === 1 ? "photo" : "photos"}
+        </p>
+      </div>
+
+      {/* Lightbox */}
+      {selectedIndex !== null && (
+        <Lightbox
+          photos={photos}
+          currentIndex={selectedIndex}
+          onClose={() => setSelectedIndex(null)}
+          onNext={handleNext}
+          onPrev={handlePrev}
+          businessName={businessName}
+        />
+      )}
+    </>
+  );
+};

@@ -20,11 +20,11 @@ This registry tracks all API endpoints in the Fleet Feast platform. It serves as
 
 ## Statistics
 
-- **Total Endpoints:** 67
+- **Total Endpoints:** 61
 - **Public Endpoints:** 14
-- **Protected Endpoints:** 53
+- **Protected Endpoints:** 47
 - **Admin-Only Endpoints:** 7
-- **HTTP Methods:** GET (33), POST (30), PUT (7), PATCH (5), DELETE (2)
+- **HTTP Methods:** GET (29), POST (25), PUT (7), PATCH (5), DELETE (2)
 
 ---
 
@@ -142,54 +142,20 @@ PENDING → ACCEPTED → CONFIRMED → COMPLETED
 
 ---
 
-### 6. Payments (8 endpoints)
+### 6. Payments (2 endpoints)
 **Base Path:** `/api/payments`
 
-| Method | Endpoint | Auth | Role | Description | Status |
-|--------|----------|------|------|-------------|--------|
-| POST | `/api/payments` | Required | Customer | Create payment intent | ✅ Implemented |
-| GET | `/api/payments/{id}` | Required | Customer/Vendor | Get payment details | ✅ Implemented |
-| POST | `/api/payments/{id}/refund` | Required | Customer/Admin | Process refund | ✅ Implemented |
-| POST | `/api/payments/webhook` | Webhook | Stripe | Stripe webhook handler | ✅ Implemented |
-| POST | `/api/payments/connect/onboard` | Required | Vendor | Create Stripe Connect onboarding link | ✅ Implemented |
-| GET | `/api/vendor/payouts` | Required | Vendor | List vendor payouts | ✅ Implemented |
-| GET | `/api/vendor/payouts/{id}` | Required | Vendor | Get payout details | ✅ Implemented |
-| POST | `/api/vendor/payouts` | Required | Vendor | Request early payout (placeholder) | ⏳ Pending |
+| Method | Endpoint | Auth | Role | Description |
+|--------|----------|------|------|-------------|
+| POST | `/api/payments/authorize` | Required | Customer | Authorize payment |
+| POST | `/api/payments/webhook` | Webhook | Stripe | Stripe webhook handler |
 
 **Payment State Machine:**
 ```
 PENDING → AUTHORIZED → CAPTURED → RELEASED
-         ↓           ↓           ↓
-      FAILED     REFUNDED    REFUNDED
+                      ↓
+                   REFUNDED
 ```
-
-**Stripe Connect Integration:**
-- Marketplace model with Express connected accounts
-- Vendor onboarding with account_onboarding flow
-- Application fee for platform commission (15%)
-- Manual payout schedule (escrow control)
-
-**Escrow System:**
-- Payment authorized when booking is ACCEPTED
-- Funds held (manual capture) until event completion
-- Payment captured 7 days after event date
-- Automatic release to vendor after escrow hold period
-- Cancellation refunds processed immediately based on policy
-
-**Refund Policy:**
-- 7+ days before event: 100% refund
-- 3-6 days before event: 50% refund
-- Under 3 days: 0% refund
-- Partial refunds supported for disputes
-
-**Webhook Events Handled:**
-- `payment_intent.succeeded` - Update payment status to AUTHORIZED
-- `payment_intent.payment_failed` - Update payment status to FAILED
-- `payment_intent.canceled` - Log cancellation
-- `charge.refunded` - Log refund completion
-- `transfer.created` - Log successful vendor payout
-- `transfer.failed` - Alert on failed payout
-- `account.updated` - Update vendor Stripe connection status
 
 ---
 
@@ -288,7 +254,7 @@ PENDING → AUTHORIZED → CAPTURED → RELEASED
 | Admin (Vendors) | 3/7 | Partial | Blake_Backend (Task Fleet-Feast-ok7) |
 | Search | 1 (deprecated) | Replaced by Food Trucks API | Ellis_Endpoints |
 | Bookings | 7/7 | ✅ Complete | Blake_Backend (Task Fleet-Feast-wu8) |
-| Payments | 7/8 | ✅ Complete | Blake_Backend (Task Fleet-Feast-5cl) |
+| Payments | 2 | Pending | Blake_Backend |
 | Messages | 4/4 | ✅ Complete | Blake_Backend (Task Fleet-Feast-2f0) |
 | Reviews | 7/7 | ✅ Complete | Ellis_Endpoints (Task Fleet-Feast-bj4) |
 | Admin (Other) | 4/7 | Pending | Blake_Backend |
@@ -492,34 +458,6 @@ vendor:availability:{vendorId}:{date}
 
 ## Change Log
 
-### Version 1.6 - 2025-12-05 (Blake_Backend)
-- Implemented Payment & Escrow System API (8 endpoints)
-  - POST `/api/payments` - Create payment intent for booking
-  - GET `/api/payments/{id}` - Get payment details
-  - POST `/api/payments/{id}/refund` - Process refund with cancellation policy
-  - POST `/api/payments/webhook` - Stripe webhook event handler
-  - POST `/api/payments/connect/onboard` - Vendor Stripe Connect onboarding
-  - GET `/api/vendor/payouts` - List vendor payouts
-  - GET `/api/vendor/payouts/{id}` - Get single payout details
-  - POST `/api/vendor/payouts` - Request early payout (placeholder)
-- Features:
-  - Stripe Connect marketplace integration with Express accounts
-  - Payment intent creation with manual capture (escrow)
-  - 15% platform commission via application fees
-  - 7-day escrow hold after event completion
-  - Automatic payment release after hold period
-  - Refund processing with cancellation policy enforcement
-  - Partial refund support for disputes
-  - Vendor onboarding with account links
-  - Webhook signature verification
-  - Payment status tracking (PENDING → AUTHORIZED → CAPTURED → RELEASED)
-  - Comprehensive error handling for Stripe API failures
-  - Idempotency for payment operations
-- Created payment module with types, validation, service layer, and Stripe client
-- All endpoints follow service layer pattern with proper error handling
-- Webhook handlers for all critical Stripe events
-- Vendor payout tracking and reporting
-
 ### Version 1.5 - 2025-12-05 (Blake_Backend)
 - Implemented Messaging System with Anti-Circumvention (4 endpoints)
   - POST `/api/messages` - Send message in booking conversation
@@ -654,7 +592,7 @@ vendor:availability:{vendorId}:{date}
 
 ---
 
-**Document Version:** 1.6
+**Document Version:** 1.5
 **Last Updated:** 2025-12-05
 **Author:** Blake_Backend
 **Next Review:** 2026-01-03

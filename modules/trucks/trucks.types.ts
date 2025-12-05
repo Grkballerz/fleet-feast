@@ -48,6 +48,7 @@ export interface TruckSearchFilters {
     lng: number;
     radiusMiles: number;
   };
+  excludeId?: string; // Exclude a specific truck (for similar trucks)
 }
 
 /**

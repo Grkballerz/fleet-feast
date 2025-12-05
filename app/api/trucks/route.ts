@@ -49,6 +49,9 @@ export async function GET(req: NextRequest) {
     // Parse available date
     const availableDate = searchParams.get("availableDate") || undefined;
 
+    // Parse exclude ID (for similar trucks)
+    const excludeId = searchParams.get("exclude") || undefined;
+
     // Parse location filter
     let location: { lat: number; lng: number; radiusMiles: number } | undefined;
     const lat = searchParams.get("lat");
@@ -112,6 +115,7 @@ export async function GET(req: NextRequest) {
       minRating,
       availableDate,
       location,
+      excludeId,
     };
 
     // Build pagination

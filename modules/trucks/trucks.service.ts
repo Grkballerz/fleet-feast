@@ -63,13 +63,18 @@ export async function searchTrucks(
   filters: TruckSearchFilters,
   pagination: SearchPagination
 ): Promise<{ trucks: TruckSearchResult[]; total: number }> {
-  const { query, cuisineType, priceRange, capacityMin, capacityMax, minRating, availableDate, location } = filters;
+  const { query, cuisineType, priceRange, capacityMin, capacityMax, minRating, availableDate, location, excludeId } = filters;
   const { page, limit, sortBy = "relevance", sortOrder = "desc" } = pagination;
 
   const offset = (page - 1) * limit;
 
   // Build WHERE conditions
   const conditions: string[] = ["v.status = 'APPROVED'", "v.deleted_at IS NULL"];
+
+  // Exclude specific truck ID (for similar trucks)
+  if (excludeId) {
+    conditions.push(`v.id != '${excludeId}'`);
+  }
 
   // Cuisine type filter
   if (cuisineType && cuisineType.length > 0) {
