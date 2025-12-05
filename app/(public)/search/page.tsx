@@ -266,6 +266,16 @@ export default function SearchPage() {
 
             {/* Results Area */}
             <main className="flex-1 min-w-0">
+              {/* Screen reader announcement for search results - WCAG 4.1.3 */}
+              <div
+                role="status"
+                aria-live="polite"
+                aria-atomic="true"
+                className="sr-only"
+              >
+                {isLoading ? "Searching for food trucks..." : `Found ${totalResults} food truck${totalResults === 1 ? '' : 's'}`}
+              </div>
+
               {/* Controls Bar */}
               <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -286,10 +296,12 @@ export default function SearchPage() {
 
                   {/* View toggle and sort */}
                   <div className="flex items-center gap-4">
-                    {/* View toggle */}
-                    <div className="flex gap-1 bg-gray-100 rounded-md p-1">
+                    {/* View toggle - WCAG 4.1.2 */}
+                    <div className="flex gap-1 bg-gray-100 rounded-md p-1" role="group" aria-label="View mode">
                       <button
                         onClick={() => setViewMode("grid")}
+                        aria-label="Grid view"
+                        aria-pressed={viewMode === "grid"}
                         className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
                           viewMode === "grid"
                             ? "bg-white text-gray-900 shadow-sm"
@@ -300,6 +312,8 @@ export default function SearchPage() {
                       </button>
                       <button
                         onClick={() => setViewMode("list")}
+                        aria-label="List view"
+                        aria-pressed={viewMode === "list"}
                         className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
                           viewMode === "list"
                             ? "bg-white text-gray-900 shadow-sm"

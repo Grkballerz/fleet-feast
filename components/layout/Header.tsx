@@ -60,13 +60,14 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
         <div className="flex items-center justify-between h-16">
           {/* Left: Logo + Desktop Nav */}
           <div className="flex items-center gap-8">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 shrink-0">
+            {/* Logo - WCAG 2.4.4, 4.1.2 */}
+            <Link href="/" aria-label="Fleet Feast home" className="flex items-center gap-2 shrink-0">
               <div className="h-10 w-10 bg-primary rounded-lg flex items-center justify-center">
                 <svg
                   className="h-6 w-6 text-white"
                   fill="currentColor"
                   viewBox="0 0 20 20"
+                  aria-hidden="true"
                 >
                   <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
                   <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1v-5a1 1 0 00-.293-.707l-2-2A1 1 0 0015 7h-1z" />
@@ -77,10 +78,10 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
               </span>
             </Link>
 
-            {/* Desktop Navigation */}
-            <div className="hidden lg:flex">
+            {/* Desktop Navigation - WCAG 1.3.1, 2.4.1 */}
+            <nav className="hidden lg:flex" aria-label="Main navigation">
               <NavMenu items={navItems} userRole={session?.user.role} />
-            </div>
+            </nav>
           </div>
 
           {/* Center: Search Bar (Desktop) */}
@@ -108,23 +109,25 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
             </div>
           </div>
 
-          {/* Right: User Menu */}
-          <div className="hidden lg:flex items-center gap-4">
+          {/* Right: User Menu - WCAG 4.1.2 */}
+          <nav className="hidden lg:flex items-center gap-4" aria-label="User menu">
             <UserMenu />
-          </div>
+          </nav>
 
-          {/* Mobile: Hamburger Button */}
+          {/* Mobile: Hamburger Button - WCAG 4.1.2 */}
           <button
             onClick={() => setMobileMenuOpen(true)}
             className="lg:hidden p-2 rounded-lg hover:bg-secondary transition-colors"
             aria-label="Open menu"
             aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-navigation-drawer"
           >
             <svg
               className="h-6 w-6 text-text-primary"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
+              aria-hidden="true"
             >
               <path
                 strokeLinecap="round"
@@ -164,6 +167,7 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
 
       {/* Mobile Navigation Drawer */}
       <MobileDrawer
+        id="mobile-navigation-drawer"
         isOpen={mobileMenuOpen}
         onClose={() => setMobileMenuOpen(false)}
       >

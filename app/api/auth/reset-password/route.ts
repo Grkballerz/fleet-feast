@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requestPasswordReset, resetPassword, AuthError } from "@/modules/auth/auth.service";
+import { rateLimit, RateLimitPresets } from "@/lib/middleware/rate-limit";
 
 // Request password reset schema
 const requestResetSchema = z.object({
@@ -30,8 +31,9 @@ const confirmResetSchema = z.object({
 
 /**
  * Handle POST request for password reset
+ * Rate limited to prevent abuse
  */
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     const body = await request.json();
 
@@ -124,3 +126,6 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+// Export with strict rate limiting applied (5 requests per 15 minutes)
+export const POST = rateLimit(handlePOST, RateLimitPresets.strict);

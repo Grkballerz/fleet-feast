@@ -1,6 +1,6 @@
 /**
  * Quote Submission API
- * POST /api/quotes/:requestId/submit - Vendor submits quote
+ * POST /api/quotes/requests/:id/submit - Vendor submits quote for a request
  *
  * Requires authentication (VENDOR role)
  */
@@ -28,7 +28,7 @@ import { UserRole } from "@prisma/client";
  */
 async function handlePOST(
   req: AuthenticatedRequest,
-  { params }: { params: { requestId: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
     const userId = getUserId(req);
@@ -39,8 +39,8 @@ async function handlePOST(
       return ApiResponses.forbidden("Only vendors can submit quotes");
     }
 
-    // Validate requestId parameter
-    const paramValidation = requestIdParamSchema.safeParse({ requestId: params.requestId });
+    // Validate id parameter (this is the request ID)
+    const paramValidation = requestIdParamSchema.safeParse({ requestId: params.id });
     if (!paramValidation.success) {
       return ApiResponses.validationError(
         paramValidation.error.flatten().fieldErrors as Record<string, string[]>

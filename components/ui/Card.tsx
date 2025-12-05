@@ -43,7 +43,7 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
  */
 export const Card = forwardRef<HTMLDivElement, CardProps>(
   (
-    { className, variant = "default", header, footer, children, ...props },
+    { className, variant = "default", header, footer, children, onClick, ...props },
     ref
   ) => {
     // Base styles
@@ -57,12 +57,22 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
         "cursor-pointer transition-all hover:shadow-lg hover:scale-[1.01] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
     };
 
+    // Keyboard handler for interactive cards - WCAG 2.1.1
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (variant === "interactive" && (e.key === "Enter" || e.key === " ")) {
+        e.preventDefault();
+        onClick?.(e as any);
+      }
+    };
+
     return (
       <div
         ref={ref}
         className={cn(baseStyles, variantStyles[variant], className)}
         tabIndex={variant === "interactive" ? 0 : undefined}
         role={variant === "interactive" ? "button" : undefined}
+        onClick={variant === "interactive" ? onClick : undefined}
+        onKeyDown={variant === "interactive" ? handleKeyDown : undefined}
         {...props}
       >
         {header && <div className="mb-4 border-b border-border pb-4">{header}</div>}

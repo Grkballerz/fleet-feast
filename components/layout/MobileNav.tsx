@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { NavMenu, NavMenuItem } from "@/components/navigation/NavMenu";
 import { MobileDrawer } from "@/components/navigation/MobileDrawer";
@@ -31,17 +33,22 @@ export interface MobileNavProps {
 export const MobileNav: React.FC<MobileNavProps> = ({ items, className }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { data: session } = useSession();
+  const pathname = usePathname();
 
   return (
     <>
-      {/* Mobile Bottom Nav Bar */}
-      <div
+      {/* Mobile Bottom Nav Bar - WCAG 2.4.1, 4.1.2 */}
+      <nav
+        role="navigation"
+        aria-label="Mobile bottom navigation"
         className={`lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-border shadow-lg ${className}`}
       >
         <div className="grid grid-cols-4 gap-1 px-2 py-2">
           {/* Home */}
-          <a
+          <Link
             href="/"
+            aria-current={pathname === "/" ? "page" : undefined}
+            aria-label="Home"
             className="flex flex-col items-center justify-center py-2 px-3 rounded-lg hover:bg-secondary transition-colors"
           >
             <svg
@@ -49,6 +56,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items, className }) => {
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
+              aria-hidden="true"
             >
               <path
                 strokeLinecap="round"
@@ -58,11 +66,13 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items, className }) => {
               />
             </svg>
             <span className="text-xs text-text-secondary mt-1">Home</span>
-          </a>
+          </Link>
 
           {/* Search */}
-          <a
+          <Link
             href="/search"
+            aria-current={pathname === "/search" ? "page" : undefined}
+            aria-label="Search food trucks"
             className="flex flex-col items-center justify-center py-2 px-3 rounded-lg hover:bg-secondary transition-colors"
           >
             <svg
@@ -70,6 +80,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items, className }) => {
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
+              aria-hidden="true"
             >
               <path
                 strokeLinecap="round"
@@ -79,16 +90,18 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items, className }) => {
               />
             </svg>
             <span className="text-xs text-text-secondary mt-1">Search</span>
-          </a>
+          </Link>
 
           {/* Messages */}
           {session && (
-            <a
+            <Link
               href={
                 session.user.role === UserRole.VENDOR
                   ? "/vendor/messages"
                   : "/dashboard/messages"
               }
+              aria-current={pathname?.includes("/messages") ? "page" : undefined}
+              aria-label="Messages"
               className="flex flex-col items-center justify-center py-2 px-3 rounded-lg hover:bg-secondary transition-colors"
             >
               <svg
@@ -96,6 +109,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items, className }) => {
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -105,12 +119,15 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items, className }) => {
                 />
               </svg>
               <span className="text-xs text-text-secondary mt-1">Messages</span>
-            </a>
+            </Link>
           )}
 
           {/* Menu */}
           <button
             onClick={() => setIsOpen(true)}
+            aria-label="Open menu"
+            aria-expanded={isOpen}
+            aria-controls="mobile-menu-drawer"
             className="flex flex-col items-center justify-center py-2 px-3 rounded-lg hover:bg-secondary transition-colors"
           >
             <svg
@@ -118,6 +135,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items, className }) => {
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
+              aria-hidden="true"
             >
               <path
                 strokeLinecap="round"
@@ -129,10 +147,14 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items, className }) => {
             <span className="text-xs text-text-secondary mt-1">Menu</span>
           </button>
         </div>
-      </div>
+      </nav>
 
       {/* Mobile Drawer */}
-      <MobileDrawer isOpen={isOpen} onClose={() => setIsOpen(false)}>
+      <MobileDrawer
+        id="mobile-menu-drawer"
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+      >
         <NavMenu
           items={items}
           userRole={session?.user.role}

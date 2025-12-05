@@ -1,0 +1,17 @@
+{
+  "comment": "ADD THESE SCRIPTS TO package.json",
+  "scripts": {
+    "build:analyze": "ANALYZE=true next build",
+    "perf:lighthouse": "lighthouse http://localhost:3000 --view --output=html --output-path=./reports/lighthouse.html",
+    "perf:bundle": "npm run build:analyze && open .next/analyze/client.html",
+    "perf:test": "npm run build && npm run perf:lighthouse",
+    "db:migrate:perf": "npx prisma migrate deploy",
+    "db:indexes": "psql $DATABASE_URL -c '\\di' | grep idx_",
+    "cache:clear": "node scripts/clear-cache.js",
+    "perf:monitor": "node scripts/performance-monitor.js"
+  },
+  "devDependencies": {
+    "webpack-bundle-analyzer": "^4.10.1",
+    "lighthouse": "^11.4.0"
+  }
+}

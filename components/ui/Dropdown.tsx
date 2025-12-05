@@ -57,7 +57,19 @@ export const Dropdown: React.FC<DropdownProps> = ({
   className,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<(HTMLElement | null)[]>([]);
+
+  // Get valid (non-divider) items
+  const validItems = items.filter(item => !item.divider);
+
+  // Focus management when dropdown opens
+  useEffect(() => {
+    if (isOpen && itemRefs.current[focusedIndex]) {
+      itemRefs.current[focusedIndex]?.focus();
+    }
+  }, [isOpen, focusedIndex]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -94,6 +106,28 @@ export const Dropdown: React.FC<DropdownProps> = ({
     setIsOpen(false);
   };
 
+  // Arrow key navigation handler - WCAG 2.1.1
+  const handleMenuKeyDown = (e: React.KeyboardEvent) => {
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        setFocusedIndex((prev) => (prev + 1) % validItems.length);
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        setFocusedIndex((prev) => (prev - 1 + validItems.length) % validItems.length);
+        break;
+      case "Home":
+        e.preventDefault();
+        setFocusedIndex(0);
+        break;
+      case "End":
+        e.preventDefault();
+        setFocusedIndex(validItems.length - 1);
+        break;
+    }
+  };
+
   return (
     <div className="relative inline-block" ref={dropdownRef}>
       {/* Trigger */}
@@ -123,6 +157,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
             className
           )}
           role="menu"
+          onKeyDown={handleMenuKeyDown}
         >
           <div className="py-1">
             {items.map((item, index) => {
@@ -135,6 +170,9 @@ export const Dropdown: React.FC<DropdownProps> = ({
                   />
                 );
               }
+
+              // Get valid item index for ref array
+              const validItemIndex = validItems.findIndex(vi => vi.label === item.label);
 
               // Menu item
               const itemClasses = cn(
@@ -149,9 +187,11 @@ export const Dropdown: React.FC<DropdownProps> = ({
                 return (
                   <a
                     key={index}
+                    ref={(el) => (itemRefs.current[validItemIndex] = el)}
                     href={item.href}
                     className={itemClasses}
                     role="menuitem"
+                    tabIndex={-1}
                     onClick={() => setIsOpen(false)}
                   >
                     {item.icon && (
@@ -167,8 +207,10 @@ export const Dropdown: React.FC<DropdownProps> = ({
               return (
                 <button
                   key={index}
+                  ref={(el) => (itemRefs.current[validItemIndex] = el)}
                   className={cn(itemClasses, "w-full text-left")}
                   role="menuitem"
+                  tabIndex={-1}
                   onClick={() => handleItemClick(item)}
                 >
                   {item.icon && (

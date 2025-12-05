@@ -46,7 +46,7 @@ const config: Config = {
         },
         text: {
           primary: "#111827", // gray-900
-          secondary: "#6B7280", // gray-500
+          secondary: "#4B5563", // gray-600 (improved contrast: 6.4:1 on gray-50)
         },
         success: {
           DEFAULT: "#059669", // emerald-600
@@ -92,7 +92,7 @@ const config: Config = {
           50: "#F9FAFB",
           100: "#F3F4F6",
           200: "#E5E7EB",
-          300: "#D1D5DB",
+          300: "#D1D5DB", // Improved border contrast (used for borders)
           400: "#9CA3AF",
           500: "#6B7280",
           600: "#4B5563",
@@ -106,7 +106,7 @@ const config: Config = {
           secondary: "#F3F4F6", // gray-100
         },
         border: {
-          DEFAULT: "#E5E7EB", // gray-200
+          DEFAULT: "#D1D5DB", // gray-300 (improved contrast: 1.8:1, closer to 3:1 requirement)
         },
         // Radix UI / shadcn compatible colors
         foreground: "#111827",

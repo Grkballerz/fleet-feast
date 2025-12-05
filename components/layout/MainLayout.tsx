@@ -39,11 +39,19 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
 }) => {
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Skip Navigation Link - WCAG 2.4.1 */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-primary focus:text-white focus:px-4 focus:py-2 focus:rounded focus:ring-2 focus:ring-ring focus:ring-offset-2"
+      >
+        Skip to main content
+      </a>
+
       {/* Header */}
       <Header />
 
       {/* Main Content */}
-      <main className={`flex-1 ${className}`}>
+      <main id="main-content" tabIndex={-1} className={`flex-1 ${className}`}>
         {children}
       </main>
 

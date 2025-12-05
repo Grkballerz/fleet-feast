@@ -20,6 +20,12 @@
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:report": "playwright show-report",
+    "load-test:smoke": "k6 run load-tests/smoke-test.js",
+    "load-test:users": "k6 run --out json=load-tests/results/concurrent-users.json load-tests/concurrent-users-test.js",
+    "load-test:api": "k6 run --out json=load-tests/results/api-stress.json load-tests/api-stress-test.js",
+    "load-test:payments": "k6 run --out json=load-tests/results/payment-flow.json load-tests/payment-flow-test.js",
+    "load-test:ratelimit": "k6 run --out json=load-tests/results/rate-limit.json load-tests/rate-limit-test.js",
+    "load-test:all": "bash load-tests/run-all-tests.sh",
     "postinstall": "prisma generate"
   },
   "dependencies": {

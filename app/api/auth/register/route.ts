@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { registerUser, AuthError } from "@/modules/auth/auth.service";
 import { UserRole } from "@prisma/client";
+import { rateLimit, RateLimitPresets } from "@/lib/middleware/rate-limit";
 
 // Request validation schema
 const registerSchema = z.object({
@@ -28,8 +29,9 @@ type RegisterRequest = z.infer<typeof registerSchema>;
 
 /**
  * Handle POST request for user registration
+ * Rate limited to 5 requests per 15 minutes to prevent abuse
  */
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     // Parse and validate request body
     const body = await request.json();
@@ -95,3 +97,6 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+// Export with strict rate limiting applied
+export const POST = rateLimit(handlePOST, RateLimitPresets.strict);

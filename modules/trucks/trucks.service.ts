@@ -68,41 +68,54 @@ export async function searchTrucks(
 
   const offset = (page - 1) * limit;
 
-  // Build WHERE conditions
-  const conditions: string[] = ["v.status = 'APPROVED'", "v.deleted_at IS NULL"];
+  // Build WHERE conditions using parameterized queries
+  const whereConditions: Prisma.Sql[] = [
+    Prisma.sql`v.status = 'APPROVED'`,
+    Prisma.sql`v.deleted_at IS NULL`
+  ];
 
-  // Exclude specific truck ID (for similar trucks)
+  // Exclude specific truck ID (for similar trucks) - FIXED SQL INJECTION
   if (excludeId) {
-    conditions.push(`v.id != '${excludeId}'`);
+    whereConditions.push(Prisma.sql`v.id != ${excludeId}`);
   }
 
-  // Cuisine type filter
+  // Cuisine type filter - FIXED SQL INJECTION
   if (cuisineType && cuisineType.length > 0) {
-    const cuisineList = cuisineType.map((c) => `'${c}'`).join(", ");
-    conditions.push(`v.cuisine_type IN (${cuisineList})`);
+    whereConditions.push(Prisma.sql`v.cuisine_type = ANY(${cuisineType})`);
   }
 
-  // Price range filter
+  // Price range filter - FIXED SQL INJECTION
   if (priceRange && priceRange.length > 0) {
-    const priceList = priceRange.map((p) => `'${p}'`).join(", ");
-    conditions.push(`v.price_range IN (${priceList})`);
+    whereConditions.push(Prisma.sql`v.price_range = ANY(${priceRange})`);
   }
 
-  // Capacity filters
+  // Capacity filters - validate as numbers
   if (capacityMin !== undefined) {
-    conditions.push(`v.capacity_max >= ${capacityMin}`);
+    if (typeof capacityMin !== 'number' || isNaN(capacityMin)) {
+      throw new TruckError("Invalid capacityMin", "INVALID_CAPACITY", 400);
+    }
+    whereConditions.push(Prisma.sql`v.capacity_max >= ${capacityMin}`);
   }
   if (capacityMax !== undefined) {
-    conditions.push(`v.capacity_min <= ${capacityMax}`);
+    if (typeof capacityMax !== 'number' || isNaN(capacityMax)) {
+      throw new TruckError("Invalid capacityMax", "INVALID_CAPACITY", 400);
+    }
+    whereConditions.push(Prisma.sql`v.capacity_min <= ${capacityMax}`);
   }
 
-  // Available date filter
+  // Available date filter - FIXED SQL INJECTION
   if (availableDate) {
-    conditions.push(`
+    // Validate date format to prevent injection
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(availableDate)) {
+      throw new TruckError("Invalid date format (use YYYY-MM-DD)", "INVALID_DATE", 400);
+    }
+
+    whereConditions.push(Prisma.sql`
       EXISTS (
         SELECT 1 FROM availability a
         WHERE a.vendor_id = v.id
-          AND a.date = '${availableDate}'::date
+          AND a.date = ${availableDate}::date
           AND a.is_available = true
       )
     `);
@@ -171,7 +184,8 @@ export async function searchTrucks(
     orderByClause = "ORDER BY v.approved_at DESC";
   }
 
-  const whereClause = conditions.join(" AND ");
+  // Combine WHERE conditions using Prisma.join for safety
+  const whereClause = Prisma.join(whereConditions, ' AND ');
 
   // Execute search query with reviews aggregation
   const trucksRaw = await prisma.$queryRaw<any[]>`
@@ -182,9 +196,9 @@ export async function searchTrucks(
     FROM vendors v
     LEFT JOIN users u ON v.user_id = u.id
     LEFT JOIN reviews r ON r.reviewee_id = u.id AND r.hidden = false AND r.deleted_at IS NULL
-    WHERE ${Prisma.raw(whereClause)}
+    WHERE ${whereClause}
     GROUP BY v.id
-    HAVING ${minRating ? Prisma.raw(`COALESCE(AVG(r.rating), 0) >= ${minRating}`) : Prisma.raw("true")}
+    HAVING ${minRating ? Prisma.sql`COALESCE(AVG(r.rating), 0) >= ${minRating}` : Prisma.sql`true`}
     ${Prisma.raw(orderByClause)}
     LIMIT ${limit}
     OFFSET ${offset}
@@ -196,9 +210,9 @@ export async function searchTrucks(
     FROM vendors v
     LEFT JOIN users u ON v.user_id = u.id
     LEFT JOIN reviews r ON r.reviewee_id = u.id AND r.hidden = false AND r.deleted_at IS NULL
-    WHERE ${Prisma.raw(whereClause)}
+    WHERE ${whereClause}
     GROUP BY v.id
-    HAVING ${minRating ? Prisma.raw(`COALESCE(AVG(r.rating), 0) >= ${minRating}`) : Prisma.raw("true")}
+    HAVING ${minRating ? Prisma.sql`COALESCE(AVG(r.rating), 0) >= ${minRating}` : Prisma.sql`true`}
   `;
 
   const total = countResult.length;

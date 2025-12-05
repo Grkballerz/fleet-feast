@@ -15,6 +15,10 @@ This registry tracks all API endpoints in the Fleet Feast platform. It serves as
 - **OpenAPI Spec:** `docs/api/openapi.yaml` - Complete API specification
 - **API Design:** `docs/api/api-design.md` - Design patterns and standards
 - **Error Codes:** `docs/api/error-codes.md` - Comprehensive error reference
+- **User Guides:** `docs/user-guides/` - End-user documentation
+  - `Customer_Guide.md` - Customer-facing documentation
+  - `Vendor_Guide.md` - Vendor-facing documentation
+  - `Admin_Guide.md` - Administrator documentation
 
 ---
 
