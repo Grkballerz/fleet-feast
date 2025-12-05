@@ -87,26 +87,34 @@ export const NavMenu: React.FC<NavMenuProps> = ({
  */
 
 export const customerNavItems: NavMenuItem[] = [
+  { label: "Dashboard", href: "/dashboard" },
   { label: "Search Trucks", href: "/search" },
-  { label: "My Bookings", href: "/dashboard/bookings" },
-  { label: "Messages", href: "/dashboard/messages" },
+  { label: "My Bookings", href: "/bookings" },
+  { label: "Messages", href: "/messages" },
   { label: "Favorites", href: "/dashboard/favorites" },
+  { label: "Reviews", href: "/dashboard/reviews" },
+  { label: "Payments", href: "/dashboard/payments" },
+  { label: "Settings", href: "/dashboard/settings" },
 ];
 
 export const vendorNavItems: NavMenuItem[] = [
-  { label: "Dashboard", href: "/vendor/dashboard" },
+  { label: "Overview", href: "/vendor/dashboard" },
   { label: "Bookings", href: "/vendor/bookings" },
   { label: "Calendar", href: "/vendor/calendar" },
+  { label: "Analytics", href: "/vendor/analytics" },
+  { label: "Reviews", href: "/vendor/reviews" },
+  { label: "Payouts", href: "/vendor/payouts" },
   { label: "Messages", href: "/vendor/messages" },
   { label: "Profile", href: "/vendor/profile" },
 ];
 
 export const adminNavItems: NavMenuItem[] = [
-  { label: "Dashboard", href: "/admin" },
-  { label: "Pending Vendors", href: "/admin/vendors/pending" },
+  { label: "Dashboard", href: "/admin/dashboard" },
+  { label: "Vendor Applications", href: "/admin/vendors" },
   { label: "Disputes", href: "/admin/disputes" },
-  { label: "Users", href: "/admin/users" },
+  { label: "Violations", href: "/admin/violations" },
   { label: "Analytics", href: "/admin/analytics" },
+  { label: "Users", href: "/admin/users" },
 ];
 
 export const publicNavItems: NavMenuItem[] = [

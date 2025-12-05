@@ -65,6 +65,8 @@ export interface BookingDetails {
   totalAmount: number;
   platformFee: number;
   vendorPayout: number;
+  discountAmount?: number;
+  loyaltyApplied?: boolean;
 
   // Status
   status: BookingStatus;

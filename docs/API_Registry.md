@@ -20,11 +20,11 @@ This registry tracks all API endpoints in the Fleet Feast platform. It serves as
 
 ## Statistics
 
-- **Total Endpoints:** 80
+- **Total Endpoints:** 92
 - **Public Endpoints:** 14
-- **Protected Endpoints:** 59
+- **Protected Endpoints:** 71
 - **Admin-Only Endpoints:** 15
-- **HTTP Methods:** GET (39), POST (35), PUT (12), PATCH (5), DELETE (2)
+- **HTTP Methods:** GET (45), POST (37), PUT (16), PATCH (5), DELETE (2)
 
 ---
 
@@ -263,7 +263,73 @@ PENDING → AUTHORIZED → CAPTURED → RELEASED
 
 ---
 
-### 9. Disputes (6 endpoints)
+### 9. Quotes (6 endpoints)
+**Base Path:** `/api/quotes`
+
+| Method | Endpoint | Auth | Role | Description | Status |
+|--------|----------|------|------|-------------|--------|
+| POST | `/api/quotes/request` | Required | Customer | Create quote request (RFQ) | ✅ Implemented |
+| GET | `/api/quotes/requests` | Required | Customer | List customer's quote requests | ✅ Implemented |
+| GET | `/api/quotes/requests/:id` | Required | Customer | Get quote request with all quotes | ✅ Implemented |
+| GET | `/api/quotes/vendor` | Required | Vendor | List vendor's received RFQs | ✅ Implemented |
+| POST | `/api/quotes/:requestId/submit` | Required | Vendor | Submit quote for RFQ | ✅ Implemented |
+| PUT | `/api/quotes/:id/accept` | Required | Customer | Accept quote and create booking | ✅ Implemented |
+
+**Quote Request Flow:**
+```
+Customer creates RFQ → Vendors notified → Vendors submit quotes → Customer compares → Customer accepts quote → Booking created
+```
+
+**Quote Pricing Structure:**
+```json
+{
+  "basePrice": 500.00,
+  "perPersonPrice": 25.00,
+  "additionalFees": [
+    { "name": "Setup Fee", "amount": 100.00 },
+    { "name": "Travel Fee", "amount": 50.00 }
+  ],
+  "total": 650.00
+}
+```
+
+**Business Rules:**
+- **Customer RFQ Creation:**
+  - Can select 1-10 vendors to request quotes from
+  - Must provide event details, requirements, and optional budget
+  - Default quote deadline: 7 days from request
+- **Vendor Quote Submission:**
+  - Only invited vendors can submit quotes
+  - Must include pricing breakdown, inclusions, and validity period
+  - Can only submit before RFQ expiry date
+  - One quote per vendor per request
+- **Quote Acceptance:**
+  - Creates PENDING booking automatically
+  - Requires event time (not included in RFQ)
+  - Marks quote request as ACCEPTED
+  - Rejects other submitted quotes
+  - 15% platform commission applied
+- **Quote Expiry:**
+  - RFQ expires after customer-defined deadline (default 7 days)
+  - Individual quotes expire based on vendor-defined validity
+  - Expired quotes cannot be accepted
+
+**Quote Statuses:**
+- `PENDING` - RFQ sent, vendor hasn't responded
+- `SUBMITTED` - Vendor submitted quote
+- `ACCEPTED` - Customer accepted quote (booking created)
+- `REJECTED` - Customer chose a different quote
+- `EXPIRED` - Quote validity period expired
+- `WITHDRAWN` - Vendor withdrew the quote
+
+**Quote Request Statuses:**
+- `OPEN` - Awaiting vendor quotes
+- `CLOSED` - No longer accepting quotes (manually closed)
+- `ACCEPTED` - Customer accepted a quote
+
+---
+
+### 10. Disputes (6 endpoints)
 **Base Path:** `/api/disputes`
 
 | Method | Endpoint | Auth | Role | Description | Status |
@@ -309,7 +375,109 @@ OPEN → INVESTIGATING → RESOLVED_REFUND
 
 ---
 
-### 10. Violations (2 endpoints)
+### 11. Loyalty (1 endpoint)
+**Base Path:** `/api/loyalty`
+
+| Method | Endpoint | Auth | Role | Description | Status |
+|--------|----------|------|------|-------------|--------|
+| GET | `/api/loyalty/check?vendorId={vendorId}` | Required | Customer | Check loyalty discount eligibility | ✅ Implemented |
+
+**Loyalty Discount System:**
+- **5% discount** on 2nd+ booking with same vendor
+- Platform absorbs cost by reducing commission from **15% → 10%**
+- Vendor payout remains unchanged
+- Discount automatically applied at booking creation
+- Eligibility based on COMPLETED booking history
+
+**Example Response:**
+```json
+{
+  "eligible": true,
+  "message": "You qualify for a 5% loyalty discount! You've completed 2 booking(s) with this vendor.",
+  "previousBookings": 2,
+  "discountPercent": 5
+}
+```
+
+**Pricing Calculation (with loyalty):**
+```
+Base Amount: $1000
+Discount (5%): -$50
+Total Amount: $950 (customer pays)
+Commission (10%): $95 (platform earns)
+Vendor Payout: $855 (vendor receives)
+```
+
+**Business Rules:**
+- Only customers can check loyalty status
+- Eligibility requires at least 1 COMPLETED booking with vendor
+- Discount applied automatically during booking creation
+- Commission rate reduced for loyalty bookings (15% → 10%)
+- Vendor payout increased despite lower customer payment
+
+**Updated Booking Fields:**
+- `discountAmount` (decimal) - Amount discounted from base price
+- `loyaltyApplied` (boolean) - Whether loyalty discount was applied
+- Booking responses now include loyalty information
+
+---
+
+### 12. Notifications (5 endpoints)
+**Base Path:** `/api/notifications`
+
+| Method | Endpoint | Auth | Role | Description | Status |
+|--------|----------|------|------|-------------|--------|
+| GET | `/api/notifications` | Required | All | Get user's notifications with pagination | ✅ Implemented |
+| PUT | `/api/notifications/{id}/read` | Required | All | Mark notification as read | ✅ Implemented |
+| PUT | `/api/notifications/read-all` | Required | All | Mark all notifications as read | ✅ Implemented |
+| GET | `/api/notifications/preferences` | Required | All | Get notification preferences | ✅ Implemented |
+| PUT | `/api/notifications/preferences` | Required | All | Update notification preferences | ✅ Implemented |
+
+**Notification Types:**
+- `BOOKING_REQUEST` - Vendor: New booking request received
+- `BOOKING_ACCEPTED` - Customer: Booking was accepted
+- `BOOKING_DECLINED` - Customer: Booking was declined
+- `BOOKING_CANCELLED` - Both: Booking was cancelled
+- `PAYMENT_CONFIRMED` - Both: Payment was successful
+- `NEW_MESSAGE` - Both: New message in booking conversation
+- `EVENT_REMINDER` - Both: Event happening in 24 hours
+- `REVIEW_PROMPT` - Both: Time to leave a review (7 days after event)
+- `DISPUTE_CREATED` - Both: Dispute was created
+- `DISPUTE_RESOLVED` - Both: Dispute was resolved
+- `VIOLATION_WARNING` - User: Received a violation warning
+- `ACCOUNT_STATUS_CHANGED` - User: Account status changed
+
+**Features:**
+- In-app notifications stored in database
+- Email notifications via SendGrid
+- User preferences per notification type
+- Email digest mode (daily summary)
+- Auto-creation from booking/payment/message events
+- Pagination support (limit, offset)
+- Unread count tracking
+- Mark as read (individual or all)
+
+**Email Templates:**
+- Responsive HTML templates for all notification types
+- Brand-consistent design with Fleet Feast styling
+- Dynamic content based on notification metadata
+- Platform links for quick action
+- Configurable sender (FROM_EMAIL, FROM_NAME)
+
+**Query Parameters (GET /api/notifications):**
+- `limit` (integer) - Notifications per page (default: 20, max: 100)
+- `offset` (integer) - Pagination offset (default: 0)
+- `unreadOnly` (boolean) - Filter to unread only (default: false)
+
+**Notification Preferences:**
+- Individual toggles for each notification type
+- Email digest mode (daily summary instead of immediate)
+- In-app notifications always enabled
+- Default: all email notifications ON
+
+---
+
+### 13. Violations (2 endpoints)
 **Base Path:** `/api/violations`
 
 | Method | Endpoint | Auth | Role | Description | Status |
@@ -340,7 +508,7 @@ OPEN → INVESTIGATING → RESOLVED_REFUND
 
 ---
 
-### 11. Admin (15 endpoints)
+### 13. Admin (15 endpoints)
 **Base Path:** `/api/admin`
 
 | Method | Endpoint | Auth | Role | Description | Status |
@@ -389,11 +557,14 @@ OPEN → INVESTIGATING → RESOLVED_REFUND
 | Vendors | 10/10 | ✅ Complete | Blake_Backend (Task Fleet-Feast-ok7), Ellis_Endpoints (Task Fleet-Feast-w6w) |
 | Food Trucks | 3/3 | ✅ Complete | Ellis_Endpoints (Task Fleet-Feast-w6w) |
 | Search | 1 (deprecated) | Replaced by Food Trucks API | Ellis_Endpoints |
-| Bookings | 7/7 | ✅ Complete | Blake_Backend (Task Fleet-Feast-wu8) |
+| Bookings | 7/7 | ✅ Complete | Blake_Backend (Task Fleet-Feast-wu8, Fleet-Feast-4tc) |
+| Quotes | 6/6 | ✅ Complete | Ellis_Endpoints (Task Fleet-Feast-4h6) |
 | Payments | 7/8 | ✅ Complete | Blake_Backend (Task Fleet-Feast-5cl) |
+| Loyalty | 1/1 | ✅ Complete | Blake_Backend (Task Fleet-Feast-4tc) |
 | Messages | 4/4 | ✅ Complete | Blake_Backend (Task Fleet-Feast-2f0) |
 | Reviews | 7/7 | ✅ Complete | Ellis_Endpoints (Task Fleet-Feast-bj4) |
 | Disputes | 4/4 | ✅ Complete | Blake_Backend (Task Fleet-Feast-32i) |
+| Notifications | 5/5 | ✅ Complete | Jordan_Junction (Task Fleet-Feast-zft) |
 | Violations | 2/2 | ✅ Complete | Blake_Backend (Task Fleet-Feast-9xc) |
 | Admin | 12/15 | ✅ Partial | Blake_Backend (Vendors, Disputes, Violations) |
 
@@ -540,6 +711,7 @@ vendor:availability:{vendorId}:{date}
 ## External Integrations
 
 ### Stripe Connect
+### Version 2.1 - 2025-12-05 (Blake_Backend)- Implemented Loyalty Discount System (1 endpoint + booking integration)  - GET `/api/loyalty/check?vendorId={vendorId}` - Check loyalty discount eligibility- Features:  - **5% automatic discount** on 2nd+ booking with same vendor  - Platform absorbs cost by reducing commission from **15% → 10%**  - **Vendor payout increases** despite customer paying less  - Eligibility based on COMPLETED booking count (≥1 previous booking)  - Automatic application during booking creation (no customer action required)  - Discount details included in all booking responses- Database Changes:  - Added `discountAmount` (Decimal, nullable) to Booking model  - Added `loyaltyApplied` (Boolean) to Booking model  - Created Prisma migration: `20251205091550_add_loyalty_discount_fields`- Created loyalty module with comprehensive service layer- Updated booking service to integrate loyalty pricing- Updated API Registry with loyalty section (section 11)
 **Endpoints Affected:**
 - `POST /api/payments/authorize` - Create PaymentIntent
 - `POST /api/payments/webhook` - Handle Stripe events
@@ -595,6 +767,44 @@ vendor:availability:{vendorId}:{date}
 ---
 
 ## Change Log
+
+### Version 1.9 - 2025-12-05 (Ellis_Endpoints)
+- Implemented Quote Request System API (6 endpoints)
+  - POST `/api/quotes/request` - Create quote request (RFQ)
+  - GET `/api/quotes/requests` - List customer's quote requests
+  - GET `/api/quotes/requests/:id` - Get quote request with all submitted quotes
+  - GET `/api/quotes/vendor` - List vendor's received RFQs
+  - POST `/api/quotes/:requestId/submit` - Vendor submits quote with pricing
+  - PUT `/api/quotes/:id/accept` - Accept quote and create booking
+- Features:
+  - Multi-vendor RFQ system for complex events
+  - Flexible pricing breakdown (base price, per-person pricing, additional fees)
+  - Quote comparison with vendor ratings
+  - Automatic booking creation when quote is accepted
+  - Quote expiry management (RFQ deadline and individual quote validity)
+  - One quote per vendor per request enforcement
+  - Status tracking for quotes and requests
+  - Authorization checks (customers create RFQs, vendors submit quotes)
+- Created quote module with:
+  - Type definitions for quote requests, quotes, and pricing structures
+  - Zod validation schemas with pricing calculation validation
+  - Service layer with transaction handling for quote acceptance
+  - Comprehensive error handling with QuoteError class
+- Updated Prisma schema:
+  - Added QuoteRequest model with event details and requirements
+  - Added Quote model with JSON pricing, inclusions array, and booking relation
+  - Added QuoteRequestStatus enum (OPEN, CLOSED, ACCEPTED)
+  - Added QuoteStatus enum (PENDING, SUBMITTED, ACCEPTED, REJECTED, EXPIRED, WITHDRAWN)
+  - Added relations to User and Booking models
+- Business logic:
+  - Default 7-day RFQ expiry
+  - Default 14-day quote validity
+  - Quote acceptance creates PENDING booking automatically
+  - 15% platform commission applied on booking creation
+  - Other quotes automatically rejected when one is accepted
+  - Vendor ratings included in quote comparisons
+- All endpoints follow service layer pattern with proper authorization
+- Quote pricing validation ensures total matches base + fees
 
 ### Version 1.8 - 2025-12-05 (Blake_Backend)
 - Implemented Violation & Penalty System API (8 endpoints)
@@ -830,9 +1040,43 @@ vendor:availability:{vendorId}:{date}
 - Cursor-based pagination pattern standardized
 - RBAC enforcement documented
 
+### Version 2.0 - 2025-12-05 (Jordan_Junction)
+- Implemented Notification System API (5 endpoints)
+  - GET `/api/notifications` - Get user's notifications with pagination
+  - PUT `/api/notifications/{id}/read` - Mark notification as read
+  - PUT `/api/notifications/read-all` - Mark all notifications as read
+  - GET `/api/notifications/preferences` - Get notification preferences
+  - PUT `/api/notifications/preferences` - Update notification preferences
+- Features:
+  - In-app notifications stored in PostgreSQL
+  - Email notifications via SendGrid integration
+  - 12 notification types covering all major events
+  - User preferences with per-type email toggles
+  - Email digest mode for daily summaries
+  - Automatic notification creation from booking/payment/message services
+  - Pagination with unreadOnly filter
+  - Unread count tracking
+  - Individual and bulk mark-as-read
+- Email Templates:
+  - Responsive HTML templates for all 12 notification types
+  - Brand-consistent Fleet Feast styling
+  - Dynamic content rendering with metadata
+  - Platform action links
+  - Configurable sender email and name
+- Created notification module with:
+  - Type definitions for notifications and preferences
+  - Email service with SendGrid integration
+  - Notification service with preference checking
+  - 12 responsive email templates
+  - Convenience functions for common notifications
+  - Email preference mapping
+- All endpoints follow service layer pattern with proper authorization
+- Default notification preferences created on first access
+- Email sending failures don't block notification creation
+
 ---
 
-**Document Version:** 1.7
+**Document Version:** 2.0
 **Last Updated:** 2025-12-05
-**Author:** Blake_Backend
+**Author:** Jordan_Junction
 **Next Review:** 2026-01-03

@@ -97,6 +97,21 @@ enum TokenType {
   PASSWORD_RESET
 }
 
+enum NotificationType {
+  BOOKING_REQUEST        // Vendor: New booking request received
+  BOOKING_ACCEPTED       // Customer: Booking was accepted
+  BOOKING_DECLINED       // Customer: Booking was declined
+  BOOKING_CANCELLED      // Both: Booking was cancelled
+  PAYMENT_CONFIRMED      // Both: Payment was successful
+  NEW_MESSAGE            // Both: New message in booking conversation
+  EVENT_REMINDER         // Both: Event happening in 24 hours
+  REVIEW_PROMPT          // Both: Time to leave a review (7 days after event)
+  DISPUTE_CREATED        // Both: Dispute was created
+  DISPUTE_RESOLVED       // Both: Dispute was resolved
+  VIOLATION_WARNING      // User: Received a violation warning
+  ACCOUNT_STATUS_CHANGED // User: Account status changed
+}
+
 enum CuisineType {
   AMERICAN
   MEXICAN
@@ -151,9 +166,13 @@ model User {
   sentMessages       Message[]           @relation("SentMessages")
   reviewsGiven       Review[]            @relation("ReviewsGiven")
   reviewsReceived    Review[]            @relation("ReviewsReceived")
-  violations         Violation[]
-  disputesInitiated  Dispute[]
-  verificationTokens VerificationToken[]
+  violations              Violation[]
+  disputesInitiated       Dispute[]
+  verificationTokens      VerificationToken[]
+  quoteRequests           QuoteRequest[]              @relation("CustomerQuoteRequests")
+  quotes                  Quote[]                     @relation("VendorQuotes")
+  notifications           Notification[]              @relation("UserNotifications")
+  notificationPreferences NotificationPreferences?    @relation("UserNotificationPreferences")
 
   @@index([email])
   @@index([role, status])
@@ -295,6 +314,9 @@ model Booking {
 
   // Financial
   totalAmount  Decimal @map("total_amount") @db.Decimal(10, 2)
+  discountAmount Decimal? @map("discount_amount") @db.Decimal(10, 2) @default(0) // 5% loyalty discount
+  loyaltyApplied Boolean  @map("loyalty_applied") @default(false) // Whether loyalty discount was applied
+
   platformFee  Decimal @map("platform_fee") @db.Decimal(10, 2) // 15% default, 10% for loyalty
   vendorPayout Decimal @map("vendor_payout") @db.Decimal(10, 2) // totalAmount - platformFee
 
@@ -323,6 +345,7 @@ model Booking {
   messages      Message[]
   review        Review?
   dispute       Dispute?
+  quote         Quote?
 
   @@index([customerId, createdAt(sort: Desc)])
   @@index([vendorId, eventDate(sort: Desc)])
@@ -514,4 +537,157 @@ model VerificationToken {
   @@index([token])
   @@index([expiresAt])
   @@map("verification_tokens")
+}
+
+// ============================================================================
+// QUOTE REQUEST SYSTEM
+// ============================================================================
+
+enum QuoteRequestStatus {
+  OPEN // Awaiting vendor quotes
+  CLOSED // No longer accepting quotes
+  ACCEPTED // Customer accepted a quote
+}
+
+enum QuoteStatus {
+  PENDING // RFQ sent, vendor hasn't responded
+  SUBMITTED // Vendor submitted quote
+  ACCEPTED // Customer accepted this quote
+  REJECTED // Customer rejected this quote
+  EXPIRED // Quote validity period expired
+  WITHDRAWN // Vendor withdrew the quote
+}
+
+model QuoteRequest {
+  id String @id @default(uuid())
+
+  // Customer
+  customerId String @map("customer_id")
+
+  // Event Details
+  eventDate  DateTime  @map("event_date") @db.Date
+  eventType  EventType @map("event_type")
+  guestCount Int       @map("guest_count")
+  location   String    @db.Text
+
+  // Requirements
+  requirements String  @db.Text // Custom requirements/description
+  budget       Decimal? @db.Decimal(10, 2) // Optional budget indication
+
+  // Status
+  status QuoteRequestStatus @default(OPEN)
+
+  // Deadlines
+  expiresAt DateTime @map("expires_at") // Quotes due by this date
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  customer User    @relation("CustomerQuoteRequests", fields: [customerId], references: [id], onDelete: Restrict)
+  quotes   Quote[]
+
+  @@index([customerId, createdAt(sort: Desc)])
+  @@index([status, expiresAt])
+  @@index([eventDate])
+  @@map("quote_requests")
+}
+
+model Quote {
+  id        String @id @default(uuid())
+  requestId String @map("request_id")
+  vendorId  String @map("vendor_id")
+
+  // Pricing Breakdown (stored as JSON for flexibility)
+  pricing Json // { basePrice, perPersonPrice?, additionalFees: [{name, amount}], total }
+
+  // Details
+  inclusions String[] // Array of what's included
+  terms      String?  @db.Text // Custom terms/conditions
+  validUntil DateTime @map("valid_until") // Quote expiration
+
+  // Status
+  status QuoteStatus @default(PENDING)
+
+  // Booking Connection
+  bookingId String? @unique @map("booking_id") // Created when quote is accepted
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  request QuoteRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  vendor  User         @relation("VendorQuotes", fields: [vendorId], references: [id], onDelete: Restrict)
+  booking Booking?     @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+
+  @@unique([requestId, vendorId]) // One quote per vendor per request
+  @@index([requestId, status])
+  @@index([vendorId, createdAt(sort: Desc)])
+  @@index([status, validUntil])
+  @@map("quotes")
+}
+
+// ============================================================================
+// NOTIFICATION SYSTEM
+// ============================================================================
+
+model Notification {
+  id     String           @id @default(uuid())
+  userId String           @map("user_id")
+  type   NotificationType
+
+  // Content
+  title    String
+  message  String  @db.Text
+  link     String? // Optional link to related resource
+  metadata Json? // Additional data for rendering notification
+
+  // Status
+  read   Boolean   @default(false)
+  readAt DateTime? @map("read_at")
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read, createdAt(sort: Desc)])
+  @@index([userId, type])
+  @@index([createdAt(sort: Desc)])
+  @@map("notifications")
+}
+
+model NotificationPreferences {
+  id     String @id @default(uuid())
+  userId String @unique @map("user_id")
+
+  // Email notification preferences (per type)
+  emailBookingRequest       Boolean @default(true) @map("email_booking_request")
+  emailBookingAccepted      Boolean @default(true) @map("email_booking_accepted")
+  emailBookingDeclined      Boolean @default(true) @map("email_booking_declined")
+  emailBookingCancelled     Boolean @default(true) @map("email_booking_cancelled")
+  emailPaymentConfirmed     Boolean @default(true) @map("email_payment_confirmed")
+  emailNewMessage           Boolean @default(true) @map("email_new_message")
+  emailEventReminder        Boolean @default(true) @map("email_event_reminder")
+  emailReviewPrompt         Boolean @default(true) @map("email_review_prompt")
+  emailDisputeCreated       Boolean @default(true) @map("email_dispute_created")
+  emailDisputeResolved      Boolean @default(true) @map("email_dispute_resolved")
+  emailViolationWarning     Boolean @default(true) @map("email_violation_warning")
+  emailAccountStatusChanged Boolean @default(true) @map("email_account_status_changed")
+
+  // Digest option
+  emailDigest Boolean @default(false) @map("email_digest") // Daily summary instead of immediate
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation("UserNotificationPreferences", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("notification_preferences")
 }

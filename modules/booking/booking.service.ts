@@ -14,11 +14,17 @@ import type {
   BookingListItem,
   RefundCalculation,
 } from "./booking.types";
+import {
+  checkLoyaltyEligibility,
+  calculateLoyaltyPricing,
+  STANDARD_COMMISSION,
+  LOYALTY_COMMISSION,
+} from "@/modules/loyalty/loyalty.service";
 
 /**
  * Constants
  */
-export const PLATFORM_COMMISSION = 0.15; // 15% platform fee
+export const PLATFORM_COMMISSION = STANDARD_COMMISSION; // 15% platform fee (standard, 10% for loyalty)
 export const RESPONSE_WINDOW_HOURS = 48; // 48-hour vendor response window
 
 /**
@@ -204,8 +210,11 @@ export async function createBooking(
     );
   }
 
-  // Calculate amounts
-  const amounts = calculateBookingAmounts(data.totalAmount);
+  // Check loyalty eligibility
+  const loyaltyStatus = await checkLoyaltyEligibility(customerId, vendor.userId);
+
+  // Calculate amounts with loyalty discount
+  const pricing = calculateLoyaltyPricing(data.totalAmount, loyaltyStatus);
 
   // Create booking
   const booking = await prisma.booking.create({
@@ -218,9 +227,11 @@ export async function createBooking(
       location: data.location,
       guestCount: data.guestCount,
       specialRequests: data.specialRequests,
-      totalAmount: amounts.totalAmount,
-      platformFee: amounts.platformFee,
-      vendorPayout: amounts.vendorPayout,
+      totalAmount: pricing.totalAmount,
+      platformFee: pricing.platformFee,
+      vendorPayout: pricing.vendorPayout,
+      discountAmount: pricing.discountAmount,
+      loyaltyApplied: pricing.loyaltyApplied,
       status: BookingStatus.PENDING,
     },
     include: {
@@ -252,6 +263,8 @@ export async function createBooking(
     totalAmount: Number(booking.totalAmount),
     platformFee: Number(booking.platformFee),
     vendorPayout: Number(booking.vendorPayout),
+    discountAmount: booking.discountAmount ? Number(booking.discountAmount) : 0,
+    loyaltyApplied: booking.loyaltyApplied,
     status: booking.status,
     createdAt: booking.createdAt,
     updatedAt: booking.updatedAt,
@@ -327,6 +340,8 @@ export async function getBookingDetails(
     totalAmount: Number(booking.totalAmount),
     platformFee: Number(booking.platformFee),
     vendorPayout: Number(booking.vendorPayout),
+    discountAmount: booking.discountAmount ? Number(booking.discountAmount) : 0,
+    loyaltyApplied: booking.loyaltyApplied,
     status: booking.status,
     createdAt: booking.createdAt,
     updatedAt: booking.updatedAt,
@@ -503,6 +518,8 @@ export async function updateBooking(
     totalAmount: Number(updatedBooking.totalAmount),
     platformFee: Number(updatedBooking.platformFee),
     vendorPayout: Number(updatedBooking.vendorPayout),
+    discountAmount: updatedBooking.discountAmount ? Number(updatedBooking.discountAmount) : 0,
+    loyaltyApplied: updatedBooking.loyaltyApplied,
     status: updatedBooking.status,
     createdAt: updatedBooking.createdAt,
     updatedAt: updatedBooking.updatedAt,
@@ -603,6 +620,8 @@ export async function acceptBooking(
     totalAmount: Number(updatedBooking.totalAmount),
     platformFee: Number(updatedBooking.platformFee),
     vendorPayout: Number(updatedBooking.vendorPayout),
+    discountAmount: updatedBooking.discountAmount ? Number(updatedBooking.discountAmount) : 0,
+    loyaltyApplied: updatedBooking.loyaltyApplied,
     status: updatedBooking.status,
     createdAt: updatedBooking.createdAt,
     updatedAt: updatedBooking.updatedAt,
@@ -705,6 +724,8 @@ export async function declineBooking(
     totalAmount: Number(updatedBooking.totalAmount),
     platformFee: Number(updatedBooking.platformFee),
     vendorPayout: Number(updatedBooking.vendorPayout),
+    discountAmount: updatedBooking.discountAmount ? Number(updatedBooking.discountAmount) : 0,
+    loyaltyApplied: updatedBooking.loyaltyApplied,
     status: updatedBooking.status,
     createdAt: updatedBooking.createdAt,
     updatedAt: updatedBooking.updatedAt,
@@ -827,6 +848,8 @@ export async function cancelBooking(
     totalAmount: Number(updatedBooking.totalAmount),
     platformFee: Number(updatedBooking.platformFee),
     vendorPayout: Number(updatedBooking.vendorPayout),
+    discountAmount: updatedBooking.discountAmount ? Number(updatedBooking.discountAmount) : 0,
+    loyaltyApplied: updatedBooking.loyaltyApplied,
     status: updatedBooking.status,
     createdAt: updatedBooking.createdAt,
     updatedAt: updatedBooking.updatedAt,

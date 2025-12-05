@@ -539,4 +539,448 @@ Track all UI components, design tokens, and styling utilities for Fleet Feast.
 
 ---
 
+## Customer Dashboard Pages (Task Fleet-Feast-pgs)
+**Status**: Complete
+**Agent**: Parker_Pages
+**Date**: 2025-12-05
+
+### Dashboard Layout
+**Path**: `app/(customer)/dashboard/layout.tsx`
+**Description**: Wrapper layout using DashboardLayout component with customer navigation
+
+**Features**:
+- Reuses existing DashboardLayout component
+- Automatic role-based navigation
+- Mobile responsive sidebar
+- Breadcrumbs and page titles
+
+### Dashboard Overview Page
+**Path**: `app/(customer)/dashboard/page.tsx`
+**Description**: Main dashboard with stats, upcoming bookings, messages preview, and action items
+
+**Features**:
+- 4 stat cards (Total Bookings, Upcoming Events, Favorites, Pending Reviews)
+- Upcoming bookings preview (next 3 events)
+- Recent messages preview (last 2 conversations)
+- Action items list (pending reviews, confirmations)
+- Quick actions toolbar
+- Empty states for all sections
+- Real-time data updates (mock API calls)
+
+**Components Used**: Card, Button, Badge, Spinner, Alert, date-fns, lucide-react icons
+
+### Favorites Page
+**Path**: `app/(customer)/dashboard/favorites/page.tsx`
+**Description**: User's favorite food trucks with quick booking and management
+
+**Features**:
+- Favorite vendors grid (2 columns on desktop)
+- Vendor cards with cuisine badges, rating, price, guest range
+- Remove from favorites functionality
+- Quick book button per vendor
+- View details navigation
+- Empty state with browse CTA
+- Remove confirmation with loading state
+- Info alert about quick booking
+
+**API Integration**: GET /api/favorites, DELETE /api/favorites/{id}
+
+**Components Used**: Card, Button, Badge, Spinner, Alert, lucide-react icons
+
+### Reviews Page
+**Path**: `app/(customer)/dashboard/reviews/page.tsx`
+**Description**: Pending and submitted reviews with review submission modal
+
+**Features**:
+- Pending reviews section (grid of bookings needing review)
+- Submitted reviews section (chronological list)
+- Review submission modal with:
+  - Star rating input (interactive)
+  - Comment textarea (1000 char limit with counter)
+  - Event context display
+  - Validation (rating required)
+  - Submit confirmation
+- Empty states for both sections
+- Info alert about review importance
+- Move from pending to submitted on submit
+
+**API Integration**: GET /api/reviews, POST /api/reviews
+
+**Components Used**: Card, Button, Badge, Spinner, Alert, Modal, Rating, Textarea, date-fns, lucide-react icons
+
+### Payment History Page
+**Path**: `app/(customer)/dashboard/payments/page.tsx`
+**Description**: Payment transaction history with receipts and refund information
+
+**Features**:
+- Total spent summary card
+- Status filter buttons (All, Completed, Pending, Refunded)
+- Payment cards with:
+  - Status badge and icon
+  - Event and payment dates
+  - Payment method details
+  - Price breakdown (booking + platform fee)
+  - Refund information if applicable
+  - Receipt download button
+  - View booking button
+- Empty state per filter
+- Info alert about escrow and receipts
+- Responsive grid layout
+
+**Payment Statuses**: CAPTURED, AUTHORIZED, PENDING, RELEASED, REFUNDED, FAILED
+
+**API Integration**: GET /api/payments, GET /api/payments/{id}/receipt
+
+**Components Used**: Card, Button, Badge, Spinner, Alert, date-fns, lucide-react icons
+
+### Account Settings Page
+**Path**: `app/(customer)/dashboard/settings/page.tsx`
+**Description**: Profile management, email preferences, password change, and account deletion
+
+**Features**:
+- Profile information section:
+  - Name, email (disabled), phone, address, city, state, ZIP
+  - Save profile button
+- Email preferences section:
+  - 5 checkbox preferences (Booking Updates, New Messages, Review Reminders, Weekly Digest, Marketing)
+  - Toggle preferences with labels and descriptions
+  - Save preferences button
+- Change password section:
+  - Current password, new password, confirm password
+  - Validation (8 char min, passwords match)
+  - Change password button
+- Delete account section:
+  - Warning alert
+  - Delete button → confirmation modal
+  - Type "DELETE" to confirm
+  - Permanent deletion with data list
+- Success/error alerts
+- Loading states for all actions
+
+**API Integration**:
+- PUT /api/user/profile
+- PUT /api/user/preferences
+- PUT /api/user/password
+- DELETE /api/user/account
+
+**Components Used**: Card, Button, Input, Spinner, Alert, Modal, Textarea, lucide-react icons
+
+### Navigation Updates
+**Path**: `components/navigation/NavMenu.tsx`
+**Updated**: Customer navigation items now include:
+- Dashboard (overview)
+- Search Trucks
+- My Bookings
+- Messages
+- Favorites
+- Reviews
+- Payments
+- Settings
+
+**Design Patterns**:
+- Consistent card-based layouts across all pages
+- Mobile-first responsive design
+- Empty states for all data lists
+- Loading states with spinner
+- Error states with alerts
+- Success confirmation messages
+- Modal dialogs for destructive actions
+- Accessible forms with labels and validation
+- Keyboard navigation support
+- ARIA attributes for screen readers
+
+**Used In**: Customer dashboard workflow
+
+**Maintained By**: Parker_Pages
+
+---
+
+## Vendor Dashboard Pages (Task Fleet-Feast-6ir)
+**Status**: Complete
+**Agent**: Parker_Pages
+**Date**: 2025-12-05
+
+### Dashboard Layout
+**Path**: `app/(vendor)/dashboard/layout.tsx`
+**Description**: Wrapper layout using DashboardLayout component with vendor navigation
+
+**Features**:
+- Reuses existing DashboardLayout component
+- Automatic role-based navigation with 8 vendor pages
+- Mobile responsive sidebar
+- Breadcrumbs and page titles
+
+### Dashboard Overview Page
+**Path**: `app/(vendor)/dashboard/page.tsx`
+**Description**: Main vendor dashboard with key metrics, pending requests, today's schedule, and recent reviews
+
+**Features**:
+- 4 stat cards (Today's Bookings, Pending Requests, Monthly Revenue, Average Rating)
+- Pending requests section with accept/decline actions
+- Today's schedule with booking list
+- Recent reviews preview (3 most recent)
+- Quick actions toolbar (4 shortcuts)
+- Empty states for all sections
+- Real-time data fetching
+- Auto-calculated stats (monthly revenue, completion rate)
+
+**API Integration**:
+- GET /api/bookings - Fetch all vendor bookings
+- GET /api/vendor/profile - Fetch vendor rating
+- GET /api/reviews/vendor/{id} - Fetch recent reviews
+
+**Components Used**: Card, Button, Badge, Spinner, Alert, date-fns, lucide-react icons
+
+---
+
+### Booking Management Page
+**Path**: `app/(vendor)/bookings/page.tsx`
+**Description**: Complete booking management with filtering, search, and accept/decline functionality
+
+**Features**:
+- Search bar (by customer, event type, location, booking ID)
+- Status filter tabs (ALL, PENDING, ACCEPTED, CONFIRMED, COMPLETED, CANCELLED)
+- Booking cards with key details (customer, date, location, guest count, price)
+- Click to view detailed booking modal
+- Accept/decline buttons for pending bookings
+- Booking details modal with:
+  - Full customer information
+  - Event details (date, time, type, location)
+  - Guest count and special requests
+  - Total amount
+  - Accept/Decline actions
+- Empty state with filter clear option
+- Loading states for actions
+- Real-time count badges per status
+
+**API Integration**:
+- GET /api/bookings - Fetch vendor bookings
+- PUT /api/bookings/{id}/accept - Accept booking
+- PUT /api/bookings/{id}/decline - Decline booking
+
+**Components Used**: Card, Button, Badge, Spinner, Alert, Input, Modal, date-fns, lucide-react icons
+
+---
+
+### Availability Calendar Page
+**Path**: `app/(vendor)/calendar/page.tsx`
+**Description**: Interactive monthly calendar for managing availability and viewing bookings
+
+**Features**:
+- Monthly calendar grid view (7x5 grid)
+- Month navigation (Previous, Today, Next)
+- Click to toggle date availability (available/blocked)
+- Visual indicators:
+  - Green checkmark for available dates
+  - Red X for blocked dates
+  - Today highlighted with ring
+  - Booking count badges
+  - Past dates grayed out
+- Automatic booking overlay (shows booking count per date)
+- Real-time save on toggle
+- Success/error messages
+- Legend for visual elements
+- Past dates disabled from editing
+
+**API Integration**:
+- GET /api/vendor/availability - Fetch availability calendar
+- POST /api/vendor/availability - Update date availability
+- GET /api/bookings - Fetch bookings for date overlay
+
+**Components Used**: Card, Button, Badge, Spinner, Alert, date-fns, lucide-react icons
+
+**Date Handling**: date-fns for calendar logic (startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval)
+
+---
+
+### Analytics Page
+**Path**: `app/(vendor)/analytics/page.tsx`
+**Description**: Business insights with revenue trends, popular menu items, and performance metrics
+
+**Features**:
+- 4 key metric cards (Total Revenue, Total Bookings, Average Rating, Completion Rate)
+- Revenue trend chart (last 6 months):
+  - Horizontal bar chart with month labels
+  - Revenue amount and booking count per month
+  - Relative bar widths based on max revenue
+- Popular menu items chart (Top 5):
+  - Ranked list with item names and order counts
+  - Progress bars showing relative popularity
+- Business insights section (3 cards):
+  - Repeat customers count
+  - Average booking value
+  - Customer satisfaction level
+- Auto-calculated stats:
+  - Monthly revenue filtering by status
+  - Completion rate percentage
+  - Repeat customer detection
+- Empty states for charts
+
+**Data Visualization**:
+- CSS-based bar charts (no external charting library)
+- Dynamic bar widths based on data percentages
+- Color-coded metrics (success green, warning yellow, primary blue)
+
+**API Integration**:
+- GET /api/bookings - Calculate revenue, trends, completion rate
+- GET /api/vendor/profile - Fetch average rating
+
+**Components Used**: Card, Badge, Spinner, Alert, date-fns, lucide-react icons
+
+---
+
+### Reviews Page
+**Path**: `app/(vendor)/reviews/page.tsx`
+**Description**: Review management with rating breakdown and response functionality
+
+**Features**:
+- Rating summary card:
+  - Large average rating display
+  - 5-star visualization
+  - Total review count
+- Rating breakdown chart:
+  - Horizontal bars for each star level (1-5)
+  - Count and percentage per level
+  - Visual distribution
+- Reviews list with:
+  - Customer name and rating
+  - Review date and event type badge
+  - Comment text
+  - Vendor response (if exists)
+  - "Respond to Review" button
+- Response modal:
+  - Original review display
+  - Response textarea (500 char limit with counter)
+  - Submit/Cancel actions
+- Empty state with star icon
+
+**API Integration**:
+- GET /api/vendor/profile - Fetch vendor ID
+- GET /api/reviews/vendor/{id} - Fetch vendor reviews
+- POST /api/reviews/{id}/respond - Submit response (placeholder)
+
+**Components Used**: Card, Button, Badge, Spinner, Alert, Textarea, Modal, date-fns, lucide-react icons
+
+---
+
+### Payouts Page
+**Path**: `app/(vendor)/payouts/page.tsx`
+**Description**: Earnings management, payout history, and bank account connection
+
+**Features**:
+- 4 summary cards (Pending Payouts, Available Now, Total Earnings, Next Payout)
+- Stripe Connect integration:
+  - Bank account connection flow
+  - Onboarding link creation
+  - Connection status check
+  - "Connect with Stripe" CTA (if not connected)
+- Payout history list:
+  - Amount, status badge, method
+  - Created date and arrival/expected date
+  - Description text
+  - Status indicators (Pending, Paid, Processing)
+- Bank account management button
+- Info alert about payout schedule (7 days + 2-3 business days)
+- Export functionality button
+- Help section with FAQ accordion
+- Empty state for no payouts
+
+**Payout Schedule Logic**:
+- 7-day escrow hold after event completion
+- 2-3 business days bank transfer time
+- 85% of booking total (15% platform fee)
+
+**API Integration**:
+- GET /api/vendor/profile - Check Stripe connection
+- GET /api/vendor/payouts - Fetch payout history
+- POST /api/payments/connect/onboard - Create Stripe onboarding link
+
+**Components Used**: Card, Button, Badge, Spinner, Alert, date-fns, lucide-react icons, Link
+
+---
+
+### Profile Management Page
+**Path**: `app/(vendor)/profile/page.tsx`
+**Description**: Vendor profile editing with business info, pricing, photos, and menu management
+
+**Features**:
+- Vendor status badge (Approved, Pending, Rejected)
+- Basic information section:
+  - Business name input
+  - Description textarea (500 char limit with counter)
+- Cuisine types section:
+  - Multi-select button grid (8 options)
+  - Toggle selection with visual feedback
+  - Selected state styling
+- Pricing & capacity section:
+  - Price per person (in cents)
+  - Minimum guests
+  - Maximum guests
+  - Input validation (max >= min)
+- Photos section:
+  - Logo upload placeholder
+  - Truck photos grid (4 columns)
+  - Upload buttons for new photos
+- Menu management:
+  - External link to menu editor
+  - Info alert about menu management
+- Form validation:
+  - Required fields check
+  - Cuisine type minimum 1
+  - Price > 0
+  - Guest count validation
+- Save button with loading state
+- Success/error alerts
+
+**API Integration**:
+- GET /api/vendor/profile - Fetch current profile
+- PUT /api/vendor/profile - Update profile
+
+**Components Used**: Card, Button, Input, Textarea, Spinner, Alert, Badge, lucide-react icons
+
+---
+
+### Navigation Updates
+**Path**: `components/navigation/NavMenu.tsx`
+**Updated**: Vendor navigation items now include:
+- Overview (/vendor/dashboard)
+- Bookings (/vendor/bookings)
+- Calendar (/vendor/calendar)
+- Analytics (/vendor/analytics)
+- Reviews (/vendor/reviews)
+- Payouts (/vendor/payouts)
+- Messages (/vendor/messages)
+- Profile (/vendor/profile)
+
+**Design Patterns**:
+- Consistent card-based layouts across all pages
+- Mobile-first responsive design (grid layouts adjust to screen size)
+- Empty states for all data lists
+- Loading states with spinners
+- Error states with alerts
+- Success confirmation messages (auto-dismiss after 3s)
+- Real-time data updates
+- Optimistic UI updates (calendar toggle)
+- Modal dialogs for detailed views and actions
+- Accessible forms with labels and validation
+- Keyboard navigation support
+- ARIA attributes for screen readers
+- Color-coded status badges (success, warning, error, neutral)
+- Interactive data visualization (CSS bar charts)
+
+**Common Features Across Pages**:
+- date-fns for date formatting and manipulation
+- lucide-react for consistent iconography
+- API error handling with user-friendly messages
+- Responsive grid layouts (1, 2, 3, 4 columns based on breakpoints)
+- Card hover effects for interactive elements
+- Loading skeletons during data fetch
+- Empty states with actionable CTAs
+
+**Used In**: Vendor dashboard workflow
+
+**Maintained By**: Parker_Pages
+
+---
+
 *Last Updated: 2025-12-05*
