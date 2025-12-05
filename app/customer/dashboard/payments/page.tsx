@@ -144,7 +144,7 @@ export default function PaymentsPage() {
   };
 
   const handleViewBooking = (bookingId: string) => {
-    router.push(`/bookings/${bookingId}`);
+    router.push(`/customer/bookings/${bookingId}`);
   };
 
   const getStatusBadge = (status: PaymentStatus) => {

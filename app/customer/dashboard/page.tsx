@@ -178,7 +178,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <Link
-            href="/bookings"
+            href="/customer/bookings"
             className="mt-4 text-sm text-primary hover:underline inline-flex items-center"
           >
             View all bookings
@@ -201,7 +201,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <Link
-            href="/dashboard/favorites"
+            href="/customer/dashboard/favorites"
             className="mt-4 text-sm text-primary hover:underline inline-flex items-center"
           >
             View favorites
@@ -224,7 +224,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <Link
-            href="/dashboard/reviews"
+            href="/customer/dashboard/reviews"
             className="mt-4 text-sm text-primary hover:underline inline-flex items-center"
           >
             Write reviews
@@ -241,7 +241,7 @@ export default function DashboardPage() {
             <h2 className="text-xl font-semibold text-text-primary">
               Upcoming Bookings
             </h2>
-            <Link href="/bookings">
+            <Link href="/customer/bookings">
               <Button variant="ghost" size="sm">
                 View All
                 <ChevronRight className="w-4 h-4 ml-1" />
@@ -262,7 +262,7 @@ export default function DashboardPage() {
               {MOCK_UPCOMING_BOOKINGS.map((booking) => (
                 <div
                   key={booking.id}
-                  onClick={() => router.push(`/bookings/${booking.id}`)}
+                  onClick={() => router.push(`/customer/bookings/${booking.id}`)}
                   className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-surface-hover cursor-pointer transition-colors"
                 >
                   <div className="flex-1">
@@ -372,7 +372,7 @@ export default function DashboardPage() {
           <h2 className="text-xl font-semibold text-text-primary">
             Recent Messages
           </h2>
-          <Link href="/messages">
+          <Link href="/customer/messages">
             <Button variant="ghost" size="sm">
               View All
               <ChevronRight className="w-4 h-4 ml-1" />
@@ -435,19 +435,19 @@ export default function DashboardPage() {
               Book Event
             </Button>
           </Link>
-          <Link href="/dashboard/favorites">
+          <Link href="/customer/dashboard/favorites">
             <Button variant="outline" className="w-full justify-start">
               <Heart className="w-4 h-4 mr-2" />
               Favorites
             </Button>
           </Link>
-          <Link href="/dashboard/payments">
+          <Link href="/customer/dashboard/payments">
             <Button variant="outline" className="w-full justify-start">
               <CreditCard className="w-4 h-4 mr-2" />
               Payments
             </Button>
           </Link>
-          <Link href="/dashboard/settings">
+          <Link href="/customer/dashboard/settings">
             <Button variant="outline" className="w-full justify-start">
               <Star className="w-4 h-4 mr-2" />
               Settings

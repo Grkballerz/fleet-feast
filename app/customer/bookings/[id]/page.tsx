@@ -195,7 +195,7 @@ export default function BookingDetailsPage() {
         <Alert variant="error">{error || "Booking not found"}</Alert>
         <Button
           variant="secondary"
-          onClick={() => router.push("/bookings")}
+          onClick={() => router.push("/customer/bookings")}
           className="mt-4"
         >
           Back to My Bookings
@@ -482,7 +482,7 @@ export default function BookingDetailsPage() {
         <div className="flex gap-4">
           <Button
             variant="secondary"
-            onClick={() => router.push("/bookings")}
+            onClick={() => router.push("/customer/bookings")}
             className="flex-1"
           >
             Back to Bookings

@@ -7,11 +7,7 @@ const createJestConfig = nextJest({
 
 // Add any custom config to be passed to Jest
 const customJestConfig = {
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-  testEnvironment: 'jest-environment-jsdom',
-  moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/$1',
-  },
+  // Shared configuration
   collectCoverageFrom: [
     'components/**/*.{js,jsx,ts,tsx}',
     'app/**/*.{js,jsx,ts,tsx}',
@@ -31,9 +27,10 @@ const customJestConfig = {
       statements: 80,
     },
   },
-  testMatch: [
-    '**/__tests__/**/*.[jt]s?(x)',
-    '**/?(*.)+(spec|test).[jt]s?(x)',
+  // Separate configurations for different test types
+  projects: [
+    '<rootDir>/jest.config.unit.js',
+    '<rootDir>/jest.config.integration.js',
   ],
 }
 

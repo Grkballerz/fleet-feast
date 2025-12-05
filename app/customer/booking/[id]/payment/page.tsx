@@ -423,7 +423,7 @@ export default function PaymentPage() {
         </Alert>
         <Button
           variant="secondary"
-          onClick={() => router.push("/bookings")}
+          onClick={() => router.push("/customer/bookings")}
           className="mt-4"
         >
           View My Bookings

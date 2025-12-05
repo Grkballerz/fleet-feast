@@ -104,7 +104,7 @@ export default function MessageThreadPage() {
         </Alert>
         <Button
           variant="outline"
-          onClick={() => router.push("/messages")}
+          onClick={() => router.push("/customer/messages")}
           className="mt-4"
           iconLeft={<ArrowLeft className="w-4 h-4" />}
         >
@@ -122,7 +122,7 @@ export default function MessageThreadPage() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => router.push("/messages")}
+          onClick={() => router.push("/customer/messages")}
           iconLeft={<ArrowLeft className="w-4 h-4" />}
           className="shrink-0"
         >

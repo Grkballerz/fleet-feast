@@ -87,14 +87,14 @@ export const NavMenu: React.FC<NavMenuProps> = ({
  */
 
 export const customerNavItems: NavMenuItem[] = [
-  { label: "Dashboard", href: "/dashboard" },
+  { label: "Dashboard", href: "/customer/dashboard" },
   { label: "Search Trucks", href: "/search" },
-  { label: "My Bookings", href: "/bookings" },
-  { label: "Messages", href: "/messages" },
-  { label: "Favorites", href: "/dashboard/favorites" },
-  { label: "Reviews", href: "/dashboard/reviews" },
-  { label: "Payments", href: "/dashboard/payments" },
-  { label: "Settings", href: "/dashboard/settings" },
+  { label: "My Bookings", href: "/customer/bookings" },
+  { label: "Messages", href: "/customer/messages" },
+  { label: "Favorites", href: "/customer/dashboard/favorites" },
+  { label: "Reviews", href: "/customer/dashboard/reviews" },
+  { label: "Payments", href: "/customer/dashboard/payments" },
+  { label: "Settings", href: "/customer/dashboard/settings" },
 ];
 
 export const vendorNavItems: NavMenuItem[] = [

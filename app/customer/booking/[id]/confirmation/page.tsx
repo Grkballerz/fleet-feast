@@ -179,7 +179,7 @@ END:VCALENDAR`;
         </Alert>
         <Button
           variant="secondary"
-          onClick={() => router.push("/bookings")}
+          onClick={() => router.push("/customer/bookings")}
           className="mt-4"
         >
           View My Bookings
@@ -408,7 +408,7 @@ END:VCALENDAR`;
           <Button
             variant="outline"
             size="sm"
-            onClick={() => router.push(`/bookings/${bookingId}`)}
+            onClick={() => router.push(`/customer/bookings/${bookingId}`)}
             iconLeft={<Clock className="h-4 w-4" />}
           >
             View Details
@@ -434,7 +434,7 @@ END:VCALENDAR`;
           </Button>
           <Button
             variant="primary"
-            onClick={() => router.push("/bookings")}
+            onClick={() => router.push("/customer/bookings")}
             className="flex-1"
           >
             View All Bookings

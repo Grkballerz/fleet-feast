@@ -270,7 +270,7 @@ export default function BookingsListPage() {
                 <BookingCard
                   key={booking.id}
                   booking={booking}
-                  onClick={() => router.push(`/bookings/${booking.id}`)}
+                  onClick={() => router.push(`/customer/bookings/${booking.id}`)}
                   getStatusBadgeVariant={getStatusBadgeVariant}
                 />
               ))}
@@ -287,7 +287,7 @@ export default function BookingsListPage() {
                 <BookingCard
                   key={booking.id}
                   booking={booking}
-                  onClick={() => router.push(`/bookings/${booking.id}`)}
+                  onClick={() => router.push(`/customer/bookings/${booking.id}`)}
                   getStatusBadgeVariant={getStatusBadgeVariant}
                 />
               ))}

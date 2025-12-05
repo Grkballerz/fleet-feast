@@ -58,9 +58,9 @@ function formatZodErrors(error: ZodError): Record<string, string[]> {
 }
 
 /**
- * Parse and validate request body
+ * Parse and validate request body (internal)
  */
-async function validateBody(
+async function parseAndValidateBody(
   req: NextRequest,
   schema: ZodSchema
 ): Promise<{ success: true; data: any } | { success: false; error: NextResponse }> {
@@ -97,9 +97,9 @@ async function validateBody(
 }
 
 /**
- * Parse and validate query parameters
+ * Parse and validate query parameters (internal)
  */
-function validateQuery(
+function parseAndValidateQuery(
   req: NextRequest,
   schema: ZodSchema
 ): { success: true; data: any } | { success: false; error: NextResponse } {
@@ -142,9 +142,9 @@ function validateQuery(
 }
 
 /**
- * Validate route parameters
+ * Validate route parameters (internal)
  */
-function validateParams(
+function parseAndValidateParams(
   params: any,
   schema: ZodSchema
 ): { success: true; data: any } | { success: false; error: NextResponse } {
@@ -213,7 +213,7 @@ export function validate<TBody = any, TQuery = any, TParams = any>(
     try {
       // Validate body if schema provided
       if (schemas.body) {
-        const result = await validateBody(req, schemas.body);
+        const result = await parseAndValidateBody(req, schemas.body);
         if (!result.success) {
           return result.error;
         }
@@ -222,7 +222,7 @@ export function validate<TBody = any, TQuery = any, TParams = any>(
 
       // Validate query if schema provided
       if (schemas.query) {
-        const result = validateQuery(req, schemas.query);
+        const result = parseAndValidateQuery(req, schemas.query);
         if (!result.success) {
           return result.error;
         }
@@ -231,7 +231,7 @@ export function validate<TBody = any, TQuery = any, TParams = any>(
 
       // Validate params if schema provided and context.params exists
       if (schemas.params && context?.params) {
-        const result = validateParams(context.params, schemas.params);
+        const result = parseAndValidateParams(context.params, schemas.params);
         if (!result.success) {
           return result.error;
         }
