@@ -1,5 +1,9 @@
 # Fleet Feast - Food Truck Marketplace
 
+[![CI](https://github.com/your-org/fleet-feast/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/fleet-feast/actions/workflows/ci.yml)
+[![Security Scan](https://github.com/your-org/fleet-feast/actions/workflows/security.yml/badge.svg)](https://github.com/your-org/fleet-feast/actions/workflows/security.yml)
+[![Production](https://github.com/your-org/fleet-feast/actions/workflows/production.yml/badge.svg)](https://github.com/your-org/fleet-feast/actions/workflows/production.yml)
+
 A full-stack food truck marketplace platform connecting NYC food trucks with corporate events and private parties. Built with Next.js 14+, TypeScript, Prisma, and Stripe Connect.
 
 ## Features
@@ -133,6 +137,11 @@ fleet-feast/
 - `npm run lint` - Run ESLint
 - `npm run format` - Format code with Prettier
 - `npm run type-check` - Run TypeScript compiler check
+- `npm test` - Run all tests
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:coverage` - Run tests with coverage report
+- `npm run test:unit` - Run unit tests only
+- `npm run test:integration` - Run integration tests only
 
 ## Database Management
 
@@ -152,22 +161,37 @@ npx prisma migrate reset
 
 ## Deployment
 
-### Vercel (Recommended)
+This project uses automated CI/CD via GitHub Actions. See **[.github/DEPLOYMENT.md](.github/DEPLOYMENT.md)** for complete deployment documentation.
+
+### Quick Deploy
+
+**Vercel (Recommended)**
 
 1. Push code to GitHub
 2. Connect repository to Vercel
 3. Add environment variables in Vercel dashboard
-4. Deploy automatically on push to main branch
+4. Automatic deployments:
+   - **Preview**: On every pull request
+   - **Production**: On merge to main branch
 
-### Manual Deployment
+### CI/CD Workflows
+
+- **CI**: Lint, type-check, test, build (runs on all PRs)
+- **Preview**: Deploy preview environment with PR comment
+- **Production**: Deploy to production with health checks
+- **Security**: Dependency scanning and CodeQL analysis
+
+### Required GitHub Secrets
 
 ```bash
-# Build the application
-npm run build
-
-# Start production server
-npm run start
+VERCEL_TOKEN           # Vercel deployment token
+VERCEL_ORG_ID          # Vercel organization ID
+VERCEL_PROJECT_ID      # Vercel project ID
+DATABASE_URL           # Production database URL
+CODECOV_TOKEN          # (Optional) Code coverage reporting
 ```
+
+See [Deployment Guide](.github/DEPLOYMENT.md) for setup instructions.
 
 ## Documentation
 
