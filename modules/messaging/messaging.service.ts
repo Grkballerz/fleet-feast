@@ -144,50 +144,56 @@ async function handleFlaggedMessage(
   messageId: string,
   circumventionResults: ReturnType<typeof scanForCircumvention>
 ): Promise<void> {
-  // Determine violation type based on detected patterns
-  const hasPhone = circumventionResults.some((r) => r.type === "PHONE");
-  const hasEmail = circumventionResults.some((r) => r.type === "EMAIL");
-  const hasSocial = circumventionResults.some(
-    (r) => r.type === "SOCIAL_HANDLE" || r.type === "SOCIAL_PLATFORM"
-  );
-
-  let violationType: ViolationType;
-  if (hasPhone || hasEmail) {
-    violationType = ViolationType.CONTACT_INFO_SHARING;
-  } else if (hasSocial) {
-    violationType = ViolationType.CIRCUMVENTION_ATTEMPT;
-  } else {
-    violationType = ViolationType.CIRCUMVENTION_ATTEMPT;
-  }
-
-  // Get highest severity
+  // Get highest severity and flag reason
   const severity = getHighestSeverity(circumventionResults);
+  const flagReason = generateFlagReason(circumventionResults);
 
-  // Build description
-  const detectedItems = circumventionResults
-    .map((r) => getSanitizedMatches(r.matches).join(", "))
-    .join("; ");
+  // Use the violation service to process circumvention violation
+  // This will handle penalty progression and account status updates
+  try {
+    const { processCircumventionViolation } = await import("@/modules/violation/violation.service");
 
-  const description = `Message flagged for ${generateFlagReason(circumventionResults)}. Detected content: ${detectedItems}`;
-
-  // Create violation record
-  await prisma.violation.create({
-    data: {
+    await processCircumventionViolation({
       userId,
-      type: violationType,
-      description,
+      messageId,
       severity,
-      relatedMessageId: messageId,
-      actionTaken: null, // Will be set by admin review
-    },
-  });
-
-  // For HIGH severity, we might want to take immediate action
-  // For now, just logging. Could add auto-suspension for repeat offenders.
-  if (severity === MessageSeverity.HIGH) {
-    console.warn(
-      `[Messaging] HIGH severity violation detected for user ${userId}, message ${messageId}`
+      flagReason,
+    });
+  } catch (error) {
+    console.error(
+      `[Messaging] Failed to process circumvention violation for user ${userId}, message ${messageId}:`,
+      error
     );
+
+    // Fallback: Create basic violation record if violation service fails
+    const hasPhone = circumventionResults.some((r) => r.type === "PHONE");
+    const hasEmail = circumventionResults.some((r) => r.type === "EMAIL");
+
+    let violationType: ViolationType;
+    if (hasPhone || hasEmail) {
+      violationType = ViolationType.CONTACT_INFO_SHARING;
+    } else {
+      violationType = ViolationType.CIRCUMVENTION_ATTEMPT;
+    }
+
+    const detectedItems = circumventionResults
+      .map((r) => getSanitizedMatches(r.matches).join(", "))
+      .join("; ");
+
+    const description = `Message flagged for ${flagReason}. Detected content: ${detectedItems}`;
+
+    await prisma.violation.create({
+      data: {
+        userId,
+        type: violationType,
+        description,
+        severity,
+        relatedMessageId: messageId,
+        automated: true,
+        source: "MESSAGING_SYSTEM",
+        sourceId: messageId,
+      },
+    });
   }
 }
 

@@ -20,11 +20,11 @@ This registry tracks all API endpoints in the Fleet Feast platform. It serves as
 
 ## Statistics
 
-- **Total Endpoints:** 67
+- **Total Endpoints:** 80
 - **Public Endpoints:** 14
-- **Protected Endpoints:** 53
-- **Admin-Only Endpoints:** 7
-- **HTTP Methods:** GET (33), POST (30), PUT (7), PATCH (5), DELETE (2)
+- **Protected Endpoints:** 59
+- **Admin-Only Endpoints:** 15
+- **HTTP Methods:** GET (39), POST (35), PUT (12), PATCH (5), DELETE (2)
 
 ---
 
@@ -263,7 +263,84 @@ PENDING → AUTHORIZED → CAPTURED → RELEASED
 
 ---
 
-### 9. Admin (7 endpoints)
+### 9. Disputes (6 endpoints)
+**Base Path:** `/api/disputes`
+
+| Method | Endpoint | Auth | Role | Description | Status |
+|--------|----------|------|------|-------------|--------|
+| POST | `/api/disputes` | Required | Customer/Vendor | Create dispute for completed booking | ✅ Implemented |
+| GET | `/api/disputes` | Required | Customer/Vendor | List user's disputes with filters | ✅ Implemented |
+| GET | `/api/disputes/{id}` | Required | Customer/Vendor/Admin | Get dispute details | ✅ Implemented |
+| PUT | `/api/disputes/{id}` | Required | Customer | Update dispute (limited) | ✅ Implemented |
+
+**Dispute Types:**
+- `NO_SHOW` - Vendor didn't arrive at event
+- `LATE_ARRIVAL` - Vendor arrived late (metadata: lateMinutes)
+- `SERVICE_QUALITY` - Poor service quality
+- `WRONG_ORDER` - Incorrect menu items delivered
+- `FOOD_QUALITY` - Poor food quality
+- `OTHER` - Other issues
+
+**Dispute Status Flow:**
+```
+OPEN → INVESTIGATING → RESOLVED_REFUND
+     ↘               ↗ RESOLVED_RELEASE
+      → ESCALATED →   CLOSED
+```
+
+**Auto-Resolution Rules:**
+- **NO_SHOW**: Automatic 100% refund
+- **LATE_ARRIVAL**:
+  - 60+ minutes late: 50% refund
+  - 30-59 minutes late: 25% refund
+  - <30 minutes: Manual review required
+- **SERVICE_QUALITY**: Always requires manual review
+- **WRONG_ORDER**: Manual review required
+- **FOOD_QUALITY**: Manual review required
+- **OTHER**: Manual review required
+
+**Business Rules:**
+- Only COMPLETED bookings can be disputed
+- 7-day window from event completion
+- Funds held during dispute (payment stays CAPTURED)
+- Resolution outcomes: FULL_REFUND, PARTIAL_REFUND, NO_REFUND, CANCELLED
+- Auto-resolution applied when eligible
+- Manual escalation for subjective disputes
+
+---
+
+### 10. Violations (2 endpoints)
+**Base Path:** `/api/violations`
+
+| Method | Endpoint | Auth | Role | Description | Status |
+|--------|----------|------|------|-------------|--------|
+| POST | `/api/violations` | Required | Admin | Create violation manually | ✅ Implemented |
+| GET | `/api/violations/user/{userId}` | Required | User/Admin | Get user's violation summary | ✅ Implemented |
+
+**Violation Types:**
+- `CONTACT_INFO_SHARING` - Sharing phone/email in messages
+- `CIRCUMVENTION_ATTEMPT` - Attempting to bypass platform
+- `HARASSMENT` - Abusive messages
+- `SPAM` - Unsolicited messages
+- `FRAUD` - Fraudulent activity
+- `OTHER` - Other policy violations
+
+**Penalty Progression:**
+- **1 point**: Warning (account remains active)
+- **3 points**: Restricted (7-day restriction on new bookings)
+- **5 points**: Suspended (30-day account suspension)
+- **8+ points**: Banned (permanent account closure)
+
+**Features:**
+- Automatic violation creation from messaging circumvention flags
+- Points accumulate over rolling 365-day period
+- Account status automatically updated based on penalty thresholds
+- Temporary penalties (restricted/suspended) with automatic expiry
+- Appeal system for disputed violations
+
+---
+
+### 11. Admin (15 endpoints)
 **Base Path:** `/api/admin`
 
 | Method | Endpoint | Auth | Role | Description | Status |
@@ -271,9 +348,35 @@ PENDING → AUTHORIZED → CAPTURED → RELEASED
 | GET | `/api/admin/vendors/pending` | Required | Admin | List pending vendors | ✅ Implemented |
 | POST | `/api/admin/vendors/{id}/approve` | Required | Admin | Approve vendor | ✅ Implemented |
 | POST | `/api/admin/vendors/{id}/reject` | Required | Admin | Reject vendor | ✅ Implemented |
-| GET | `/api/admin/disputes` | Required | Admin | List disputes | Pending |
-| POST | `/api/admin/disputes/{disputeId}/resolve` | Required | Admin | Resolve dispute | Pending |
-| GET | `/api/admin/violations` | Required | Admin | List violations | Pending |
+| GET | `/api/admin/disputes` | Required | Admin | List all disputes with filters | ✅ Implemented |
+| GET | `/api/admin/disputes/{id}` | Required | Admin | Get dispute details | ✅ Implemented |
+| PUT | `/api/admin/disputes/{id}` | Required | Admin | Update dispute status | ✅ Implemented |
+| POST | `/api/admin/disputes/{id}/resolve` | Required | Admin | Resolve dispute with outcome | ✅ Implemented |
+| GET | `/api/admin/violations` | Required | Admin | List all violations with filters | ✅ Implemented |
+| GET | `/api/admin/violations/{id}` | Required | Admin | Get violation details | ✅ Implemented |
+| PUT | `/api/admin/violations/{id}` | Required | Admin | Update violation notes | ✅ Implemented |
+| POST | `/api/admin/violations/{id}/appeal` | Required | Admin | Handle violation appeal | ✅ Implemented |
+| PUT | `/api/admin/users/{id}/status` | Required | Admin | Update user account status | ✅ Implemented |
+
+**Admin Dispute Actions:**
+- Update dispute status (OPEN → INVESTIGATING → ESCALATED)
+- Apply auto-resolution rules (PUT with `autoResolve: true`)
+- Manual resolution with custom refund percentage
+- View dispute statistics and trends
+
+**Admin Violation Management:**
+- List all violations with filters (type, severity, user, date range)
+- View detailed violation information
+- Handle violation appeals (approve/reject)
+- Manual account status updates (warning, restriction, suspension, ban)
+- Audit trail for all admin actions
+
+**Appeal Process:**
+- Users can appeal violations via support
+- Admin reviews evidence and makes decision
+- Approved appeals remove violation from point calculation
+- Account status automatically recalculated on appeal approval
+- Full audit trail with admin notes
 
 ---
 
@@ -285,13 +388,14 @@ PENDING → AUTHORIZED → CAPTURED → RELEASED
 | Users | 2 | Pending | Blake_Backend |
 | Vendors | 10/10 | ✅ Complete | Blake_Backend (Task Fleet-Feast-ok7), Ellis_Endpoints (Task Fleet-Feast-w6w) |
 | Food Trucks | 3/3 | ✅ Complete | Ellis_Endpoints (Task Fleet-Feast-w6w) |
-| Admin (Vendors) | 3/7 | Partial | Blake_Backend (Task Fleet-Feast-ok7) |
 | Search | 1 (deprecated) | Replaced by Food Trucks API | Ellis_Endpoints |
 | Bookings | 7/7 | ✅ Complete | Blake_Backend (Task Fleet-Feast-wu8) |
 | Payments | 7/8 | ✅ Complete | Blake_Backend (Task Fleet-Feast-5cl) |
 | Messages | 4/4 | ✅ Complete | Blake_Backend (Task Fleet-Feast-2f0) |
 | Reviews | 7/7 | ✅ Complete | Ellis_Endpoints (Task Fleet-Feast-bj4) |
-| Admin (Other) | 4/7 | Pending | Blake_Backend |
+| Disputes | 4/4 | ✅ Complete | Blake_Backend (Task Fleet-Feast-32i) |
+| Violations | 2/2 | ✅ Complete | Blake_Backend (Task Fleet-Feast-9xc) |
+| Admin | 12/15 | ✅ Partial | Blake_Backend (Vendors, Disputes, Violations) |
 
 ---
 
@@ -492,6 +596,80 @@ vendor:availability:{vendorId}:{date}
 
 ## Change Log
 
+### Version 1.8 - 2025-12-05 (Blake_Backend)
+- Implemented Violation & Penalty System API (8 endpoints)
+  - POST `/api/violations` - Create violation manually (admin only)
+  - GET `/api/violations/user/{userId}` - Get user's violation summary and history
+  - GET `/api/admin/violations` - List all violations with filters
+  - GET `/api/admin/violations/{id}` - Get violation details
+  - PUT `/api/admin/violations/{id}` - Update violation notes
+  - POST `/api/admin/violations/{id}/appeal` - Handle violation appeal decision
+  - PUT `/api/admin/users/{id}/status` - Update user account status manually
+- Features:
+  - Automatic violation creation from messaging circumvention flags
+  - Progressive penalty system based on point accumulation:
+    - 1 point: Warning (account remains active)
+    - 3 points: Restricted (7-day restriction on new bookings)
+    - 5 points: Suspended (30-day account suspension)
+    - 8+ points: Banned (permanent account closure)
+  - Points calculated over rolling 365-day period
+  - Account status automatically updated when violations occur
+  - Temporary penalties (restricted/suspended) with automatic expiry
+  - Appeal system for disputed violations
+  - Appeal approval recalculates user status automatically
+  - Full audit trail for all violations and admin actions
+  - Violation types: contact sharing, circumvention, harassment, spam, fraud
+  - Source tracking (messaging system, dispute system, manual report)
+  - Admin filtering by type, severity, user, date range
+- Created violation module with:
+  - Type definitions for violations, penalties, and appeals
+  - Penalty progression rules with configurable thresholds
+  - Validation schemas for all endpoints
+  - Service layer with automatic penalty calculation
+  - Integration with messaging anti-circumvention system
+- Updated Prisma schema:
+  - Added statusExpiresAt to User model for temporary penalties
+  - Added appeal fields to Violation model (appealed, appealDecision, appealNotes)
+  - Added automated and source tracking fields
+  - Added indexes for performance
+- Updated messaging service to use violation service for auto-penalties
+- All endpoints follow service layer pattern with proper authorization
+- Comprehensive error handling with ViolationError class
+
+### Version 1.7 - 2025-12-05 (Blake_Backend)
+- Implemented Dispute Resolution System API (4 user + 4 admin endpoints)
+  - POST `/api/disputes` - Create dispute for completed booking
+  - GET `/api/disputes` - List user's disputes with filters
+  - GET `/api/disputes/{id}` - Get dispute details
+  - PUT `/api/disputes/{id}` - Update dispute (limited, customer-facing)
+  - GET `/api/admin/disputes` - List all disputes with optional statistics
+  - GET `/api/admin/disputes/{id}` - Get complete dispute details (admin)
+  - PUT `/api/admin/disputes/{id}` - Update dispute status or auto-resolve
+  - POST `/api/admin/disputes/{id}/resolve` - Resolve with specific outcome
+- Features:
+  - Only COMPLETED bookings within 7-day window can be disputed
+  - Dispute types: NO_SHOW, LATE_ARRIVAL, SERVICE_QUALITY, WRONG_ORDER, FOOD_QUALITY, OTHER
+  - Auto-resolution rules engine:
+    - NO_SHOW: Automatic 100% refund
+    - LATE_ARRIVAL: 50% refund (60+ min), 25% refund (30-59 min), manual review (<30 min)
+    - All subjective disputes (SERVICE_QUALITY, FOOD_QUALITY, etc.): Manual review required
+  - Funds held during dispute (payment remains CAPTURED)
+  - Resolution outcomes: FULL_REFUND, PARTIAL_REFUND, NO_REFUND, CANCELLED
+  - Admin can manually resolve with custom refund percentage
+  - Dispute status workflow: OPEN → INVESTIGATING → ESCALATED → RESOLVED_REFUND/RESOLVED_RELEASE/CLOSED
+  - Integration with payment service for refund processing
+  - Booking status updated appropriately (DISPUTED → REFUNDED/COMPLETED)
+  - Dispute statistics for admin dashboard
+- Created dispute module with:
+  - Type definitions for disputes, resolutions, and outcomes
+  - Zod validation schemas with conditional logic
+  - Auto-resolution rules engine with threshold-based logic
+  - Service layer with transaction handling for fund management
+  - Comprehensive error handling with DisputeError class
+- All endpoints follow service layer pattern with proper authorization
+- Auto-resolution can be triggered via API or applied during creation
+- Dispute metadata stored as JSON for flexible data (e.g., lateMinutes)
+
 ### Version 1.6 - 2025-12-05 (Blake_Backend)
 - Implemented Payment & Escrow System API (8 endpoints)
   - POST `/api/payments` - Create payment intent for booking
@@ -654,7 +832,7 @@ vendor:availability:{vendorId}:{date}
 
 ---
 
-**Document Version:** 1.6
+**Document Version:** 1.7
 **Last Updated:** 2025-12-05
 **Author:** Blake_Backend
 **Next Review:** 2026-01-03
