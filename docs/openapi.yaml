@@ -1,0 +1,1105 @@
+openapi: 3.0.0
+info:
+  title: Fleet Feast API
+  version: 1.0.0
+  description: |
+    REST API for Fleet Feast - A Food Truck Marketplace Platform
+
+    ## Overview
+    Fleet Feast connects customers with food truck vendors for events. The API supports:
+    - Customer booking and vendor management
+    - Secure payment processing with Stripe Connect
+    - In-app messaging with anti-circumvention features
+    - Review and rating system
+    - Admin tools for vendor approval and dispute resolution
+
+    ## Authentication
+    All protected endpoints require JWT authentication via HTTP-only cookies.
+    Login via POST /api/auth/login to receive authentication cookie.
+
+    ## Rate Limiting
+    - Authenticated: 100 requests/minute
+    - Unauthenticated: 20 requests/minute
+
+  contact:
+    name: Fleet Feast API Support
+    email: api@fleetfeast.com
+  license:
+    name: MIT
+
+servers:
+  - url: https://api.fleetfeast.com
+    description: Production server
+  - url: http://localhost:3000
+    description: Development server
+
+tags:
+  - name: Authentication
+    description: User registration, login, and password management
+  - name: Users
+    description: User profile management
+  - name: Vendors
+    description: Vendor application, profile, and business management
+  - name: Food Trucks
+    description: Public food truck search and discovery
+  - name: Bookings
+    description: Event booking request-to-book flow
+  - name: Quotes
+    description: Request for Quote (RFQ) system for complex events
+  - name: Payments
+    description: Stripe Connect payment processing and escrow
+  - name: Messages
+    description: In-app messaging with anti-circumvention
+  - name: Reviews
+    description: Bidirectional review and rating system
+  - name: Disputes
+    description: Dispute resolution for completed bookings
+  - name: Loyalty
+    description: Repeat customer discount system
+  - name: Notifications
+    description: In-app and email notification management
+  - name: Violations
+    description: Policy violation tracking and penalties
+  - name: Admin
+    description: Admin-only vendor approval and dispute management
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: token
+      description: JWT token in HTTP-only secure cookie
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: VALIDATION_ERROR
+            message:
+              type: string
+              example: Guest count must be between 1 and 10,000
+            details:
+              type: object
+              additionalProperties: true
+      required:
+        - success
+        - error
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Operation completed successfully
+        data:
+          type: object
+          additionalProperties: true
+      required:
+        - success
+
+    Pagination:
+      type: object
+      properties:
+        nextCursor:
+          type: string
+          nullable: true
+          example: eyJpZCI6ImFiYzEyMyJ9
+        prevCursor:
+          type: string
+          nullable: true
+        hasMore:
+          type: boolean
+        totalCount:
+          type: integer
+          example: 150
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [CUSTOMER, VENDOR, ADMIN]
+        status:
+          type: string
+          enum: [ACTIVE, SUSPENDED, BANNED, RESTRICTED]
+        createdAt:
+          type: string
+          format: date-time
+        emailVerified:
+          type: boolean
+
+    VendorProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        businessName:
+          type: string
+          example: Taco Loco Food Truck
+        description:
+          type: string
+        cuisineType:
+          type: array
+          items:
+            type: string
+            enum: [MEXICAN, AMERICAN, ITALIAN, ASIAN, BBQ, FUSION, VEGETARIAN, DESSERTS, OTHER]
+        priceRange:
+          type: string
+          enum: [BUDGET, MODERATE, PREMIUM]
+        servingCapacityMin:
+          type: integer
+        servingCapacityMax:
+          type: integer
+        status:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED]
+        averageRating:
+          type: number
+          format: float
+          nullable: true
+        totalReviews:
+          type: integer
+
+    Booking:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        customerId:
+          type: string
+          format: uuid
+        vendorId:
+          type: string
+          format: uuid
+        eventDate:
+          type: string
+          format: date
+          example: "2025-12-25"
+        eventTime:
+          type: string
+          pattern: '^([01]?[0-9]|2[0-3]):[0-5][0-9]$'
+          example: "14:30"
+        eventType:
+          type: string
+          enum: [CORPORATE, WEDDING, BIRTHDAY, FESTIVAL, PRIVATE_PARTY, OTHER]
+        location:
+          type: string
+        guestCount:
+          type: integer
+          minimum: 1
+          maximum: 10000
+        totalAmount:
+          type: number
+          format: decimal
+        platformFee:
+          type: number
+          format: decimal
+        vendorPayout:
+          type: number
+          format: decimal
+        status:
+          type: string
+          enum: [PENDING, ACCEPTED, CONFIRMED, COMPLETED, CANCELLED, DISPUTED, REFUNDED]
+        discountAmount:
+          type: number
+          format: decimal
+          nullable: true
+        loyaltyApplied:
+          type: boolean
+        specialRequests:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        acceptedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    Payment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        bookingId:
+          type: string
+          format: uuid
+        amount:
+          type: number
+          format: decimal
+        status:
+          type: string
+          enum: [PENDING, AUTHORIZED, CAPTURED, RELEASED, REFUNDED, FAILED]
+        stripePaymentIntentId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        bookingId:
+          type: string
+          format: uuid
+        senderId:
+          type: string
+          format: uuid
+        content:
+          type: string
+          maxLength: 2000
+        flagged:
+          type: boolean
+        flaggedReason:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+
+    Review:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        bookingId:
+          type: string
+          format: uuid
+        reviewerId:
+          type: string
+          format: uuid
+        revieweeId:
+          type: string
+          format: uuid
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        content:
+          type: string
+          nullable: true
+        response:
+          type: string
+          nullable: true
+        hidden:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+paths:
+  /api/auth/register:
+    post:
+      tags: [Authentication]
+      summary: Register new user
+      description: Create a new user account with email verification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, role]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+                  description: Min 8 chars, must include uppercase, lowercase, number
+                role:
+                  type: string
+                  enum: [CUSTOMER, VENDOR]
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/User'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/login:
+    post:
+      tags: [Authentication]
+      summary: User login
+      description: Authenticate user and receive session cookie
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: token=eyJhbGc...; HttpOnly; Secure; SameSite=Strict
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/User'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/logout:
+    post:
+      tags: [Authentication]
+      summary: User logout
+      description: Invalidate session and clear cookie
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/trucks:
+    get:
+      tags: [Food Trucks]
+      summary: Search food trucks
+      description: |
+        Search and filter food trucks with full-text search.
+        Includes PostgreSQL full-text search on name, description, and menu items.
+      parameters:
+        - name: query
+          in: query
+          schema:
+            type: string
+          description: Full-text search query
+        - name: cuisineType
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          description: Filter by cuisine types (comma-separated)
+        - name: priceRange
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [BUDGET, MODERATE, PREMIUM]
+          description: Filter by price range
+        - name: capacityMin
+          in: query
+          schema:
+            type: integer
+          description: Minimum guest capacity
+        - name: capacityMax
+          in: query
+          schema:
+            type: integer
+          description: Maximum guest capacity
+        - name: minRating
+          in: query
+          schema:
+            type: number
+            format: float
+            minimum: 1
+            maximum: 5
+          description: Minimum average rating
+        - name: availableDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Filter by availability date (YYYY-MM-DD)
+        - name: lat
+          in: query
+          schema:
+            type: number
+            format: float
+          description: Latitude for location search
+        - name: lng
+          in: query
+          schema:
+            type: number
+            format: float
+          description: Longitude for location search
+        - name: radiusMiles
+          in: query
+          schema:
+            type: number
+            format: float
+          description: Search radius in miles
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: Page number
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+          description: Results per page
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [relevance, rating, price]
+            default: relevance
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      trucks:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/VendorProfile'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+
+  /api/trucks/{id}:
+    get:
+      tags: [Food Trucks]
+      summary: Get truck details
+      description: Get detailed truck profile with menu, reviews, and availability
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Truck details
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          vendor:
+                            $ref: '#/components/schemas/VendorProfile'
+                          menu:
+                            type: array
+                            items:
+                              type: object
+                          reviews:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Review'
+        '404':
+          description: Truck not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/bookings:
+    get:
+      tags: [Bookings]
+      summary: List user bookings
+      description: List bookings for current user (customer or vendor view)
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [PENDING, ACCEPTED, CONFIRMED, COMPLETED, CANCELLED, DISPUTED, REFUNDED]
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        '200':
+          description: Booking list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      bookings:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Booking'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+
+    post:
+      tags: [Bookings]
+      summary: Create booking
+      description: |
+        Create booking request for a vendor.
+
+        Business Rules:
+        - Event date must be in the future
+        - Vendor must be available on event date
+        - Guest count must be within vendor capacity range
+        - Loyalty discount (5%) automatically applied for repeat customers
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [vendorId, eventDate, eventTime, eventType, location, guestCount, totalAmount]
+              properties:
+                vendorId:
+                  type: string
+                  format: uuid
+                eventDate:
+                  type: string
+                  format: date
+                  example: "2025-12-25"
+                eventTime:
+                  type: string
+                  pattern: '^([01]?[0-9]|2[0-3]):[0-5][0-9]$'
+                  example: "14:30"
+                eventType:
+                  type: string
+                  enum: [CORPORATE, WEDDING, BIRTHDAY, FESTIVAL, PRIVATE_PARTY, OTHER]
+                location:
+                  type: string
+                  minLength: 5
+                  maxLength: 500
+                guestCount:
+                  type: integer
+                  minimum: 1
+                  maximum: 10000
+                totalAmount:
+                  type: number
+                  format: decimal
+                  minimum: 0
+                  maximum: 1000000
+                specialRequests:
+                  type: string
+                  maxLength: 2000
+      responses:
+        '201':
+          description: Booking created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Booking'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Vendor unavailable or capacity exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/bookings/{id}/accept:
+    put:
+      tags: [Bookings]
+      summary: Accept booking (Vendor)
+      description: |
+        Vendor accepts booking request.
+
+        Triggers:
+        - Booking status: PENDING → ACCEPTED
+        - Payment authorization created
+        - Notification sent to customer
+
+        Business Rules:
+        - Must be completed within 48 hours of booking creation
+        - Only vendor can accept
+        - Booking must be in PENDING status
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Booking accepted
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Booking'
+        '403':
+          description: Not authorized
+        '409':
+          description: Invalid state transition or expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/payments:
+    post:
+      tags: [Payments]
+      summary: Create payment intent
+      description: |
+        Create Stripe PaymentIntent for booking.
+
+        Payment Flow:
+        1. PENDING → AUTHORIZED (when customer completes payment)
+        2. AUTHORIZED → CAPTURED (7 days after event)
+        3. CAPTURED → RELEASED (automatic payout to vendor)
+
+        Escrow System:
+        - Funds held until 7 days after event completion
+        - Platform commission: 15% (or 10% for loyalty bookings)
+        - Cancellation refunds based on policy
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [bookingId]
+              properties:
+                bookingId:
+                  type: string
+                  format: uuid
+      responses:
+        '201':
+          description: Payment intent created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          payment:
+                            $ref: '#/components/schemas/Payment'
+                          clientSecret:
+                            type: string
+                            description: Stripe client secret for frontend
+
+  /api/payments/webhook:
+    post:
+      tags: [Payments]
+      summary: Stripe webhook handler
+      description: |
+        Handle Stripe webhook events.
+
+        Events Handled:
+        - payment_intent.succeeded
+        - payment_intent.payment_failed
+        - payment_intent.canceled
+        - charge.refunded
+        - transfer.created
+        - transfer.failed
+        - account.updated
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Stripe webhook event payload
+      responses:
+        '200':
+          description: Webhook processed
+        '400':
+          description: Invalid signature
+
+  /api/messages:
+    get:
+      tags: [Messages]
+      summary: Get inbox
+      description: Get all conversations with pagination
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Inbox conversations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      conversations:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            booking:
+                              $ref: '#/components/schemas/Booking'
+                            lastMessage:
+                              $ref: '#/components/schemas/Message'
+                            unreadCount:
+                              type: integer
+
+    post:
+      tags: [Messages]
+      summary: Send message
+      description: |
+        Send message in booking conversation.
+
+        Anti-Circumvention Features:
+        - Real-time content scanning for contact info
+        - Pattern detection: phone, email, social media
+        - Automatic violation flagging (message still delivered)
+        - Violation tracking with severity levels
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [bookingId, content]
+              properties:
+                bookingId:
+                  type: string
+                  format: uuid
+                content:
+                  type: string
+                  minLength: 1
+                  maxLength: 2000
+      responses:
+        '201':
+          description: Message sent
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Message'
+
+  /api/reviews:
+    post:
+      tags: [Reviews]
+      summary: Submit review
+      description: |
+        Submit review for completed booking.
+
+        Business Rules:
+        - Only for COMPLETED bookings
+        - Each party can submit ONE review per booking
+        - Rating: 1-5 stars (required)
+        - Content optional but encouraged
+        - 7-day edit window
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [bookingId, rating]
+              properties:
+                bookingId:
+                  type: string
+                  format: uuid
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                content:
+                  type: string
+                  maxLength: 2000
+      responses:
+        '201':
+          description: Review created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Review'
+        '403':
+          description: Booking not completed or review already exists
+
+  /api/loyalty/check:
+    get:
+      tags: [Loyalty]
+      summary: Check loyalty discount eligibility
+      description: |
+        Check if customer qualifies for loyalty discount with vendor.
+
+        Loyalty System:
+        - 5% discount on 2nd+ booking with same vendor
+        - Platform absorbs cost (commission: 15% → 10%)
+        - Vendor payout remains unchanged
+        - Discount automatically applied at booking creation
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: vendorId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Loyalty eligibility
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          eligible:
+                            type: boolean
+                          message:
+                            type: string
+                          previousBookings:
+                            type: integer
+                          discountPercent:
+                            type: number
+
+  /api/notifications:
+    get:
+      tags: [Notifications]
+      summary: Get notifications
+      description: Get user's notifications with pagination
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: unreadOnly
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Notifications list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      notifications:
+                        type: array
+                        items:
+                          type: object
+                      unreadCount:
+                        type: integer
+
+  /api/admin/vendors/pending:
+    get:
+      tags: [Admin]
+      summary: List pending vendor applications
+      description: Admin endpoint to review vendor applications
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Pending vendors list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      vendors:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/VendorProfile'
+        '403':
+          description: Admin role required
+
+  /api/admin/vendors/{id}/approve:
+    post:
+      tags: [Admin]
+      summary: Approve vendor application
+      description: |
+        Admin approves vendor application.
+
+        Triggers:
+        - Vendor status: PENDING → APPROVED
+        - Stripe Connect onboarding initiated
+        - Notification sent to vendor
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Vendor approved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '403':
+          description: Admin role required
+        '409':
+          description: Already approved or rejected
