@@ -55,19 +55,20 @@ This registry tracks all API endpoints in the Fleet Feast platform. It serves as
 ---
 
 ### 3. Vendors (9 endpoints)
-**Base Path:** `/api/vendors`
+**Base Path:** `/api/vendor`
 
-| Method | Endpoint | Auth | Role | Description |
-|--------|----------|------|------|-------------|
-| POST | `/api/vendors` | Required | Customer | Apply as vendor |
-| GET | `/api/vendors/{vendorId}` | Public | - | Get vendor profile |
-| PATCH | `/api/vendors/{vendorId}` | Required | Vendor | Update vendor profile |
-| POST | `/api/vendors/{vendorId}/documents` | Required | Vendor | Upload document |
-| GET | `/api/vendors/{vendorId}/documents` | Required | Vendor/Admin | List documents |
-| GET | `/api/vendors/{vendorId}/menu` | Public | - | Get vendor menu |
-| PUT | `/api/vendors/{vendorId}/menu` | Required | Vendor | Update menu |
-| GET | `/api/vendors/{vendorId}/availability` | Public | - | Get availability |
-| POST | `/api/vendors/{vendorId}/availability` | Required | Vendor | Set availability |
+| Method | Endpoint | Auth | Role | Description | Status |
+|--------|----------|------|------|-------------|--------|
+| POST | `/api/vendor/apply` | Required | Vendor | Apply as vendor | ✅ Implemented |
+| POST | `/api/vendor/documents` | Required | Vendor | Upload document | ✅ Implemented |
+| GET | `/api/vendor/documents` | Required | Vendor | List own documents | ✅ Implemented |
+| GET | `/api/vendor/profile` | Required | Vendor | Get own profile | ✅ Implemented |
+| PUT | `/api/vendor/profile` | Required | Vendor | Update own profile | ✅ Implemented |
+| GET | `/api/vendor/{id}/public` | Public | - | Get public vendor profile | ✅ Implemented |
+| GET | `/api/vendor/{vendorId}/menu` | Public | - | Get vendor menu | Pending |
+| PUT | `/api/vendor/{vendorId}/menu` | Required | Vendor | Update menu | Pending |
+| GET | `/api/vendor/{vendorId}/availability` | Public | - | Get availability | Pending |
+| POST | `/api/vendor/{vendorId}/availability` | Required | Vendor | Set availability | Pending |
 
 ---
 
@@ -166,14 +167,14 @@ PENDING → AUTHORIZED → CAPTURED → RELEASED
 ### 9. Admin (7 endpoints)
 **Base Path:** `/api/admin`
 
-| Method | Endpoint | Auth | Role | Description |
-|--------|----------|------|------|-------------|
-| GET | `/api/admin/vendors/pending` | Required | Admin | List pending vendors |
-| POST | `/api/admin/vendors/{vendorId}/approve` | Required | Admin | Approve vendor |
-| POST | `/api/admin/vendors/{vendorId}/reject` | Required | Admin | Reject vendor |
-| GET | `/api/admin/disputes` | Required | Admin | List disputes |
-| POST | `/api/admin/disputes/{disputeId}/resolve` | Required | Admin | Resolve dispute |
-| GET | `/api/admin/violations` | Required | Admin | List violations |
+| Method | Endpoint | Auth | Role | Description | Status |
+|--------|----------|------|------|-------------|--------|
+| GET | `/api/admin/vendors/pending` | Required | Admin | List pending vendors | ✅ Implemented |
+| POST | `/api/admin/vendors/{id}/approve` | Required | Admin | Approve vendor | ✅ Implemented |
+| POST | `/api/admin/vendors/{id}/reject` | Required | Admin | Reject vendor | ✅ Implemented |
+| GET | `/api/admin/disputes` | Required | Admin | List disputes | Pending |
+| POST | `/api/admin/disputes/{disputeId}/resolve` | Required | Admin | Resolve dispute | Pending |
+| GET | `/api/admin/violations` | Required | Admin | List violations | Pending |
 
 ---
 
@@ -181,15 +182,16 @@ PENDING → AUTHORIZED → CAPTURED → RELEASED
 
 | Domain | Endpoints | Status | Implemented By |
 |--------|-----------|--------|----------------|
-| Authentication | 6 | Pending | Blake_Backend |
+| Authentication | 6 | Complete | Blake_Backend (Task Fleet-Feast-igb) |
 | Users | 2 | Pending | Blake_Backend |
-| Vendors | 9 | Pending | Blake_Backend |
+| Vendors | 6/10 | In Progress | Blake_Backend (Task Fleet-Feast-ok7) |
+| Admin (Vendors) | 3/7 | Partial | Blake_Backend (Task Fleet-Feast-ok7) |
 | Search | 1 | Pending | Blake_Backend |
 | Bookings | 7 | Pending | Blake_Backend |
 | Payments | 2 | Pending | Blake_Backend |
 | Messages | 3 | Pending | Blake_Backend |
 | Reviews | 4 | Pending | Blake_Backend |
-| Admin | 7 | Pending | Blake_Backend |
+| Admin (Other) | 4/7 | Pending | Blake_Backend |
 
 ---
 
@@ -390,6 +392,22 @@ vendor:availability:{vendorId}:{date}
 
 ## Change Log
 
+### Version 1.1 - 2025-12-05 (Blake_Backend)
+- Implemented Vendor Application & Onboarding API (6 endpoints)
+  - POST `/api/vendor/apply` - Vendor application submission
+  - POST `/api/vendor/documents` - Document upload
+  - GET `/api/vendor/documents` - List vendor documents
+  - GET `/api/vendor/profile` - Get vendor profile
+  - PUT `/api/vendor/profile` - Update vendor profile
+  - GET `/api/vendor/{id}/public` - Public vendor profile
+- Implemented Admin Vendor Approval API (3 endpoints)
+  - GET `/api/admin/vendors/pending` - List pending applications
+  - POST `/api/admin/vendors/{id}/approve` - Approve vendor
+  - POST `/api/admin/vendors/{id}/reject` - Reject vendor
+- Created vendor service layer with business logic
+- Added Zod validation schemas for all vendor endpoints
+- Implemented file upload placeholder for S3/Cloudinary integration
+
 ### Version 1.0 - 2025-12-03 (Ellis_Endpoints)
 - Initial API design complete
 - 52 endpoints defined across 9 domains
@@ -401,7 +419,7 @@ vendor:availability:{vendorId}:{date}
 
 ---
 
-**Document Version:** 1.0
-**Last Updated:** 2025-12-03
-**Author:** Ellis_Endpoints
+**Document Version:** 1.1
+**Last Updated:** 2025-12-05
+**Author:** Blake_Backend
 **Next Review:** 2026-01-03
