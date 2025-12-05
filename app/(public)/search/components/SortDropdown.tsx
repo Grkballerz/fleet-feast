@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Dropdown } from "@/components/ui/Dropdown";
+import { Dropdown, DropdownItem } from "@/components/ui/Dropdown";
 
 export type SortOption = "relevance" | "rating" | "price";
 export type SortOrder = "asc" | "desc";
@@ -62,10 +62,11 @@ export const SortDropdown: React.FC<SortDropdownProps> = ({
   );
   const currentLabel = currentOption?.label || "Sort by";
 
-  // Handle option selection
-  const handleSelect = (option: typeof SORT_OPTIONS[0]) => {
-    onSortChange(option.value, option.order);
-  };
+  // Convert SORT_OPTIONS to DropdownItem[] format
+  const sortItems: DropdownItem[] = SORT_OPTIONS.map((option) => ({
+    label: option.label,
+    onClick: () => onSortChange(option.value, option.order),
+  }));
 
   return (
     <Dropdown
@@ -87,20 +88,8 @@ export const SortDropdown: React.FC<SortDropdownProps> = ({
           </svg>
         </button>
       }
-    >
-      {SORT_OPTIONS.map((option, index) => (
-        <button
-          key={`${option.value}-${option.order}`}
-          onClick={() => handleSelect(option)}
-          className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 ${
-            option.value === sortBy && option.order === sortOrder
-              ? "bg-blue-50 text-blue-700 font-medium"
-              : "text-gray-700"
-          }`}
-        >
-          {option.label}
-        </button>
-      ))}
-    </Dropdown>
+      items={sortItems}
+      align="right"
+    />
   );
 };

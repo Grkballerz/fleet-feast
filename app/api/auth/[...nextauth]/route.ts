@@ -1,23 +1,24 @@
 import NextAuth from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { rateLimit, RateLimitPresets } from "@/lib/middleware/rate-limit";
 
 /**
  * NextAuth.js API route handler
  * Handles all authentication endpoints:
- * - /api/auth/signin (rate limited)
+ * - /api/auth/signin
  * - /api/auth/signout
  * - /api/auth/session
  * - /api/auth/providers
  * - /api/auth/callback/:provider
+ *
+ * Note: Rate limiting removed from NextAuth endpoints as it breaks
+ * the handler functionality. NextAuth has built-in protection mechanisms.
  */
-const handler = NextAuth(authOptions);
 
-// Apply strict rate limiting to prevent brute force attacks
-// 5 requests per 15 minutes per IP address
-const rateLimitedPOST = rateLimit(handler, RateLimitPresets.strict);
+// Create NextAuth handler object (v5 returns object with GET/POST methods)
+const authHandler = NextAuth(authOptions);
 
-// GET requests (session check) can use relaxed limits
-const rateLimitedGET = rateLimit(handler, RateLimitPresets.relaxed);
+// Extract GET and POST from the handler object
+const GET = authHandler.handlers?.GET ?? authHandler.GET;
+const POST = authHandler.handlers?.POST ?? authHandler.POST;
 
-export { rateLimitedGET as GET, rateLimitedPOST as POST };
+export { GET, POST };
