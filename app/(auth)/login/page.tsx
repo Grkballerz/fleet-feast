@@ -12,11 +12,15 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Alert } from "@/components/ui/Alert";
 
 // Validation schema
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
-  password: z.string().min(1, "Password is required"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  rememberMe: z.boolean().optional(),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -40,6 +44,7 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: verifiedEmail || "",
+      rememberMe: false,
     },
   });
 
@@ -55,7 +60,7 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        setError(result.error);
+        setError("Invalid email or password. Please try again.");
       } else if (result?.ok) {
         // Redirect to dashboard based on user role
         router.push("/customer");
@@ -69,145 +74,95 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        {/* Header */}
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900">Fleet Feast</h1>
-          <h2 className="mt-6 text-2xl font-semibold text-gray-900">
-            Sign in to your account
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Or{" "}
-            <Link
-              href="/register"
-              className="font-medium text-primary hover:text-primary-dark"
-            >
-              create a new account
-            </Link>
-          </p>
+    <div className="space-y-6">
+      {/* Page Title */}
+      <div className="text-center">
+        <h1 className="text-2xl font-bold text-text-primary mb-2">
+          Welcome Back
+        </h1>
+        <p className="text-text-secondary">
+          Sign in to your account to continue
+        </p>
+      </div>
+
+      {/* Verification success message */}
+      {verified === "true" && (
+        <Alert variant="success" title="Email verified successfully!">
+          You can now sign in to your account.
+        </Alert>
+      )}
+
+      {/* Error message */}
+      {error && (
+        <Alert variant="error" title="Sign in failed" dismissible onDismiss={() => setError(null)}>
+          {error}
+        </Alert>
+      )}
+
+      {/* Login Form */}
+      <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
+        {/* Email field */}
+        <Input
+          {...register("email")}
+          id="email"
+          type="email"
+          label="Email address"
+          placeholder="you@example.com"
+          autoComplete="email"
+          error={errors.email?.message}
+          required
+        />
+
+        {/* Password field */}
+        <Input
+          {...register("password")}
+          id="password"
+          type="password"
+          label="Password"
+          placeholder="Enter your password"
+          autoComplete="current-password"
+          error={errors.password?.message}
+          required
+        />
+
+        {/* Remember me and forgot password */}
+        <div className="flex items-center justify-between">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              {...register("rememberMe")}
+              type="checkbox"
+              className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded cursor-pointer"
+            />
+            <span className="text-sm text-text-secondary">Remember me</span>
+          </label>
+
+          <Link
+            href="/forgot-password"
+            className="text-sm font-medium text-primary hover:text-primary-hover transition-colors"
+          >
+            Forgot password?
+          </Link>
         </div>
 
-        {/* Verification success message */}
-        {verified === "true" && (
-          <div className="rounded-md bg-green-50 border border-green-200 p-4">
-            <div className="flex">
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-green-800">
-                  Email verified successfully!
-                </h3>
-                <div className="mt-2 text-sm text-green-700">
-                  <p>You can now sign in to your account.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Submit button */}
+        <Button
+          type="submit"
+          variant="primary"
+          size="lg"
+          loading={isLoading}
+          className="w-full"
+        >
+          Sign in
+        </Button>
+      </form>
 
-        {/* Error message */}
-        {error && (
-          <div className="rounded-md bg-red-50 border border-red-200 p-4">
-            <div className="flex">
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">
-                  Sign in failed
-                </h3>
-                <div className="mt-2 text-sm text-red-700">
-                  <p>{error}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Login Form */}
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-          <div className="space-y-4">
-            {/* Email field */}
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Email address
-              </label>
-              <input
-                {...register("email")}
-                id="email"
-                type="email"
-                autoComplete="email"
-                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm ${
-                  errors.email
-                    ? "border-red-300"
-                    : "border-gray-300"
-                }`}
-                placeholder="you@example.com"
-              />
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.email.message}
-                </p>
-              )}
-            </div>
-
-            {/* Password field */}
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Password
-              </label>
-              <input
-                {...register("password")}
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm ${
-                  errors.password
-                    ? "border-red-300"
-                    : "border-gray-300"
-                }`}
-                placeholder="Enter your password"
-              />
-              {errors.password && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.password.message}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Forgot password link */}
-          <div className="flex items-center justify-end">
-            <div className="text-sm">
-              <Link
-                href="/reset-password"
-                className="font-medium text-primary hover:text-primary-dark"
-              >
-                Forgot your password?
-              </Link>
-            </div>
-          </div>
-
-          {/* Submit button */}
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? "Signing in..." : "Sign in"}
-            </button>
-          </div>
-        </form>
-
-        {/* Footer */}
-        <p className="mt-4 text-center text-sm text-gray-600">
-          New to Fleet Feast?{" "}
+      {/* Sign up link */}
+      <div className="text-center pt-4 border-t border-border">
+        <p className="text-sm text-text-secondary">
+          Don't have an account?{" "}
           <Link
             href="/register"
-            className="font-medium text-primary hover:text-primary-dark"
+            className="font-medium text-primary hover:text-primary-hover transition-colors"
           >
             Create an account
           </Link>

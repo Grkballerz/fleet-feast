@@ -75,4 +75,64 @@ Track all UI components, design tokens, and styling utilities for Fleet Feast.
 
 ---
 
-*Last Updated: 2025-12-03*
+## Vendor Application Components (Task Fleet-Feast-qm9)
+**Status**: Complete
+**Agent**: Parker_Pages
+**Date**: 2025-12-05
+
+### Multi-Step Application Form
+**Path**: `app/(vendor)/apply/`
+**Description**: Complete vendor application flow with 5 steps, progress tracking, and auto-save functionality
+
+**Components**:
+- `ApplicationForm.tsx` - Parent component with state management and validation
+- `ProgressIndicator.tsx` - Step indicator with mobile/desktop layouts
+- `Step1BusinessInfo.tsx` - Business information form
+- `Step2Documents.tsx` - Document upload with drag-and-drop
+- `Step3Menu.tsx` - Menu item CRUD interface
+- `Step4Availability.tsx` - Availability calendar and pricing model
+- `Step5Preview.tsx` - Review and submit with terms acceptance
+
+**Features**:
+- 5-step multi-form with progress indicator
+- Client-side validation per step
+- Auto-save to localStorage
+- Server-side draft persistence (PUT /api/vendor/profile)
+- Drag-and-drop file upload
+- Real-time file upload with progress
+- Menu item CRUD with modal
+- Interactive 90-day calendar
+- Recurring availability patterns
+- Complete application preview
+- Terms acceptance checkbox
+- Error handling and validation feedback
+
+**Type Definitions**: `types/vendor-application.ts`
+- ApplicationState, BusinessInfoData, DocumentData
+- MenuItemData, AvailabilityData, ValidationErrors
+- DocumentType, PricingModel, DietaryTag, AvailabilityPattern enums
+
+**Pages**:
+- `app/(vendor)/apply/page.tsx` - Main application page
+- `app/(vendor)/apply/layout.tsx` - Layout with DashboardLayout
+- `app/(vendor)/apply/success/page.tsx` - Success confirmation page
+
+**API Integration**:
+- POST `/api/vendor/apply` - Submit application
+- POST `/api/vendor/documents` - Upload documents
+- PUT `/api/vendor/profile` - Save draft
+- GET `/api/vendor/profile` - Load existing data
+
+**Dependencies**:
+- DashboardLayout component
+- UI components: Button, Input, Card, Alert, Spinner, Badge, Modal
+- Next.js 14 App Router
+- React hooks for state management
+
+**Used In**: Vendor onboarding flow
+
+**Maintained By**: Parker_Pages
+
+---
+
+*Last Updated: 2025-12-05*

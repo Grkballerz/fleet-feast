@@ -20,11 +20,11 @@ This registry tracks all API endpoints in the Fleet Feast platform. It serves as
 
 ## Statistics
 
-- **Total Endpoints:** 52
-- **Public Endpoints:** 8
+- **Total Endpoints:** 55
+- **Public Endpoints:** 11
 - **Protected Endpoints:** 44
 - **Admin-Only Endpoints:** 7
-- **HTTP Methods:** GET (21), POST (24), PATCH (5), PUT (1), DELETE (1)
+- **HTTP Methods:** GET (24), POST (25), PATCH (5), PUT (2), DELETE (1)
 
 ---
 
@@ -65,29 +65,44 @@ This registry tracks all API endpoints in the Fleet Feast platform. It serves as
 | GET | `/api/vendor/profile` | Required | Vendor | Get own profile | ✅ Implemented |
 | PUT | `/api/vendor/profile` | Required | Vendor | Update own profile | ✅ Implemented |
 | GET | `/api/vendor/{id}/public` | Public | - | Get public vendor profile | ✅ Implemented |
-| GET | `/api/vendor/{vendorId}/menu` | Public | - | Get vendor menu | Pending |
-| PUT | `/api/vendor/{vendorId}/menu` | Required | Vendor | Update menu | Pending |
-| GET | `/api/vendor/{vendorId}/availability` | Public | - | Get availability | Pending |
-| POST | `/api/vendor/{vendorId}/availability` | Required | Vendor | Set availability | Pending |
+| GET | `/api/vendor/menu` | Required | Vendor | Get own menu | ✅ Implemented |
+| PUT | `/api/vendor/menu` | Required | Vendor | Update own menu | ✅ Implemented |
+| GET | `/api/vendor/availability` | Required | Vendor | Get own availability | ✅ Implemented |
+| POST | `/api/vendor/availability` | Required | Vendor | Set own availability | ✅ Implemented |
 
 ---
 
-### 4. Search (1 endpoint)
+### 4. Food Trucks (3 endpoints)
+**Base Path:** `/api/trucks`
+
+| Method | Endpoint | Auth | Description | Status |
+|--------|----------|------|-------------|--------|
+| GET | `/api/trucks` | Public | List/search food trucks with filters | ✅ Implemented |
+| GET | `/api/trucks/{id}` | Public | Get truck profile with menu, reviews, availability | ✅ Implemented |
+| GET | `/api/trucks/{id}/availability` | Public | Check truck availability for a date | ✅ Implemented |
+
+**Search Query Parameters:**
+- `query` (string) - Full-text search (name, description, menu items)
+- `cuisineType` (array) - Filter by cuisine (comma-separated)
+- `priceRange` (array) - Filter by price (comma-separated)
+- `capacityMin` (integer) - Minimum guest capacity
+- `capacityMax` (integer) - Maximum guest capacity
+- `minRating` (float) - Minimum average rating (1-5)
+- `availableDate` (date) - Filter by availability date (YYYY-MM-DD)
+- `lat`, `lng`, `radiusMiles` (float) - Location-based filtering
+- `page` (integer) - Page number (default: 1)
+- `limit` (integer) - Results per page (default: 20, max: 100)
+- `sortBy` (string) - Sort by: relevance, rating, price (default: relevance)
+- `sortOrder` (string) - Sort order: asc, desc (default: desc)
+
+---
+
+### 5. Search (DEPRECATED - Use `/api/trucks` instead)
 **Base Path:** `/api/search`
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| GET | `/api/search/vendors` | Public | Search food trucks |
-
-**Query Parameters:**
-- `query` (string) - Search term
-- `cuisineType` (array) - Filter by cuisine
-- `priceRange` (array) - Filter by price
-- `minCapacity` (integer) - Minimum guest count
-- `maxCapacity` (integer) - Maximum guest count
-- `eventDate` (date) - Check availability
-- `cursor` (string) - Pagination cursor
-- `limit` (integer) - Results per page (default: 20, max: 100)
+| GET | `/api/search/vendors` | Public | ⚠️ Deprecated - Use `/api/trucks` |
 
 ---
 
@@ -184,9 +199,10 @@ PENDING → AUTHORIZED → CAPTURED → RELEASED
 |--------|-----------|--------|----------------|
 | Authentication | 6 | Complete | Blake_Backend (Task Fleet-Feast-igb) |
 | Users | 2 | Pending | Blake_Backend |
-| Vendors | 6/10 | In Progress | Blake_Backend (Task Fleet-Feast-ok7) |
+| Vendors | 10/10 | ✅ Complete | Blake_Backend (Task Fleet-Feast-ok7), Ellis_Endpoints (Task Fleet-Feast-w6w) |
+| Food Trucks | 3/3 | ✅ Complete | Ellis_Endpoints (Task Fleet-Feast-w6w) |
 | Admin (Vendors) | 3/7 | Partial | Blake_Backend (Task Fleet-Feast-ok7) |
-| Search | 1 | Pending | Blake_Backend |
+| Search | 1 (deprecated) | Replaced by Food Trucks API | Ellis_Endpoints |
 | Bookings | 7 | Pending | Blake_Backend |
 | Payments | 2 | Pending | Blake_Backend |
 | Messages | 3 | Pending | Blake_Backend |
@@ -392,6 +408,27 @@ vendor:availability:{vendorId}:{date}
 
 ## Change Log
 
+### Version 1.2 - 2025-12-05 (Ellis_Endpoints)
+- Implemented Food Truck Profiles & Search API (7 endpoints)
+  - GET `/api/trucks` - List/search trucks with PostgreSQL full-text search
+  - GET `/api/trucks/{id}` - Get truck details with menu, reviews, availability
+  - GET `/api/trucks/{id}/availability` - Check truck availability for a date
+  - GET `/api/vendor/menu` - Get vendor's own menu
+  - PUT `/api/vendor/menu` - Update vendor's menu (upsert)
+  - GET `/api/vendor/availability` - Get vendor's own availability calendar
+  - POST `/api/vendor/availability` - Batch update vendor availability
+- Features:
+  - PostgreSQL full-text search on business name, description, AND menu items
+  - Combined filters: cuisine, price, capacity, rating, availability, location
+  - Location-based filtering with radius (Haversine distance calculation)
+  - Pagination with offset/limit pattern
+  - Sorting by relevance, rating, or price
+  - Review aggregation (average rating, total reviews)
+  - Email masking in public reviews
+  - Excludes sensitive data (coordinates, stripe info) from public endpoints
+- Created trucks module with types, validation, and service layer
+- All endpoints follow service layer pattern with proper error handling
+
 ### Version 1.1 - 2025-12-05 (Blake_Backend)
 - Implemented Vendor Application & Onboarding API (6 endpoints)
   - POST `/api/vendor/apply` - Vendor application submission
@@ -419,7 +456,7 @@ vendor:availability:{vendorId}:{date}
 
 ---
 
-**Document Version:** 1.1
+**Document Version:** 1.2
 **Last Updated:** 2025-12-05
-**Author:** Blake_Backend
+**Author:** Ellis_Endpoints
 **Next Review:** 2026-01-03

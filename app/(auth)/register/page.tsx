@@ -11,23 +11,31 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Alert } from "@/components/ui/Alert";
 
 // Validation schema
-const registerSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-      "Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 number"
-    ),
-  confirmPassword: z.string().min(1, "Please confirm your password"),
-  role: z.enum(["CUSTOMER", "VENDOR"]),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords do not match",
-  path: ["confirmPassword"],
-});
+const registerSchema = z
+  .object({
+    email: z.string().email("Invalid email address"),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+        "Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 number"
+      ),
+    confirmPassword: z.string().min(1, "Please confirm your password"),
+    role: z.enum(["CUSTOMER", "VENDOR"]),
+    agreeToTerms: z.boolean().refine((val) => val === true, {
+      message: "You must agree to the Terms of Service",
+    }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
@@ -47,6 +55,7 @@ export default function RegisterPage() {
     resolver: zodResolver(registerSchema),
     defaultValues: {
       role: "CUSTOMER",
+      agreeToTerms: false,
     },
   });
 
@@ -88,238 +97,255 @@ export default function RegisterPage() {
   // Success state
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
-          <div className="text-center">
-            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
-              <svg
-                className="h-6 w-6 text-green-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-            </div>
-            <h2 className="mt-6 text-3xl font-bold text-gray-900">
-              Check your email
-            </h2>
-            <p className="mt-2 text-sm text-gray-600">
-              We've sent you a verification link. Please check your email to activate your account.
-            </p>
-            <div className="mt-6">
-              <Link
-                href="/login"
-                className="text-primary hover:text-primary-dark font-medium"
-              >
-                Return to sign in
-              </Link>
-            </div>
-          </div>
+      <div className="space-y-6 text-center">
+        <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-success/10">
+          <svg
+            className="h-8 w-8 text-success"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-text-primary mb-2">
+            Check your email
+          </h1>
+          <p className="text-text-secondary">
+            We've sent you a verification link. Please check your email to
+            activate your account.
+          </p>
+        </div>
+        <Alert variant="info">
+          Can't find the email? Check your spam folder or{" "}
+          <button
+            onClick={() => setSuccess(false)}
+            className="font-medium underline hover:no-underline"
+          >
+            try again
+          </button>
+          .
+        </Alert>
+        <div className="pt-4">
+          <Link href="/login">
+            <Button variant="outline" size="lg" className="w-full">
+              Return to sign in
+            </Button>
+          </Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        {/* Header */}
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900">Fleet Feast</h1>
-          <h2 className="mt-6 text-2xl font-semibold text-gray-900">
-            Create your account
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Already have an account?{" "}
-            <Link
-              href="/login"
-              className="font-medium text-primary hover:text-primary-dark"
+    <div className="space-y-6">
+      {/* Page Title */}
+      <div className="text-center">
+        <h1 className="text-2xl font-bold text-text-primary mb-2">
+          Create your account
+        </h1>
+        <p className="text-text-secondary">
+          Join FleetFeast and start booking amazing food trucks
+        </p>
+      </div>
+
+      {/* Error message */}
+      {error && (
+        <Alert
+          variant="error"
+          title="Registration failed"
+          dismissible
+          onDismiss={() => setError(null)}
+        >
+          {error}
+        </Alert>
+      )}
+
+      {/* Registration Form */}
+      <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
+        {/* Role selection */}
+        <div>
+          <label className="block text-sm font-medium text-text-primary mb-3">
+            I want to...
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            <label
+              className={`relative flex cursor-pointer rounded-lg border-2 p-4 transition-all ${
+                selectedRole === "CUSTOMER"
+                  ? "border-primary bg-primary/5"
+                  : "border-border bg-card hover:border-gray-300"
+              }`}
             >
-              Sign in
-            </Link>
-          </p>
+              <input
+                {...register("role")}
+                type="radio"
+                value="CUSTOMER"
+                className="sr-only"
+              />
+              <div className="flex flex-col flex-1">
+                <span className="block text-sm font-semibold text-text-primary">
+                  Book food trucks
+                </span>
+                <span className="mt-1 text-xs text-text-secondary">
+                  Customer account
+                </span>
+              </div>
+              {selectedRole === "CUSTOMER" && (
+                <div className="absolute top-3 right-3">
+                  <svg
+                    className="h-5 w-5 text-primary"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              )}
+            </label>
+            <label
+              className={`relative flex cursor-pointer rounded-lg border-2 p-4 transition-all ${
+                selectedRole === "VENDOR"
+                  ? "border-primary bg-primary/5"
+                  : "border-border bg-card hover:border-gray-300"
+              }`}
+            >
+              <input
+                {...register("role")}
+                type="radio"
+                value="VENDOR"
+                className="sr-only"
+              />
+              <div className="flex flex-col flex-1">
+                <span className="block text-sm font-semibold text-text-primary">
+                  Offer my food truck
+                </span>
+                <span className="mt-1 text-xs text-text-secondary">
+                  Vendor account
+                </span>
+              </div>
+              {selectedRole === "VENDOR" && (
+                <div className="absolute top-3 right-3">
+                  <svg
+                    className="h-5 w-5 text-primary"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              )}
+            </label>
+          </div>
         </div>
 
-        {/* Error message */}
-        {error && (
-          <div className="rounded-md bg-red-50 border border-red-200 p-4">
-            <div className="flex">
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">
-                  Registration failed
-                </h3>
-                <div className="mt-2 text-sm text-red-700">
-                  <p>{error}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Email field */}
+        <Input
+          {...register("email")}
+          id="email"
+          type="email"
+          label="Email address"
+          placeholder="you@example.com"
+          autoComplete="email"
+          error={errors.email?.message}
+          required
+        />
 
-        {/* Registration Form */}
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-          <div className="space-y-4">
-            {/* Role selection */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                I want to...
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <label
-                  className={`relative flex cursor-pointer rounded-lg border p-4 focus:outline-none ${
-                    selectedRole === "CUSTOMER"
-                      ? "border-primary bg-primary-50"
-                      : "border-gray-300 bg-white"
-                  }`}
-                >
-                  <input
-                    {...register("role")}
-                    type="radio"
-                    value="CUSTOMER"
-                    className="sr-only"
-                  />
-                  <div className="flex flex-col flex-1">
-                    <span className="block text-sm font-medium text-gray-900">
-                      Book food trucks
-                    </span>
-                    <span className="mt-1 flex items-center text-xs text-gray-500">
-                      Customer account
-                    </span>
-                  </div>
-                </label>
-                <label
-                  className={`relative flex cursor-pointer rounded-lg border p-4 focus:outline-none ${
-                    selectedRole === "VENDOR"
-                      ? "border-primary bg-primary-50"
-                      : "border-gray-300 bg-white"
-                  }`}
-                >
-                  <input
-                    {...register("role")}
-                    type="radio"
-                    value="VENDOR"
-                    className="sr-only"
-                  />
-                  <div className="flex flex-col flex-1">
-                    <span className="block text-sm font-medium text-gray-900">
-                      Offer my food truck
-                    </span>
-                    <span className="mt-1 flex items-center text-xs text-gray-500">
-                      Vendor account
-                    </span>
-                  </div>
-                </label>
-              </div>
-            </div>
+        {/* Password field */}
+        <Input
+          {...register("password")}
+          id="password"
+          type="password"
+          label="Password"
+          placeholder="Create a strong password"
+          autoComplete="new-password"
+          error={errors.password?.message}
+          helperText="Must be at least 8 characters with 1 uppercase, 1 lowercase, and 1 number"
+          required
+        />
 
-            {/* Email field */}
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
+        {/* Confirm password field */}
+        <Input
+          {...register("confirmPassword")}
+          id="confirmPassword"
+          type="password"
+          label="Confirm password"
+          placeholder="Re-enter your password"
+          autoComplete="new-password"
+          error={errors.confirmPassword?.message}
+          required
+        />
+
+        {/* Terms of service checkbox */}
+        <div>
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              {...register("agreeToTerms")}
+              type="checkbox"
+              className="h-4 w-4 mt-0.5 text-primary focus:ring-primary border-gray-300 rounded cursor-pointer"
+            />
+            <span className="text-sm text-text-secondary">
+              I agree to the{" "}
+              <Link
+                href="/terms"
+                className="text-primary hover:text-primary-hover font-medium underline"
+                target="_blank"
               >
-                Email address
-              </label>
-              <input
-                {...register("email")}
-                id="email"
-                type="email"
-                autoComplete="email"
-                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm ${
-                  errors.email ? "border-red-300" : "border-gray-300"
-                }`}
-                placeholder="you@example.com"
-              />
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.email.message}
-                </p>
-              )}
-            </div>
-
-            {/* Password field */}
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link
+                href="/privacy"
+                className="text-primary hover:text-primary-hover font-medium underline"
+                target="_blank"
               >
-                Password
-              </label>
-              <input
-                {...register("password")}
-                id="password"
-                type="password"
-                autoComplete="new-password"
-                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm ${
-                  errors.password ? "border-red-300" : "border-gray-300"
-                }`}
-                placeholder="Create a strong password"
-              />
-              {errors.password && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.password.message}
-                </p>
-              )}
-              <p className="mt-1 text-xs text-gray-500">
-                Must be at least 8 characters with 1 uppercase, 1 lowercase, and 1 number
-              </p>
-            </div>
+                Privacy Policy
+              </Link>
+            </span>
+          </label>
+          {errors.agreeToTerms && (
+            <p className="mt-1 text-sm text-error">
+              {errors.agreeToTerms.message}
+            </p>
+          )}
+        </div>
 
-            {/* Confirm password field */}
-            <div>
-              <label
-                htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Confirm password
-              </label>
-              <input
-                {...register("confirmPassword")}
-                id="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm ${
-                  errors.confirmPassword ? "border-red-300" : "border-gray-300"
-                }`}
-                placeholder="Re-enter your password"
-              />
-              {errors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.confirmPassword.message}
-                </p>
-              )}
-            </div>
-          </div>
+        {/* Submit button */}
+        <Button
+          type="submit"
+          variant="primary"
+          size="lg"
+          loading={isLoading}
+          className="w-full"
+        >
+          Create account
+        </Button>
+      </form>
 
-          {/* Submit button */}
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? "Creating account..." : "Create account"}
-            </button>
-          </div>
-
-          {/* Terms */}
-          <p className="text-xs text-center text-gray-500">
-            By creating an account, you agree to our{" "}
-            <Link href="/terms" className="text-primary hover:text-primary-dark">
-              Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link href="/privacy" className="text-primary hover:text-primary-dark">
-              Privacy Policy
-            </Link>
-          </p>
-        </form>
+      {/* Sign in link */}
+      <div className="text-center pt-4 border-t border-border">
+        <p className="text-sm text-text-secondary">
+          Already have an account?{" "}
+          <Link
+            href="/login"
+            className="font-medium text-primary hover:text-primary-hover transition-colors"
+          >
+            Sign in
+          </Link>
+        </p>
       </div>
     </div>
   );
