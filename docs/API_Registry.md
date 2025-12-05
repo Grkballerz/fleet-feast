@@ -20,11 +20,11 @@ This registry tracks all API endpoints in the Fleet Feast platform. It serves as
 
 ## Statistics
 
-- **Total Endpoints:** 55
-- **Public Endpoints:** 11
+- **Total Endpoints:** 58
+- **Public Endpoints:** 14
 - **Protected Endpoints:** 44
 - **Admin-Only Endpoints:** 7
-- **HTTP Methods:** GET (24), POST (25), PATCH (5), PUT (2), DELETE (1)
+- **HTTP Methods:** GET (28), POST (24), PUT (6), PATCH (5), DELETE (2)
 
 ---
 
@@ -109,22 +109,36 @@ This registry tracks all API endpoints in the Fleet Feast platform. It serves as
 ### 5. Bookings (7 endpoints)
 **Base Path:** `/api/bookings`
 
-| Method | Endpoint | Auth | Role | Description |
-|--------|----------|------|------|-------------|
-| GET | `/api/bookings` | Required | Customer/Vendor | List user bookings |
-| POST | `/api/bookings` | Required | Customer | Create booking |
-| GET | `/api/bookings/{bookingId}` | Required | Customer/Vendor | Get booking details |
-| PATCH | `/api/bookings/{bookingId}` | Required | Customer/Vendor | Update booking |
-| POST | `/api/bookings/{bookingId}/accept` | Required | Vendor | Accept booking |
-| POST | `/api/bookings/{bookingId}/decline` | Required | Vendor | Decline booking |
-| POST | `/api/bookings/{bookingId}/cancel` | Required | Customer/Vendor | Cancel booking |
+| Method | Endpoint | Auth | Role | Description | Status |
+|--------|----------|------|------|-------------|--------|
+| GET | `/api/bookings` | Required | Customer/Vendor | List user bookings | ✅ Implemented |
+| POST | `/api/bookings` | Required | Customer | Create booking | ✅ Implemented |
+| GET | `/api/bookings/{id}` | Required | Customer/Vendor | Get booking details | ✅ Implemented |
+| PUT | `/api/bookings/{id}` | Required | Customer | Update booking (PENDING only) | ✅ Implemented |
+| PUT | `/api/bookings/{id}/accept` | Required | Vendor | Accept booking | ✅ Implemented |
+| PUT | `/api/bookings/{id}/decline` | Required | Vendor | Decline booking | ✅ Implemented |
+| DELETE | `/api/bookings/{id}` | Required | Customer/Vendor | Cancel booking | ✅ Implemented |
 
 **Booking State Transitions:**
 ```
 PENDING → ACCEPTED → CONFIRMED → COMPLETED
-         ↓           ↓
-      DECLINED   CANCELLED → REFUNDED
+         ↓           ↓           ↓
+      CANCELLED  CANCELLED  CANCELLED → REFUNDED
+                              ↓
+                          DISPUTED → REFUNDED
 ```
+
+**Business Rules:**
+- **Availability Check:** Vendor must be available on event date
+- **Capacity Validation:** Guest count must be within vendor capacity range
+- **48-Hour Response Window:** Vendor must accept/decline within 48 hours
+- **Status Validation:** Only valid status transitions allowed
+- **Cancellation Policy:**
+  - 7+ days before event: 100% refund
+  - 3-6 days before event: 50% refund
+  - Under 3 days: No refund
+- **Platform Commission:** 15% fee on all bookings
+- **Authorization:** Users can only view/manage their own bookings
 
 ---
 
@@ -161,21 +175,35 @@ PENDING → AUTHORIZED → CAPTURED → RELEASED
 
 ---
 
-### 8. Reviews (4 endpoints)
+### 8. Reviews (7 endpoints)
 **Base Path:** `/api/reviews`
 
-| Method | Endpoint | Auth | Role | Description |
-|--------|----------|------|------|-------------|
-| GET | `/api/reviews` | Public | - | List reviews |
-| POST | `/api/reviews` | Required | Customer/Vendor | Create review |
-| PATCH | `/api/reviews/{reviewId}` | Required | Owner | Update review |
-| DELETE | `/api/reviews/{reviewId}` | Required | Owner | Delete review |
+| Method | Endpoint | Auth | Role | Description | Status |
+|--------|----------|------|------|-------------|--------|
+| POST | `/api/reviews` | Required | Customer/Vendor | Submit review for completed booking | ✅ Implemented |
+| GET | `/api/reviews/{id}` | Public | - | Get single review with context | ✅ Implemented |
+| PUT | `/api/reviews/{id}` | Required | Owner | Update own review (within 7 days) | ✅ Implemented |
+| DELETE | `/api/reviews/{id}` | Required | Owner | Soft delete own review | ✅ Implemented |
+| GET | `/api/reviews/vendor/{vendorId}` | Public | - | List vendor's reviews with aggregates | ✅ Implemented |
+| GET | `/api/reviews/user/{userId}` | Public | - | List user's reviews (as reviewer) | ✅ Implemented |
+| GET | `/api/reviews/vendor/{vendorId}/rating` | Public | - | Get vendor rating aggregate | ✅ Via vendor endpoint |
 
 **Review Rules:**
-- Only after booking completion (event date passed)
-- 7-day edit window
+- Only allowed for COMPLETED bookings
+- Each party can submit ONE review per booking
+- 7-day edit window for modifications
 - Bidirectional (customer ↔ vendor)
-- Rating: 1-5 stars
+- Rating: 1-5 stars (required)
+- Content: Optional but encouraged
+- Email masking in public display (e.g., j***@example.com)
+- Soft delete (deletedAt timestamp)
+- Hidden reviews excluded from aggregates
+
+**Aggregate Calculations:**
+- Average rating per vendor
+- Total review count
+- Rating breakdown (1-5 star distribution)
+- Updated automatically on create/update/delete
 
 ---
 
@@ -203,10 +231,10 @@ PENDING → AUTHORIZED → CAPTURED → RELEASED
 | Food Trucks | 3/3 | ✅ Complete | Ellis_Endpoints (Task Fleet-Feast-w6w) |
 | Admin (Vendors) | 3/7 | Partial | Blake_Backend (Task Fleet-Feast-ok7) |
 | Search | 1 (deprecated) | Replaced by Food Trucks API | Ellis_Endpoints |
-| Bookings | 7 | Pending | Blake_Backend |
+| Bookings | 7/7 | ✅ Complete | Blake_Backend (Task Fleet-Feast-wu8) |
 | Payments | 2 | Pending | Blake_Backend |
 | Messages | 3 | Pending | Blake_Backend |
-| Reviews | 4 | Pending | Blake_Backend |
+| Reviews | 7/7 | ✅ Complete | Ellis_Endpoints (Task Fleet-Feast-bj4) |
 | Admin (Other) | 4/7 | Pending | Blake_Backend |
 
 ---
@@ -408,6 +436,57 @@ vendor:availability:{vendorId}:{date}
 
 ## Change Log
 
+### Version 1.4 - 2025-12-05 (Blake_Backend)
+- Implemented Booking System API (7 endpoints)
+  - POST `/api/bookings` - Create booking request
+  - GET `/api/bookings` - List user's bookings (customer or vendor view)
+  - GET `/api/bookings/{id}` - Get booking details
+  - PUT `/api/bookings/{id}` - Update booking (PENDING status only)
+  - PUT `/api/bookings/{id}/accept` - Vendor accepts booking
+  - PUT `/api/bookings/{id}/decline` - Vendor declines booking
+  - DELETE `/api/bookings/{id}` - Cancel booking
+- Features:
+  - Request-to-book flow with vendor availability checking
+  - 48-hour vendor response window enforcement
+  - Status transition validation (PENDING → ACCEPTED → CONFIRMED → COMPLETED)
+  - Cancellation policy with refund calculation:
+    - 7+ days before: 100% refund
+    - 3-6 days before: 50% refund
+    - Under 3 days: No refund
+  - Platform commission calculation (15% fee)
+  - Vendor capacity validation (guest count must be within min/max range)
+  - Authorization checks (users can only view/manage own bookings)
+  - Customer can update booking in PENDING status only
+  - Vendor can accept/decline only within 48-hour window
+- Created booking module with types, validation, and service layer
+- All endpoints follow service layer pattern with proper error handling
+- Comprehensive business logic for booking lifecycle management
+
+### Version 1.3 - 2025-12-05 (Ellis_Endpoints)
+- Implemented Review & Rating System API (7 endpoints)
+  - POST `/api/reviews` - Submit review for completed booking
+  - GET `/api/reviews/{id}` - Get single review with booking context
+  - PUT `/api/reviews/{id}` - Update own review (within 7-day window)
+  - DELETE `/api/reviews/{id}` - Soft delete own review
+  - GET `/api/reviews/vendor/{vendorId}` - List vendor reviews with pagination
+  - GET `/api/reviews/user/{userId}` - List user reviews (as reviewer)
+  - Aggregate rating endpoint integrated into vendor listing
+- Features:
+  - Bidirectional reviews (customer ↔ vendor)
+  - Tied to COMPLETED bookings only
+  - Each party can submit ONE review per booking
+  - Rating 1-5 stars (required), content optional
+  - 7-day edit window after creation
+  - Email masking in public display (j***@example.com)
+  - Soft delete with deletedAt timestamp
+  - Hidden reviews excluded from aggregates
+  - Automatic aggregate rating calculation on create/update/delete
+  - Rating breakdown by star level (1-5)
+  - Pagination and filtering support
+- Created reviews module with types, validation, and service layer
+- All endpoints follow service layer pattern with proper error handling
+- Review eligibility checks prevent duplicate/invalid reviews
+
 ### Version 1.2 - 2025-12-05 (Ellis_Endpoints)
 - Implemented Food Truck Profiles & Search API (7 endpoints)
   - GET `/api/trucks` - List/search trucks with PostgreSQL full-text search
@@ -456,7 +535,7 @@ vendor:availability:{vendorId}:{date}
 
 ---
 
-**Document Version:** 1.2
+**Document Version:** 1.4
 **Last Updated:** 2025-12-05
-**Author:** Ellis_Endpoints
+**Author:** Blake_Backend
 **Next Review:** 2026-01-03

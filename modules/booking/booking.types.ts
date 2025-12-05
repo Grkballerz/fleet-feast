@@ -1,0 +1,124 @@
+/**
+ * Booking Module TypeScript Types
+ * Shared types for booking-related operations
+ */
+
+import { BookingStatus, EventType } from "@prisma/client";
+import { Decimal } from "@prisma/client/runtime/library";
+
+/**
+ * Booking request data (customer creates booking)
+ */
+export interface BookingRequestData {
+  vendorId: string;
+  eventDate: string; // YYYY-MM-DD format
+  eventTime: string; // HH:MM format
+  eventType: EventType;
+  location: string;
+  guestCount: number;
+  specialRequests?: string;
+  totalAmount: number; // Calculated by frontend or recalculated by backend
+}
+
+/**
+ * Booking update data (limited fields)
+ */
+export interface BookingUpdateData {
+  eventDate?: string;
+  eventTime?: string;
+  location?: string;
+  guestCount?: number;
+  specialRequests?: string;
+}
+
+/**
+ * Vendor response data
+ */
+export interface VendorResponseData {
+  reason?: string; // For decline only
+}
+
+/**
+ * Cancellation data
+ */
+export interface CancellationData {
+  reason?: string;
+}
+
+/**
+ * Full booking details
+ */
+export interface BookingDetails {
+  id: string;
+  customerId: string;
+  vendorId: string;
+
+  // Event details
+  eventDate: string;
+  eventTime: string;
+  eventType: EventType;
+  location: string;
+  guestCount: number;
+  specialRequests: string | null;
+
+  // Financial
+  totalAmount: number;
+  platformFee: number;
+  vendorPayout: number;
+
+  // Status
+  status: BookingStatus;
+
+  // Timestamps
+  createdAt: Date;
+  updatedAt: Date;
+  acceptedAt: Date | null;
+  respondedAt: Date | null;
+  cancelledAt: Date | null;
+
+  // Cancellation
+  cancelledBy: string | null;
+  cancellationReason: string | null;
+  refundAmount: number | null;
+
+  // Vendor info (for customer)
+  vendor?: {
+    id: string;
+    businessName: string;
+    cuisineType: string;
+  };
+
+  // Customer info (for vendor)
+  customer?: {
+    id: string;
+    email: string;
+  };
+}
+
+/**
+ * Booking list item (summary)
+ */
+export interface BookingListItem {
+  id: string;
+  eventDate: string;
+  eventTime: string;
+  eventType: EventType;
+  location: string;
+  guestCount: number;
+  totalAmount: number;
+  status: BookingStatus;
+  createdAt: Date;
+
+  // Other party info
+  vendorBusinessName?: string; // For customer
+  customerEmail?: string; // For vendor
+}
+
+/**
+ * Refund calculation result
+ */
+export interface RefundCalculation {
+  refundAmount: number;
+  refundPercentage: number;
+  daysBeforeEvent: number;
+}
