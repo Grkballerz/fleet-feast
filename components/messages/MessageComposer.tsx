@@ -122,14 +122,14 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
   // Disabled state UI
   if (disabled) {
     return (
-      <div className="border-t p-4 bg-gray-50 text-center text-gray-500">
+      <div className="neo-border-t p-4 neo-glass text-center text-gray-500">
         <p>Messaging is disabled for this booking</p>
       </div>
     );
   }
 
   return (
-    <div className="border-t p-4 bg-white">
+    <div className="neo-border-t p-4 neo-glass-card">
       {/* Warning alert for flagged content */}
       {warning && (
         <Alert variant="warning" className="mb-3">
@@ -154,7 +154,7 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
           maxLength={MAX_LENGTH}
           showCharCount
           rows={2}
-          className="flex-1"
+          className="flex-1 neo-input"
           disabled={isSending}
         />
 
@@ -164,7 +164,7 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
           disabled={!content.trim() || isSending}
           loading={isSending}
           iconLeft={<Send className="w-5 h-5" />}
-          className="mb-6"
+          className="mb-6 neo-btn-primary"
           aria-label="Send message"
         >
           Send

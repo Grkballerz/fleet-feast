@@ -117,7 +117,7 @@ export default function MessageThreadPage() {
   return (
     <div className="flex flex-col h-screen">
       {/* Header */}
-      <div className="border-b bg-white px-4 py-3 flex items-center gap-4">
+      <div className="neo-glass-header neo-border-b px-4 py-3 flex items-center gap-4">
         {/* Back button */}
         <Button
           variant="ghost"

@@ -48,13 +48,13 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
   ) => {
     // Base styles
     const baseStyles =
-      "rounded-lg border border-border bg-card p-6 shadow-sm transition-shadow duration-normal";
+      "neo-card-glass p-6 transition-all duration-normal";
 
     // Variant-specific styles
     const variantStyles = {
-      default: "hover:shadow-md",
+      default: "",
       interactive:
-        "cursor-pointer transition-all hover:shadow-lg hover:scale-[1.01] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        "cursor-pointer hover:neo-shadow-lg hover:translate-x-[-1px] hover:translate-y-[-1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
     };
 
     // Keyboard handler for interactive cards - WCAG 2.1.1

@@ -70,9 +70,9 @@ export default function ForgotPasswordPage() {
   if (success) {
     return (
       <div className="space-y-6">
-        <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-success/10">
+        <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-neo bg-green-500/20 neo-border-thin border-green-500">
           <svg
-            className="h-8 w-8 text-success"
+            className="h-8 w-8 text-green-500"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -86,41 +86,39 @@ export default function ForgotPasswordPage() {
           </svg>
         </div>
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-text-primary mb-2">
+          <h1 className="neo-heading text-2xl text-white mb-2">
             Check your email
           </h1>
-          <p className="text-text-secondary">
+          <p className="text-white/70">
             We've sent password reset instructions to{" "}
-            <strong className="text-text-primary">{submittedEmail}</strong>
+            <strong className="text-white">{submittedEmail}</strong>
           </p>
         </div>
 
-        <Alert variant="info">
+        <div className="p-4 rounded-neo bg-blue-500/20 neo-border-thin border-blue-500 text-blue-200">
           <p className="text-sm">
             If you don't see the email, check your spam folder. The link will
             expire in 1 hour for security reasons.
           </p>
-        </Alert>
-
-        <div className="space-y-3">
-          <p className="text-sm text-text-secondary text-center">
-            Didn't receive the email?
-          </p>
-          <Button
-            variant="outline"
-            size="lg"
-            className="w-full"
-            onClick={() => setSuccess(false)}
-          >
-            Try again
-          </Button>
         </div>
 
-        <div className="pt-4 border-t border-border text-center">
+        <div className="space-y-3">
+          <p className="text-sm text-white/70 text-center">
+            Didn't receive the email?
+          </p>
+          <button
+            onClick={() => setSuccess(false)}
+            className="neo-btn-secondary w-full py-3 px-6"
+          >
+            Try again
+          </button>
+        </div>
+
+        <div className="pt-4 border-t border-white/20 text-center">
           <Link href="/login">
-            <Button variant="ghost" size="md" className="w-full">
+            <button className="w-full py-2.5 px-6 text-white/80 hover:text-white font-medium transition-colors">
               Back to sign in
-            </Button>
+            </button>
           </Link>
         </div>
       </div>
@@ -131,24 +129,20 @@ export default function ForgotPasswordPage() {
     <div className="space-y-6">
       {/* Page Title */}
       <div className="text-center">
-        <h1 className="text-2xl font-bold text-text-primary mb-2">
+        <h1 className="neo-heading text-2xl text-white mb-2">
           Forgot your password?
         </h1>
-        <p className="text-text-secondary">
+        <p className="text-white/70">
           No worries! Enter your email and we'll send you reset instructions.
         </p>
       </div>
 
       {/* Error message */}
       {error && (
-        <Alert
-          variant="error"
-          title="Error"
-          dismissible
-          onDismiss={() => setError(null)}
-        >
-          {error}
-        </Alert>
+        <div className="p-4 rounded-neo bg-red-500/20 neo-border-thin border-red-500 text-red-300">
+          <p className="font-bold mb-1">Error</p>
+          <p className="text-sm">{error}</p>
+        </div>
       )}
 
       {/* Form */}
@@ -165,26 +159,34 @@ export default function ForgotPasswordPage() {
           required
         />
 
-        <Button
+        <button
           type="submit"
-          variant="primary"
-          size="lg"
-          loading={isLoading}
-          className="w-full"
+          disabled={isLoading}
+          className="neo-btn-primary w-full py-3.5 px-6 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
-          Send reset instructions
-        </Button>
+          {isLoading ? (
+            <>
+              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>Sending...</span>
+            </>
+          ) : (
+            <span>Send reset instructions</span>
+          )}
+        </button>
       </form>
 
       {/* Back to login */}
-      <div className="pt-4 border-t border-border text-center">
-        <p className="text-sm text-text-secondary mb-3">
+      <div className="pt-4 border-t border-white/20 text-center">
+        <p className="text-sm text-white/70 mb-3">
           Remember your password?
         </p>
         <Link href="/login">
-          <Button variant="ghost" size="md" className="w-full">
+          <button className="w-full py-2.5 px-6 text-white/80 hover:text-white font-medium transition-colors">
             Back to sign in
-          </Button>
+          </button>
         </Link>
       </div>
     </div>

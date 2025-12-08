@@ -28,16 +28,16 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
     <nav aria-label="Progress" className="mb-8">
       {/* Mobile Progress */}
       <div className="lg:hidden">
-        <div className="mb-2 text-sm text-text-secondary">
+        <div className="mb-2 text-sm font-bold text-text-primary">
           Step {currentStep} of {steps.length}
         </div>
-        <div className="overflow-hidden rounded-full bg-background">
+        <div className="overflow-hidden rounded-neo neo-border bg-white">
           <div
-            className="h-2 bg-primary transition-all duration-300"
+            className="h-4 bg-primary transition-all duration-300"
             style={{ width: `${(currentStep / steps.length) * 100}%` }}
           />
         </div>
-        <div className="mt-2 text-sm font-medium text-text-primary">
+        <div className="mt-2 text-sm font-bold text-text-primary">
           {steps.find((s) => s.number === currentStep)?.label}
         </div>
       </div>
@@ -62,21 +62,21 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
               >
                 {/* Step Circle */}
                 <span
-                  className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all ${
+                  className={`flex items-center justify-center w-12 h-12 rounded-neo neo-border-thick transition-all ${
                     status === "completed"
-                      ? "bg-primary border-primary text-white"
+                      ? "bg-primary text-white neo-shadow"
                       : status === "current"
-                      ? "border-primary bg-white text-primary ring-4 ring-primary/20"
-                      : "border-border bg-white text-text-secondary"
+                      ? "bg-white text-primary neo-border-primary neo-shadow-primary"
+                      : "bg-white text-text-secondary"
                   } ${
                     status !== "upcoming"
-                      ? "group-hover:border-primary/80 group-hover:ring-4 group-hover:ring-primary/10"
+                      ? "group-hover:neo-shadow-hover"
                       : ""
                   }`}
                 >
                   {status === "completed" ? (
                     <svg
-                      className="w-5 h-5"
+                      className="w-6 h-6"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
@@ -87,13 +87,13 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
                       />
                     </svg>
                   ) : (
-                    <span className="font-semibold">{step.number}</span>
+                    <span className="font-black text-lg">{step.number}</span>
                   )}
                 </span>
 
                 {/* Step Label */}
                 <span
-                  className={`ml-3 text-sm font-medium transition-colors ${
+                  className={`ml-3 text-sm font-bold transition-colors ${
                     status === "current"
                       ? "text-primary"
                       : status === "completed"
@@ -107,7 +107,7 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
 
               {/* Connector Line */}
               {!isLast && (
-                <div className="flex-1 h-0.5 mx-4">
+                <div className="flex-1 h-1 mx-4 neo-border-thin">
                   <div
                     className={`h-full transition-colors ${
                       status === "completed" ? "bg-primary" : "bg-border"

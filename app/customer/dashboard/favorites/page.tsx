@@ -182,7 +182,7 @@ export default function FavoritesPage() {
 
       {/* Empty State */}
       {favorites.length === 0 ? (
-        <Card className="p-12 text-center">
+        <Card className="neo-card-glass p-12 text-center neo-shadow rounded-neo">
           <Heart className="w-16 h-16 text-text-tertiary mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-text-primary mb-2">
             No favorites yet
@@ -199,7 +199,7 @@ export default function FavoritesPage() {
         /* Favorites Grid */
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {favorites.map((vendor) => (
-            <Card key={vendor.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+            <Card key={vendor.id} className="neo-card-glass overflow-hidden neo-shadow hover:neo-shadow-lg transition-all rounded-neo">
               {/* Card Header with Remove Button */}
               <div className="p-6 pb-0">
                 <div className="flex items-start justify-between mb-4">

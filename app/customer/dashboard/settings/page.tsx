@@ -210,7 +210,7 @@ export default function SettingsPage() {
       )}
 
       {/* Profile Information */}
-      <Card className="p-6">
+      <Card className="neo-card-glass p-6 neo-shadow rounded-neo">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
             <User className="w-5 h-5 text-primary" />
@@ -297,7 +297,7 @@ export default function SettingsPage() {
       </Card>
 
       {/* Email Preferences */}
-      <Card className="p-6">
+      <Card className="neo-card-glass p-6 neo-shadow rounded-neo">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
             <Bell className="w-5 h-5 text-primary" />
@@ -417,7 +417,7 @@ export default function SettingsPage() {
       </Card>
 
       {/* Change Password */}
-      <Card className="p-6">
+      <Card className="neo-card-glass p-6 neo-shadow rounded-neo">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
             <Lock className="w-5 h-5 text-primary" />
@@ -490,7 +490,7 @@ export default function SettingsPage() {
       </Card>
 
       {/* Delete Account */}
-      <Card className="p-6 border-error">
+      <Card className="neo-card-glass p-6 neo-border-primary neo-shadow rounded-neo">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 bg-error/10 rounded-full flex items-center justify-center">
             <Trash2 className="w-5 h-5 text-error" />

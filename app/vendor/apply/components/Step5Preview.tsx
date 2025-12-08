@@ -56,9 +56,9 @@ export const Step5Preview: React.FC<Step5PreviewProps> = ({
 
   return (
     <div className="space-y-6">
-      <Card>
-        <div className="p-6">
-          <h2 className="text-2xl font-bold text-text-primary mb-2">
+      <div className="neo-card-glass neo-shadow-lg rounded-neo p-6">
+        <div>
+          <h2 className="neo-heading text-2xl mb-2">
             Review Your Application
           </h2>
           <p className="text-text-secondary mb-6">
@@ -68,17 +68,17 @@ export const Step5Preview: React.FC<Step5PreviewProps> = ({
           {/* Business Information */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold text-text-primary">
+              <h3 className="neo-heading text-xl">
                 Business Information
               </h3>
               <button
                 onClick={() => onEdit(1)}
-                className="text-primary hover:text-primary/80 font-medium text-sm"
+                className="text-primary hover:text-primary/80 font-bold text-sm"
               >
                 Edit
               </button>
             </div>
-            <div className="bg-background rounded-lg p-4 space-y-3">
+            <div className="bg-background rounded-neo neo-border p-4 space-y-3">
               <div>
                 <span className="text-text-secondary text-sm">Business Name</span>
                 <p className="font-medium text-text-primary">
@@ -125,10 +125,10 @@ export const Step5Preview: React.FC<Step5PreviewProps> = ({
           {/* Documents */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold text-text-primary">Documents</h3>
+              <h3 className="neo-heading text-xl">Documents</h3>
               <button
                 onClick={() => onEdit(2)}
-                className="text-primary hover:text-primary/80 font-medium text-sm"
+                className="text-primary hover:text-primary/80 font-bold text-sm"
               >
                 Edit
               </button>
@@ -138,7 +138,7 @@ export const Step5Preview: React.FC<Step5PreviewProps> = ({
                 documents.map((doc) => (
                   <div
                     key={doc.type}
-                    className="flex items-center gap-3 bg-background rounded-lg p-3"
+                    className="flex items-center gap-3 bg-background rounded-neo neo-border p-3"
                   >
                     <svg
                       className="h-6 w-6 text-success"
@@ -170,12 +170,12 @@ export const Step5Preview: React.FC<Step5PreviewProps> = ({
           {/* Menu */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold text-text-primary">
+              <h3 className="neo-heading text-xl">
                 Menu ({menu.length} items)
               </h3>
               <button
                 onClick={() => onEdit(3)}
-                className="text-primary hover:text-primary/80 font-medium text-sm"
+                className="text-primary hover:text-primary/80 font-bold text-sm"
               >
                 Edit
               </button>
@@ -185,7 +185,7 @@ export const Step5Preview: React.FC<Step5PreviewProps> = ({
                 menu.map((item, index) => (
                   <div
                     key={item.id || index}
-                    className="bg-background rounded-lg p-4"
+                    className="bg-background rounded-neo neo-border p-4"
                   >
                     <div className="flex items-start justify-between mb-2">
                       <h4 className="font-semibold text-text-primary">
@@ -218,17 +218,17 @@ export const Step5Preview: React.FC<Step5PreviewProps> = ({
           {/* Availability */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold text-text-primary">
+              <h3 className="neo-heading text-xl">
                 Availability & Pricing
               </h3>
               <button
                 onClick={() => onEdit(4)}
-                className="text-primary hover:text-primary/80 font-medium text-sm"
+                className="text-primary hover:text-primary/80 font-bold text-sm"
               >
                 Edit
               </button>
             </div>
-            <div className="bg-background rounded-lg p-4 space-y-3">
+            <div className="bg-background rounded-neo neo-border p-4 space-y-3">
               <div>
                 <span className="text-text-secondary text-sm">Pricing Model</span>
                 <p className="font-medium text-text-primary">
@@ -258,20 +258,20 @@ export const Step5Preview: React.FC<Step5PreviewProps> = ({
           </div>
 
           {/* Terms and Conditions */}
-          <div className="border-2 border-border rounded-lg p-4">
+          <div className="neo-border-thick rounded-neo p-4">
             <label className="flex items-start gap-3 cursor-pointer">
               <input
                 type="checkbox"
                 checked={termsAccepted}
                 onChange={(e) => setTermsAccepted(e.target.checked)}
-                className="mt-1 w-5 h-5 text-primary border-border rounded focus:ring-2 focus:ring-primary"
+                className="mt-1 w-6 h-6 text-primary neo-border-thick rounded-neo focus:ring-2 focus:ring-primary"
               />
-              <span className="text-sm text-text-primary">
+              <span className="text-sm text-text-primary font-medium">
                 I agree to the{" "}
                 <a
                   href="/terms"
                   target="_blank"
-                  className="text-primary hover:underline"
+                  className="text-primary hover:underline font-bold"
                 >
                   Terms and Conditions
                 </a>{" "}
@@ -279,7 +279,7 @@ export const Step5Preview: React.FC<Step5PreviewProps> = ({
                 <a
                   href="/privacy"
                   target="_blank"
-                  className="text-primary hover:underline"
+                  className="text-primary hover:underline font-bold"
                 >
                   Privacy Policy
                 </a>
@@ -290,10 +290,10 @@ export const Step5Preview: React.FC<Step5PreviewProps> = ({
 
           {Object.keys(errors).length > 0 && (
             <Alert variant="error" className="mt-4">
-              <p className="font-medium">Please correct the following errors:</p>
+              <p className="font-bold">Please correct the following errors:</p>
               <ul className="list-disc list-inside mt-2 space-y-1">
                 {Object.entries(errors).map(([key, message]) => (
-                  <li key={key} className="text-sm">
+                  <li key={key} className="text-sm font-medium">
                     {message}
                   </li>
                 ))}
@@ -301,7 +301,7 @@ export const Step5Preview: React.FC<Step5PreviewProps> = ({
             </Alert>
           )}
         </div>
-      </Card>
+      </div>
 
       {/* Navigation */}
       <div className="flex justify-between">

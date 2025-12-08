@@ -55,12 +55,12 @@ export const NavLink: React.FC<NavLinkProps> = ({
   const isActive = pathname === href || pathname.startsWith(`${href}/`);
 
   const baseStyles = mobile
-    ? "flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-colors"
-    : "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors";
+    ? "flex items-center gap-3 px-4 py-3 text-base font-bold rounded-neo transition-all"
+    : "flex items-center gap-2 px-3 py-2 text-sm font-bold rounded-neo transition-all";
 
   const activeStyles = isActive
-    ? "bg-primary text-white"
-    : "text-text-primary hover:bg-secondary hover:text-primary";
+    ? "bg-primary text-white neo-border neo-shadow hover:neo-shadow-lg hover:-translate-y-0.5"
+    : "text-text-primary hover:bg-secondary hover:text-primary hover:neo-shadow active:translate-x-0.5 active:translate-y-0.5";
 
   return (
     <Link

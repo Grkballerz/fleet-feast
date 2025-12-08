@@ -142,13 +142,13 @@ export default function VendorPayoutsPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="text-2xl font-bold text-text-primary">Payouts</h2>
+          <h2 className="text-2xl font-bold text-text-primary neo-heading">Payouts</h2>
           <p className="text-text-secondary mt-1">
             Manage your earnings and payout schedule
           </p>
         </div>
 
-        <Card className="text-center py-12">
+        <div className="neo-card-glass neo-shadow rounded-neo p-12 text-center">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-primary/10 rounded-full mb-4">
             <CreditCard className="w-10 h-10 text-primary" />
           </div>
@@ -166,7 +166,7 @@ export default function VendorPayoutsPage() {
           <p className="text-xs text-text-secondary mt-4">
             Powered by <span className="font-semibold">Stripe</span> • Secure & Encrypted
           </p>
-        </Card>
+        </div>
       </div>
     );
   }
@@ -175,7 +175,7 @@ export default function VendorPayoutsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-text-primary">Payouts</h2>
+        <h2 className="text-2xl font-bold text-text-primary neo-heading">Payouts</h2>
         <p className="text-text-secondary mt-1">
           Manage your earnings and payout schedule
         </p>
@@ -183,7 +183,7 @@ export default function VendorPayoutsPage() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="card-compact">
+        <div className="neo-card-glass neo-shadow rounded-neo p-4">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-text-secondary">Pending Payouts</p>
@@ -191,13 +191,13 @@ export default function VendorPayoutsPage() {
                 ${((summary?.pendingAmount || 0) / 100).toFixed(2)}
               </p>
             </div>
-            <div className="p-3 bg-warning/10 rounded-lg">
+            <div className="p-3 bg-warning/10 rounded-neo">
               <Clock className="w-5 h-5 text-warning" />
             </div>
           </div>
-        </Card>
+        </div>
 
-        <Card className="card-compact">
+        <div className="neo-card-glass neo-shadow rounded-neo p-4">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-text-secondary">Available Now</p>
@@ -205,13 +205,13 @@ export default function VendorPayoutsPage() {
                 ${((summary?.availableAmount || 0) / 100).toFixed(2)}
               </p>
             </div>
-            <div className="p-3 bg-success/10 rounded-lg">
+            <div className="p-3 bg-success/10 rounded-neo">
               <CheckCircle className="w-5 h-5 text-success" />
             </div>
           </div>
-        </Card>
+        </div>
 
-        <Card className="card-compact">
+        <div className="neo-card-glass neo-shadow rounded-neo p-4">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-text-secondary">Total Earnings</p>
@@ -219,13 +219,13 @@ export default function VendorPayoutsPage() {
                 ${((summary?.totalEarnings || 0) / 100).toFixed(2)}
               </p>
             </div>
-            <div className="p-3 bg-primary/10 rounded-lg">
+            <div className="p-3 bg-primary/10 rounded-neo">
               <TrendingUp className="w-5 h-5 text-primary" />
             </div>
           </div>
-        </Card>
+        </div>
 
-        <Card className="card-compact">
+        <div className="neo-card-glass neo-shadow rounded-neo p-4">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-text-secondary">Next Payout</p>
@@ -235,11 +235,11 @@ export default function VendorPayoutsPage() {
                   : "N/A"}
               </p>
             </div>
-            <div className="p-3 bg-primary/10 rounded-lg">
+            <div className="p-3 bg-primary/10 rounded-neo">
               <Calendar className="w-5 h-5 text-primary" />
             </div>
           </div>
-        </Card>
+        </div>
       </div>
 
       {/* Info Banner */}
@@ -249,10 +249,10 @@ export default function VendorPayoutsPage() {
       </Alert>
 
       {/* Bank Account Management */}
-      <Card>
+      <div className="neo-card-glass neo-shadow rounded-neo p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-text-primary mb-1">
+            <h3 className="text-lg font-semibold text-text-primary neo-heading mb-1">
               Bank Account
             </h3>
             <p className="text-sm text-text-secondary">
@@ -264,12 +264,12 @@ export default function VendorPayoutsPage() {
             Manage in Stripe
           </Button>
         </div>
-      </Card>
+      </div>
 
       {/* Payout History */}
-      <Card>
+      <div className="neo-card-glass neo-shadow rounded-neo p-6">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold text-text-primary">
+          <h3 className="text-lg font-semibold text-text-primary neo-heading">
             Payout History
           </h3>
           <Button variant="ghost" size="sm">
@@ -293,7 +293,7 @@ export default function VendorPayoutsPage() {
             {payouts.map((payout) => (
               <div
                 key={payout.id}
-                className="p-4 border border-border rounded-lg hover:bg-background-hover transition-colors"
+                className="p-4 neo-border rounded-neo hover:bg-background-hover transition-colors"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -329,11 +329,11 @@ export default function VendorPayoutsPage() {
             ))}
           </div>
         )}
-      </Card>
+      </div>
 
       {/* Help Section */}
-      <Card className="bg-background">
-        <h3 className="text-lg font-semibold text-text-primary mb-3">
+      <div className="neo-card-glass neo-shadow rounded-neo p-6 bg-background">
+        <h3 className="text-lg font-semibold text-text-primary neo-heading mb-3">
           Need Help?
         </h3>
         <div className="space-y-2 text-sm text-text-secondary">
@@ -355,7 +355,7 @@ export default function VendorPayoutsPage() {
             View Full FAQ
           </Button>
         </Link>
-      </Card>
+      </div>
     </div>
   );
 }

@@ -40,15 +40,15 @@ export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
   ) => {
     // Base styles
     const baseStyles =
-      "inline-flex items-center rounded-full font-medium transition-colors";
+      "inline-flex items-center rounded-neo neo-border-thin font-bold transition-colors";
 
     // Variant-specific styles
     const variantStyles = {
-      success: "bg-success/10 text-success",
-      warning: "bg-warning/10 text-warning",
-      error: "bg-error/10 text-error",
-      neutral: "bg-secondary text-text-secondary",
-      primary: "bg-primary/10 text-primary",
+      success: "bg-success/10 text-success border-success",
+      warning: "bg-warning/10 text-warning border-warning",
+      error: "bg-error/10 text-error border-error",
+      neutral: "bg-secondary text-text-secondary border-gray-300",
+      primary: "bg-primary/10 text-primary border-primary",
     };
 
     // Size-specific styles

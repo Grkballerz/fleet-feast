@@ -69,20 +69,20 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     // Variant-specific styles
     const variantStyles = {
       primary:
-        "rounded-lg bg-primary text-white hover:bg-primary-hover hover:shadow-md disabled:hover:bg-primary",
+        "neo-btn-primary px-6 py-3 disabled:opacity-50",
       secondary:
-        "rounded-lg border-2 border-primary bg-transparent text-primary hover:bg-primary hover:text-white hover:shadow-md disabled:hover:bg-transparent disabled:hover:text-primary",
+        "neo-btn-secondary px-6 py-3 disabled:opacity-50",
       outline:
-        "rounded-lg border-2 border-border bg-transparent text-text-primary hover:bg-secondary hover:border-gray-300 disabled:hover:bg-transparent",
+        "rounded-neo neo-border bg-white text-text-primary px-6 py-3 neo-shadow hover:neo-shadow-lg active:neo-shadow-active disabled:opacity-50",
       ghost:
-        "rounded-lg bg-transparent text-text-primary hover:bg-secondary hover:shadow-sm disabled:hover:bg-transparent",
+        "rounded-neo bg-transparent text-text-primary px-6 py-3 hover:bg-secondary disabled:opacity-50",
       destructive:
-        "rounded-lg bg-error text-white hover:bg-error/90 hover:shadow-md disabled:hover:bg-error",
+        "rounded-neo neo-border bg-error text-white px-6 py-3 neo-shadow hover:bg-error/90 hover:neo-shadow-lg active:neo-shadow-active disabled:opacity-50",
     };
 
     // Size-specific styles
     const sizeStyles = {
-      sm: "px-4 py-2 text-sm gap-2",
+      sm: "px-4 py-2.5 text-sm gap-2",
       md: "px-6 py-3 text-base gap-2",
       lg: "px-8 py-4 text-lg gap-3",
     };

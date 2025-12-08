@@ -76,11 +76,11 @@ interface MenuItemCardProps {
 
 const MenuItemCard: React.FC<MenuItemCardProps> = ({ item }) => {
   return (
-    <div className="flex justify-between items-start gap-4 py-4 border-b border-gray-200 last:border-0">
+    <div className="flex justify-between items-start gap-4 py-4 border-b last:border-0">
       <div className="flex-1 space-y-1">
         {/* Item Name */}
         <div className="flex items-center gap-2 flex-wrap">
-          <h4 className="font-semibold text-base">{item.name}</h4>
+          <h4 className="font-bold text-base">{item.name}</h4>
 
           {/* Dietary Tags */}
           {item.dietaryTags && item.dietaryTags.length > 0 && (
@@ -95,7 +95,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({ item }) => {
                     key={idx}
                     variant="success"
                     size="sm"
-                    className="flex items-center gap-1"
+                    className="flex items-center gap-1 neo-border-thin rounded-neo"
                   >
                     {icon}
                     <span>{displayName}</span>
@@ -108,12 +108,12 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({ item }) => {
 
         {/* Item Description */}
         {item.description && (
-          <p className="text-sm text-text-secondary">{item.description}</p>
+          <p className="text-sm text-text-secondary font-medium">{item.description}</p>
         )}
       </div>
 
       {/* Price */}
-      <div className="font-semibold text-base whitespace-nowrap">
+      <div className="font-black text-base whitespace-nowrap text-primary">
         ${item.price.toFixed(2)}
       </div>
     </div>
@@ -155,11 +155,11 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ menu, className }) => 
     <div className={cn("space-y-6", className)}>
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Menu</h2>
+        <h2 className="neo-heading text-2xl">Menu</h2>
 
         {/* Pricing Model Badge */}
         {menu.pricingModel && (
-          <Badge variant="neutral" size="md">
+          <Badge variant="neutral" size="md" className="neo-border rounded-neo">
             {menu.pricingModel === "per_person" && "Per Person Pricing"}
             {menu.pricingModel === "flat_rate" && "Flat Rate"}
             {menu.pricingModel === "custom" && "Custom Pricing"}
@@ -175,10 +175,10 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ menu, className }) => 
               key={category.name}
               onClick={() => setSelectedCategory(category.name)}
               className={cn(
-                "px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap",
+                "px-4 py-2 rounded-neo neo-border font-bold transition-all",
                 selectedCategory === category.name || (!selectedCategory && category === categories[0])
-                  ? "bg-primary text-white"
-                  : "bg-secondary text-text-secondary hover:bg-gray-200"
+                  ? "neo-btn-primary"
+                  : "bg-white text-text-primary hover:neo-shadow"
               )}
             >
               {category.name}
@@ -189,22 +189,22 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ menu, className }) => 
 
       {/* Menu Items */}
       {displayCategory && (
-        <div className="bg-white rounded-lg border border-gray-200 p-4 md:p-6">
-          <div className="divide-y divide-gray-200">
+        <div className="neo-card-glass rounded-neo neo-shadow p-4 md:p-6">
+          <div className="divide-y neo-border-thin">
             {displayCategory.items.map((item, idx) => (
               <MenuItemCard key={idx} item={item} />
             ))}
           </div>
 
           {/* Item Count */}
-          <p className="text-sm text-text-secondary mt-4 pt-4 border-t border-gray-200">
+          <p className="text-sm text-text-secondary font-medium mt-4 pt-4 neo-border-thin border-t">
             {displayCategory.items.length} {displayCategory.items.length === 1 ? "item" : "items"}
           </p>
         </div>
       )}
 
       {/* Dietary Legend */}
-      <div className="flex flex-wrap gap-3 text-sm text-text-secondary">
+      <div className="flex flex-wrap gap-3 text-sm text-text-secondary font-medium">
         <span className="flex items-center gap-1">
           <Leaf className="h-4 w-4 text-success" />
           Vegetarian/Vegan

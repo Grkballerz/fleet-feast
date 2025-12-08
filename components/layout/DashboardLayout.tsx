@@ -73,17 +73,25 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Skip Navigation Link - WCAG 2.4.1 */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:border-3 focus:border-black focus:shadow-brutal focus:text-black focus:font-bold"
+      >
+        Skip to main content
+      </a>
+
       {/* Sidebar (Desktop) */}
       <Sidebar items={navItems} userRole={session?.user.role} />
 
       {/* Main Content Area */}
       <div className="lg:pl-64 flex flex-col min-h-screen">
         {/* Top Bar (Mobile & Desktop) */}
-        <header className="sticky top-0 z-20 bg-white border-b border-border shadow-sm">
+        <header className="sticky top-0 z-20 neo-glass-header border-b-3 border-black">
           <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16">
             {/* Page Title */}
             {title && (
-              <h1 className="text-xl font-semibold text-text-primary">
+              <h1 className="neo-heading text-xl text-text-primary">
                 {title}
               </h1>
             )}
@@ -97,13 +105,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
         {/* Breadcrumbs */}
         {showBreadcrumbs && (
-          <div className="px-4 sm:px-6 lg:px-8 border-b border-border bg-white">
+          <div className="px-4 sm:px-6 lg:px-8 border-b-3 border-black neo-glass-header">
             <Breadcrumbs />
           </div>
         )}
 
-        {/* Page Content */}
-        <main className={`flex-1 px-4 sm:px-6 lg:px-8 py-6 pb-20 lg:pb-6 ${className}`}>
+        {/* Page Content - WCAG 4.1.2 */}
+        <main id="main-content" className={`flex-1 px-4 sm:px-6 lg:px-8 py-6 pb-20 lg:pb-6 ${className}`}>
           {children}
         </main>
       </div>

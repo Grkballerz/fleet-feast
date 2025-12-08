@@ -76,10 +76,10 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         {/* Message bubble */}
         <div
           className={cn(
-            "rounded-2xl px-4 py-2",
+            "rounded-neo px-4 py-2 neo-border",
             isOwn
-              ? "bg-primary text-white rounded-br-none"
-              : "bg-gray-100 text-text-primary rounded-bl-none"
+              ? "bg-primary text-white neo-shadow"
+              : "neo-glass-card"
           )}
         >
           {/* Flagged warning */}

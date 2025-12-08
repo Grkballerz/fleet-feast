@@ -60,22 +60,22 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>(
     // Variant-specific styles and icons
     const variantConfig = {
       success: {
-        containerStyles: "bg-success/10 border-success/20 text-success",
+        containerStyles: "bg-success/10 text-success neo-border border-success neo-shadow",
         iconStyles: "text-success",
         Icon: CheckCircle,
       },
       warning: {
-        containerStyles: "bg-warning/10 border-warning/20 text-warning",
+        containerStyles: "bg-warning/10 text-warning neo-border border-warning neo-shadow",
         iconStyles: "text-warning",
         Icon: AlertTriangle,
       },
       error: {
-        containerStyles: "bg-error/10 border-error/20 text-error",
+        containerStyles: "bg-error/10 text-error neo-border border-error neo-shadow",
         iconStyles: "text-error",
         Icon: XCircle,
       },
       info: {
-        containerStyles: "bg-primary/10 border-primary/20 text-primary",
+        containerStyles: "bg-primary/10 text-primary neo-border border-primary neo-shadow",
         iconStyles: "text-primary",
         Icon: Info,
       },
@@ -88,7 +88,7 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>(
       <div
         ref={ref}
         className={cn(
-          "relative rounded-lg border p-4 animate-slideIn",
+          "relative rounded-neo p-4 animate-slideIn",
           config.containerStyles,
           dismissible && "pr-12",
           className

@@ -169,14 +169,14 @@ export const MessageThread: React.FC<MessageThreadProps> = ({
   const groupedMessages = groupMessagesByDate(messages);
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full neo-glass">
       {/* Messages list */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {Array.from(groupedMessages.entries()).map(([dateLabel, dateMessages]) => (
           <div key={dateLabel}>
             {/* Date separator */}
             <div className="flex items-center justify-center my-4">
-              <div className="bg-gray-200 text-gray-600 text-xs font-medium px-3 py-1 rounded-full">
+              <div className="neo-glass-card neo-border rounded-neo text-gray-600 text-xs font-medium px-3 py-1">
                 {dateLabel}
               </div>
             </div>

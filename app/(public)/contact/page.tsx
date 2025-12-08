@@ -87,7 +87,7 @@ export default function ContactPage() {
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-gray-50 to-white py-16 md:py-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+          <h1 className="neo-heading-xl text-gray-900 mb-6">
             Get in Touch
           </h1>
           <p className="text-xl text-gray-600">
@@ -102,8 +102,8 @@ export default function ContactPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Contact Form */}
             <div className="lg:col-span-2">
-              <Card className="p-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              <div className="neo-card-glass rounded-neo p-8 neo-shadow">
+                <h2 className="neo-heading text-2xl text-gray-900 mb-6">
                   Send Us a Message
                 </h2>
 
@@ -202,8 +202,8 @@ export default function ContactPage() {
                       value={formData.message}
                       onChange={handleChange}
                       placeholder="Tell us more about your question or request..."
-                      className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none ${
-                        errors.message ? "border-red-500" : "border-gray-300"
+                      className={`neo-input w-full px-4 py-2 resize-none ${
+                        errors.message ? "border-red-500" : ""
                       }`}
                     />
                     {errors.message && (
@@ -214,24 +214,22 @@ export default function ContactPage() {
                   </div>
 
                   {/* Submit Button */}
-                  <Button
+                  <button
                     type="submit"
-                    variant="primary"
-                    size="lg"
                     disabled={isSubmitting}
-                    className="w-full"
+                    className="neo-btn-primary w-full px-8 py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isSubmitting ? "Sending..." : "Send Message"}
-                  </Button>
+                  </button>
                 </form>
-              </Card>
+              </div>
             </div>
 
             {/* Contact Information */}
             <div className="space-y-6">
               {/* Contact Details */}
-              <Card className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              <div className="neo-card-glass rounded-neo p-6 neo-shadow">
+                <h3 className="neo-heading text-lg text-gray-900 mb-4">
                   Contact Information
                 </h3>
                 <div className="space-y-4">
@@ -319,11 +317,11 @@ export default function ContactPage() {
                     </div>
                   </div>
                 </div>
-              </Card>
+              </div>
 
               {/* Social Media */}
-              <Card className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              <div className="neo-card-glass rounded-neo p-6 neo-shadow">
+                <h3 className="neo-heading text-lg text-gray-900 mb-4">
                   Follow Us
                 </h3>
                 <div className="flex gap-4">
@@ -373,11 +371,11 @@ export default function ContactPage() {
                     </svg>
                   </a>
                 </div>
-              </Card>
+              </div>
 
               {/* Business Hours */}
-              <Card className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              <div className="neo-card-glass rounded-neo p-6 neo-shadow">
+                <h3 className="neo-heading text-lg text-gray-900 mb-4">
                   Business Hours
                 </h3>
                 <div className="space-y-2 text-sm">
@@ -394,7 +392,7 @@ export default function ContactPage() {
                     <span className="font-medium">Closed</span>
                   </div>
                 </div>
-              </Card>
+              </div>
             </div>
           </div>
         </div>

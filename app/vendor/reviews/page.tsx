@@ -182,7 +182,7 @@ export default function VendorReviewsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-text-primary">Reviews</h2>
+        <h2 className="text-2xl font-bold text-text-primary neo-heading">Reviews</h2>
         <p className="text-text-secondary mt-1">
           Manage and respond to customer reviews
         </p>
@@ -190,7 +190,7 @@ export default function VendorReviewsPage() {
 
       {/* Rating Summary */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-1">
+        <div className="neo-card-glass neo-shadow rounded-neo p-6 lg:col-span-1">
           <div className="text-center">
             <div className="inline-flex items-center justify-center w-24 h-24 bg-primary/10 rounded-full mb-4">
               <Star className="w-12 h-12 fill-warning text-warning" />
@@ -205,10 +205,10 @@ export default function VendorReviewsPage() {
               Based on {reviews.length} review{reviews.length !== 1 ? "s" : ""}
             </p>
           </div>
-        </Card>
+        </div>
 
-        <Card className="lg:col-span-2">
-          <h3 className="text-lg font-semibold text-text-primary mb-4">
+        <div className="neo-card-glass neo-shadow rounded-neo p-6 lg:col-span-2">
+          <h3 className="text-lg font-semibold text-text-primary neo-heading mb-4">
             Rating Breakdown
           </h3>
           <div className="space-y-3">
@@ -216,13 +216,13 @@ export default function VendorReviewsPage() {
               renderRatingBar(stars, ratingBreakdown[stars], reviews.length)
             )}
           </div>
-        </Card>
+        </div>
       </div>
 
       {/* Reviews List */}
-      <Card>
+      <div className="neo-card-glass neo-shadow rounded-neo p-6">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold text-text-primary">
+          <h3 className="text-lg font-semibold text-text-primary neo-heading">
             All Reviews ({reviews.length})
           </h3>
         </div>
@@ -297,7 +297,7 @@ export default function VendorReviewsPage() {
             ))}
           </div>
         )}
-      </Card>
+      </div>
 
       {/* Response Modal */}
       {selectedReview && (

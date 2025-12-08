@@ -157,7 +157,7 @@ export default function VendorDashboardPage() {
     <div className="space-y-6">
       {/* Welcome Message */}
       <div>
-        <h2 className="text-2xl font-bold text-text-primary">
+        <h2 className="text-2xl font-bold text-text-primary neo-heading">
           Welcome back, {session?.user?.name || "Vendor"}!
         </h2>
         <p className="text-text-secondary mt-1">
@@ -167,7 +167,7 @@ export default function VendorDashboardPage() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="card-compact">
+        <div className="neo-card-glass neo-shadow rounded-neo p-4">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-text-secondary">Today's Bookings</p>
@@ -175,13 +175,13 @@ export default function VendorDashboardPage() {
                 {stats?.todaysBookings || 0}
               </p>
             </div>
-            <div className="p-3 bg-primary/10 rounded-lg">
+            <div className="p-3 bg-primary/10 rounded-neo">
               <Calendar className="w-6 h-6 text-primary" />
             </div>
           </div>
-        </Card>
+        </div>
 
-        <Card className="card-compact">
+        <div className="neo-card-glass neo-shadow rounded-neo p-4">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-text-secondary">Pending Requests</p>
@@ -189,13 +189,13 @@ export default function VendorDashboardPage() {
                 {stats?.pendingRequests || 0}
               </p>
             </div>
-            <div className="p-3 bg-warning/10 rounded-lg">
+            <div className="p-3 bg-warning/10 rounded-neo">
               <Clock className="w-6 h-6 text-warning" />
             </div>
           </div>
-        </Card>
+        </div>
 
-        <Card className="card-compact">
+        <div className="neo-card-glass neo-shadow rounded-neo p-4">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-text-secondary">Revenue This Month</p>
@@ -203,13 +203,13 @@ export default function VendorDashboardPage() {
                 ${((stats?.monthlyRevenue || 0) / 100).toFixed(2)}
               </p>
             </div>
-            <div className="p-3 bg-success/10 rounded-lg">
+            <div className="p-3 bg-success/10 rounded-neo">
               <DollarSign className="w-6 h-6 text-success" />
             </div>
           </div>
-        </Card>
+        </div>
 
-        <Card className="card-compact">
+        <div className="neo-card-glass neo-shadow rounded-neo p-4">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-text-secondary">Average Rating</p>
@@ -217,18 +217,18 @@ export default function VendorDashboardPage() {
                 {stats?.averageRating?.toFixed(1) || "0.0"}
               </p>
             </div>
-            <div className="p-3 bg-primary/10 rounded-lg">
+            <div className="p-3 bg-primary/10 rounded-neo">
               <Star className="w-6 h-6 text-primary" />
             </div>
           </div>
-        </Card>
+        </div>
       </div>
 
       {/* Pending Requests */}
       {pendingRequests.length > 0 && (
-        <Card>
+        <div className="neo-card-glass neo-shadow rounded-neo p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-text-primary">
+            <h3 className="text-lg font-semibold text-text-primary neo-heading">
               Pending Requests
             </h3>
             <Link href="/vendor/bookings?status=PENDING">
@@ -241,7 +241,7 @@ export default function VendorDashboardPage() {
             {pendingRequests.map((booking) => (
               <div
                 key={booking.id}
-                className="p-4 border border-border rounded-lg hover:bg-background-hover transition-colors"
+                className="p-4 neo-border rounded-neo hover:bg-background-hover transition-colors"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -272,14 +272,14 @@ export default function VendorDashboardPage() {
               </div>
             ))}
           </div>
-        </Card>
+        </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Today's Bookings */}
-        <Card>
+        <div className="neo-card-glass neo-shadow rounded-neo p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-text-primary">
+            <h3 className="text-lg font-semibold text-text-primary neo-heading">
               Today's Schedule
             </h3>
             <Link href="/vendor/calendar">
@@ -298,7 +298,7 @@ export default function VendorDashboardPage() {
               {todaysBookings.map((booking) => (
                 <div
                   key={booking.id}
-                  className="p-3 border border-border rounded-lg"
+                  className="p-3 neo-border rounded-neo"
                 >
                   <div className="flex items-start justify-between">
                     <div>
@@ -316,12 +316,12 @@ export default function VendorDashboardPage() {
               ))}
             </div>
           )}
-        </Card>
+        </div>
 
         {/* Recent Reviews */}
-        <Card>
+        <div className="neo-card-glass neo-shadow rounded-neo p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-text-primary">
+            <h3 className="text-lg font-semibold text-text-primary neo-heading">
               Recent Reviews
             </h3>
             <Link href="/vendor/reviews">
@@ -368,12 +368,12 @@ export default function VendorDashboardPage() {
               ))}
             </div>
           )}
-        </Card>
+        </div>
       </div>
 
       {/* Quick Actions */}
-      <Card>
-        <h3 className="text-lg font-semibold text-text-primary mb-4">
+      <div className="neo-card-glass neo-shadow rounded-neo p-6">
+        <h3 className="text-lg font-semibold text-text-primary neo-heading mb-4">
           Quick Actions
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -402,7 +402,7 @@ export default function VendorDashboardPage() {
             </Button>
           </Link>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

@@ -119,7 +119,7 @@ export const Modal: React.FC<ModalProps> = ({
             >
               <Dialog.Panel
                 className={cn(
-                  "w-full transform overflow-hidden rounded-xl bg-card p-6 text-left align-middle shadow-xl transition-all",
+                  "w-full transform overflow-hidden neo-glass-brutal rounded-neo p-6 text-left align-middle neo-shadow-lg transition-all",
                   sizeStyles[size],
                   className
                 )}

@@ -216,7 +216,7 @@ export default function PaymentsPage() {
             View all your transactions and download receipts
           </p>
         </div>
-        <Card className="p-4 sm:w-auto">
+        <Card className="neo-card-glass p-4 sm:w-auto neo-shadow rounded-neo">
           <p className="text-text-secondary text-sm mb-1">Total Spent</p>
           <p className="text-2xl font-bold text-text-primary">
             ${totalSpent.toFixed(2)}
@@ -225,7 +225,7 @@ export default function PaymentsPage() {
       </div>
 
       {/* Filters */}
-      <Card className="p-4">
+      <Card className="neo-card-glass p-4 neo-shadow rounded-neo">
         <div className="flex flex-wrap gap-2">
           <Button
             variant={filterStatus === "ALL" ? "primary" : "outline"}
@@ -286,7 +286,7 @@ export default function PaymentsPage() {
       ) : (
         <div className="space-y-4">
           {filteredPayments.map((payment) => (
-            <Card key={payment.id} className="p-6 hover:shadow-md transition-shadow">
+            <Card key={payment.id} className="neo-card-glass p-6 neo-shadow hover:neo-shadow-lg transition-all rounded-neo">
               <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                 {/* Status Icon */}
                 <div className="flex-shrink-0">

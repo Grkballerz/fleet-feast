@@ -98,9 +98,9 @@ export default function RegisterPage() {
   if (success) {
     return (
       <div className="space-y-6 text-center">
-        <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-success/10">
+        <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-neo bg-green-500/20 neo-border-thin border-green-500">
           <svg
-            className="h-8 w-8 text-success"
+            className="h-8 w-8 text-green-500"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -114,29 +114,31 @@ export default function RegisterPage() {
           </svg>
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-text-primary mb-2">
+          <h1 className="neo-heading text-2xl text-white mb-2">
             Check your email
           </h1>
-          <p className="text-text-secondary">
+          <p className="text-white/70">
             We've sent you a verification link. Please check your email to
             activate your account.
           </p>
         </div>
-        <Alert variant="info">
-          Can't find the email? Check your spam folder or{" "}
-          <button
-            onClick={() => setSuccess(false)}
-            className="font-medium underline hover:no-underline"
-          >
-            try again
-          </button>
-          .
-        </Alert>
+        <div className="p-4 rounded-neo bg-blue-500/20 neo-border-thin border-blue-500 text-blue-200">
+          <p className="text-sm">
+            Can't find the email? Check your spam folder or{" "}
+            <button
+              onClick={() => setSuccess(false)}
+              className="font-bold underline hover:no-underline"
+            >
+              try again
+            </button>
+            .
+          </p>
+        </div>
         <div className="pt-4">
           <Link href="/login">
-            <Button variant="outline" size="lg" className="w-full">
+            <button className="neo-btn-secondary w-full py-3 px-6">
               Return to sign in
-            </Button>
+            </button>
           </Link>
         </div>
       </div>
@@ -147,39 +149,35 @@ export default function RegisterPage() {
     <div className="space-y-6">
       {/* Page Title */}
       <div className="text-center">
-        <h1 className="text-2xl font-bold text-text-primary mb-2">
+        <h1 className="neo-heading text-2xl text-white mb-2">
           Create your account
         </h1>
-        <p className="text-text-secondary">
+        <p className="text-white/70">
           Join FleetFeast and start booking amazing food trucks
         </p>
       </div>
 
       {/* Error message */}
       {error && (
-        <Alert
-          variant="error"
-          title="Registration failed"
-          dismissible
-          onDismiss={() => setError(null)}
-        >
-          {error}
-        </Alert>
+        <div className="p-4 rounded-neo bg-red-500/20 neo-border-thin border-red-500 text-red-300">
+          <p className="font-bold mb-1">Registration failed</p>
+          <p className="text-sm">{error}</p>
+        </div>
       )}
 
       {/* Registration Form */}
       <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
         {/* Role selection */}
         <div>
-          <label className="block text-sm font-medium text-text-primary mb-3">
+          <label className="block text-sm font-bold text-white/90 mb-3">
             I want to...
           </label>
           <div className="grid grid-cols-2 gap-3">
             <label
-              className={`relative flex cursor-pointer rounded-lg border-2 p-4 transition-all ${
+              className={`relative flex cursor-pointer rounded-neo p-4 transition-all ${
                 selectedRole === "CUSTOMER"
-                  ? "border-primary bg-primary/5"
-                  : "border-border bg-card hover:border-gray-300"
+                  ? "neo-border-primary bg-primary/10 neo-shadow-primary"
+                  : "neo-border bg-white/5 hover:bg-white/10"
               }`}
             >
               <input
@@ -189,10 +187,10 @@ export default function RegisterPage() {
                 className="sr-only"
               />
               <div className="flex flex-col flex-1">
-                <span className="block text-sm font-semibold text-text-primary">
+                <span className="block text-sm font-bold text-white">
                   Book food trucks
                 </span>
-                <span className="mt-1 text-xs text-text-secondary">
+                <span className="mt-1 text-xs text-white/60">
                   Customer account
                 </span>
               </div>
@@ -213,10 +211,10 @@ export default function RegisterPage() {
               )}
             </label>
             <label
-              className={`relative flex cursor-pointer rounded-lg border-2 p-4 transition-all ${
+              className={`relative flex cursor-pointer rounded-neo p-4 transition-all ${
                 selectedRole === "VENDOR"
-                  ? "border-primary bg-primary/5"
-                  : "border-border bg-card hover:border-gray-300"
+                  ? "neo-border-primary bg-primary/10 neo-shadow-primary"
+                  : "neo-border bg-white/5 hover:bg-white/10"
               }`}
             >
               <input
@@ -226,10 +224,10 @@ export default function RegisterPage() {
                 className="sr-only"
               />
               <div className="flex flex-col flex-1">
-                <span className="block text-sm font-semibold text-text-primary">
+                <span className="block text-sm font-bold text-white">
                   Offer my food truck
                 </span>
-                <span className="mt-1 text-xs text-text-secondary">
+                <span className="mt-1 text-xs text-white/60">
                   Vendor account
                 </span>
               </div>
@@ -295,13 +293,13 @@ export default function RegisterPage() {
             <input
               {...register("agreeToTerms")}
               type="checkbox"
-              className="h-4 w-4 mt-0.5 text-primary focus:ring-primary border-gray-300 rounded cursor-pointer"
+              className="h-4 w-4 mt-0.5 rounded-sm border-2 border-black text-primary focus:ring-2 focus:ring-primary cursor-pointer"
             />
-            <span className="text-sm text-text-secondary">
+            <span className="text-sm text-white/80">
               I agree to the{" "}
               <Link
                 href="/terms"
-                className="text-primary hover:text-primary-hover font-medium underline"
+                className="text-primary hover:text-orange-500 font-bold underline"
                 target="_blank"
               >
                 Terms of Service
@@ -309,7 +307,7 @@ export default function RegisterPage() {
               and{" "}
               <Link
                 href="/privacy"
-                className="text-primary hover:text-primary-hover font-medium underline"
+                className="text-primary hover:text-orange-500 font-bold underline"
                 target="_blank"
               >
                 Privacy Policy
@@ -317,31 +315,39 @@ export default function RegisterPage() {
             </span>
           </label>
           {errors.agreeToTerms && (
-            <p className="mt-1 text-sm text-error">
+            <p className="mt-1 text-sm text-red-400 font-medium">
               {errors.agreeToTerms.message}
             </p>
           )}
         </div>
 
         {/* Submit button */}
-        <Button
+        <button
           type="submit"
-          variant="primary"
-          size="lg"
-          loading={isLoading}
-          className="w-full"
+          disabled={isLoading}
+          className="neo-btn-primary w-full py-3.5 px-6 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
-          Create account
-        </Button>
+          {isLoading ? (
+            <>
+              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>Creating account...</span>
+            </>
+          ) : (
+            <span>Create account</span>
+          )}
+        </button>
       </form>
 
       {/* Sign in link */}
-      <div className="text-center pt-4 border-t border-border">
-        <p className="text-sm text-text-secondary">
+      <div className="text-center pt-4 border-t border-white/20">
+        <p className="text-sm text-white/70">
           Already have an account?{" "}
           <Link
             href="/login"
-            className="font-medium text-primary hover:text-primary-hover transition-colors"
+            className="font-bold text-primary hover:text-orange-500 transition-colors"
           >
             Sign in
           </Link>

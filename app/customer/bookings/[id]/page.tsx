@@ -226,7 +226,7 @@ export default function BookingDetailsPage() {
 
         {/* Status Timeline */}
         {currentStatusIndex >= 0 && (
-          <Card className="mb-6">
+          <Card className="neo-card-glass mb-6 neo-shadow rounded-neo">
             <CardHeader>
               <h2 className="heading-3">Booking Status</h2>
             </CardHeader>
@@ -306,7 +306,7 @@ export default function BookingDetailsPage() {
         )}
 
         {/* Event Details */}
-        <Card className="mb-6">
+        <Card className="neo-card-glass mb-6 neo-shadow rounded-neo">
           <CardHeader>
             <h2 className="heading-3">Event Information</h2>
           </CardHeader>
@@ -382,7 +382,7 @@ export default function BookingDetailsPage() {
         {(booking.status === "ACCEPTED" ||
           booking.status === "CONFIRMED" ||
           booking.status === "COMPLETED") && (
-          <Card className="mb-6">
+          <Card className="neo-card-glass mb-6 neo-shadow rounded-neo">
             <CardHeader>
               <h2 className="heading-3">Vendor Contact</h2>
             </CardHeader>
@@ -425,7 +425,7 @@ export default function BookingDetailsPage() {
         )}
 
         {/* Price Breakdown */}
-        <Card className="mb-6">
+        <Card className="neo-card-glass mb-6 neo-shadow rounded-neo">
           <CardHeader>
             <div className="flex items-center gap-2">
               <DollarSign className="h-5 w-5 text-primary" />

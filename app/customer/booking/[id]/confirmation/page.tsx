@@ -203,7 +203,7 @@ END:VCALENDAR`;
         </div>
 
         {/* Booking ID Card */}
-        <Card className="mb-6">
+        <Card className="neo-card-glass mb-6 neo-shadow rounded-neo">
           <CardBody>
             <div className="flex items-center justify-between">
               <div>
@@ -226,7 +226,7 @@ END:VCALENDAR`;
         </Card>
 
         {/* Next Steps */}
-        <Card className="mb-6">
+        <Card className="neo-card-glass mb-6 neo-shadow rounded-neo">
           <CardHeader>
             <h2 className="heading-3">What Happens Next?</h2>
           </CardHeader>
@@ -276,7 +276,7 @@ END:VCALENDAR`;
         </Card>
 
         {/* Event Details */}
-        <Card className="mb-6">
+        <Card className="neo-card-glass mb-6 neo-shadow rounded-neo">
           <CardHeader>
             <h2 className="heading-3">Event Details</h2>
           </CardHeader>
@@ -355,7 +355,7 @@ END:VCALENDAR`;
         </Card>
 
         {/* Add to Calendar */}
-        <Card className="mb-6">
+        <Card className="neo-card-glass mb-6 neo-shadow rounded-neo">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-primary" />

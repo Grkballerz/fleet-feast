@@ -168,9 +168,9 @@ export default function VendorCalendarPage() {
           <div
             key={dateStr}
             className={`
-              min-h-[100px] sm:min-h-[120px] border border-border p-2
+              min-h-[100px] sm:min-h-[120px] neo-border rounded-neo p-2
               ${isCurrentMonth ? "bg-white" : "bg-background"}
-              ${isPast ? "opacity-50" : "cursor-pointer hover:bg-background-hover"}
+              ${isPast ? "opacity-50" : "cursor-pointer hover:bg-background-hover neo-shadow"}
               ${isToday(currentDay) ? "ring-2 ring-primary" : ""}
             `}
             onClick={() => !isPast && toggleDayAvailability(currentDay)}
@@ -237,7 +237,7 @@ export default function VendorCalendarPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-text-primary">Availability Calendar</h2>
+        <h2 className="text-2xl font-bold text-text-primary neo-heading">Availability Calendar</h2>
         <p className="text-text-secondary mt-1">
           Manage your availability and view upcoming bookings
         </p>
@@ -263,10 +263,10 @@ export default function VendorCalendarPage() {
       </Alert>
 
       {/* Calendar */}
-      <Card>
+      <div className="neo-card-glass neo-shadow rounded-neo p-6">
         {/* Month Navigation */}
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-semibold text-text-primary">
+          <h3 className="text-xl font-semibold text-text-primary neo-heading">
             {format(currentMonth, "MMMM yyyy")}
           </h3>
           <div className="flex gap-2">
@@ -308,11 +308,11 @@ export default function VendorCalendarPage() {
 
         {/* Calendar Grid */}
         {renderCalendar()}
-      </Card>
+      </div>
 
       {/* Legend */}
-      <Card className="card-compact">
-        <h4 className="font-medium text-text-primary mb-3">Legend</h4>
+      <div className="neo-card-glass neo-shadow rounded-neo p-4">
+        <h4 className="font-medium text-text-primary neo-heading mb-3">Legend</h4>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="flex items-center gap-2">
             <CheckCircle className="w-4 h-4 text-success" />
@@ -333,7 +333,7 @@ export default function VendorCalendarPage() {
             <span className="text-sm text-text-secondary">Has Booking</span>
           </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

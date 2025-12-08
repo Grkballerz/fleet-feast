@@ -75,7 +75,7 @@ const TruckCard: React.FC<TruckCardProps> = ({ truck }) => {
   return (
     <Link
       href={`/trucks/${truck.id}`}
-      className="group block bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+      className="group block neo-card-glass rounded-neo neo-border overflow-hidden neo-shadow hover:neo-shadow-hover transition-all focus:outline-none"
     >
       {/* Image */}
       <div className="relative aspect-video overflow-hidden">
@@ -91,7 +91,7 @@ const TruckCard: React.FC<TruckCardProps> = ({ truck }) => {
           <Badge
             variant="primary"
             size="sm"
-            className="bg-white/90 backdrop-blur-sm text-primary"
+            className="neo-glass-brutal rounded-neo text-white neo-shadow"
           >
             {cuisineTypeDisplay[truck.cuisineType]}
           </Badge>
@@ -101,13 +101,13 @@ const TruckCard: React.FC<TruckCardProps> = ({ truck }) => {
       {/* Content */}
       <div className="p-4 space-y-2">
         {/* Truck Name */}
-        <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
+        <h3 className="font-black text-lg line-clamp-1 group-hover:text-primary transition-colors">
           {truck.businessName}
         </h3>
 
         {/* Description */}
         {truck.description && (
-          <p className="text-sm text-text-secondary line-clamp-2">
+          <p className="text-sm text-text-secondary line-clamp-2 font-medium">
             {truck.description}
           </p>
         )}
@@ -117,18 +117,18 @@ const TruckCard: React.FC<TruckCardProps> = ({ truck }) => {
           {rating > 0 ? (
             <div className="flex items-center gap-1">
               <Rating value={rating} readOnly size="sm" />
-              <span className="text-sm font-medium">{rating.toFixed(1)}</span>
+              <span className="text-sm font-bold">{rating.toFixed(1)}</span>
               {reviewCount > 0 && (
-                <span className="text-xs text-text-secondary">
+                <span className="text-xs text-text-secondary font-medium">
                   ({reviewCount})
                 </span>
               )}
             </div>
           ) : (
-            <span className="text-sm text-text-secondary">No reviews yet</span>
+            <span className="text-sm text-text-secondary font-medium">No reviews yet</span>
           )}
 
-          <span className="text-sm font-semibold text-text-secondary">
+          <span className="text-sm font-black text-text-secondary">
             {priceRangeDisplay[truck.priceRange]}
           </span>
         </div>
@@ -164,7 +164,7 @@ export const SimilarTrucks: React.FC<SimilarTrucksProps> = ({
 
   return (
     <div className={cn("space-y-4", className)}>
-      <h2 className="text-2xl font-bold">Similar Trucks</h2>
+      <h2 className="neo-heading text-2xl">Similar Trucks</h2>
 
       {isLoading ? (
         <div className="flex justify-center items-center py-12">
@@ -172,11 +172,11 @@ export const SimilarTrucks: React.FC<SimilarTrucksProps> = ({
         </div>
       ) : error ? (
         <div className="text-center py-12">
-          <p className="text-error">Failed to load similar trucks.</p>
+          <p className="text-error font-bold">Failed to load similar trucks.</p>
         </div>
       ) : !data?.data || data.data.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-text-secondary">
+          <p className="text-text-secondary font-medium">
             No similar trucks found at this time.
           </p>
         </div>

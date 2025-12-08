@@ -10,7 +10,7 @@ export default function VendorApplicationPage() {
   return (
     <div className="py-8">
       <div className="max-w-4xl mx-auto mb-8">
-        <h1 className="text-3xl font-bold text-text-primary mb-2">
+        <h1 className="neo-heading text-3xl mb-2">
           Become a Fleet Feast Vendor
         </h1>
         <p className="text-lg text-text-secondary">

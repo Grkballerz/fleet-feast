@@ -182,14 +182,14 @@ export default function VendorBookingsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-text-primary">Manage Bookings</h2>
+        <h2 className="text-2xl font-bold text-text-primary neo-heading">Manage Bookings</h2>
         <p className="text-text-secondary mt-1">
           Review and manage your booking requests and confirmed events
         </p>
       </div>
 
       {/* Search and Filter */}
-      <Card className="card-compact">
+      <div className="neo-card-glass neo-shadow rounded-neo p-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
             <Input
@@ -200,7 +200,7 @@ export default function VendorBookingsPage() {
             />
           </div>
         </div>
-      </Card>
+      </div>
 
       {/* Status Filter Tabs */}
       <div className="flex overflow-x-auto gap-2 pb-2">
@@ -219,7 +219,7 @@ export default function VendorBookingsPage() {
 
       {/* Bookings List */}
       {filteredBookings.length === 0 ? (
-        <Card className="text-center py-12">
+        <div className="neo-card-glass neo-shadow rounded-neo p-12 text-center">
           <Calendar className="w-16 h-16 mx-auto mb-4 text-text-tertiary" />
           <h3 className="text-lg font-semibold text-text-primary mb-2">
             {searchQuery || statusFilter !== "ALL"
@@ -242,13 +242,13 @@ export default function VendorBookingsPage() {
               Clear Filters
             </Button>
           )}
-        </Card>
+        </div>
       ) : (
         <div className="space-y-3">
           {filteredBookings.map((booking) => (
-            <Card
+            <div
               key={booking.id}
-              className="card-interactive cursor-pointer"
+              className="neo-card-glass neo-shadow rounded-neo p-4 cursor-pointer hover:neo-shadow-lg transition-all"
               onClick={() => {
                 setSelectedBooking(booking);
                 setShowDetailsModal(true);
@@ -317,7 +317,7 @@ export default function VendorBookingsPage() {
                   </Button>
                 </div>
               )}
-            </Card>
+            </div>
           ))}
         </div>
       )}

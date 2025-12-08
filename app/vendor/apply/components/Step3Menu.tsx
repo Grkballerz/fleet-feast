@@ -116,11 +116,11 @@ export const Step3Menu: React.FC<Step3MenuProps> = ({
 
   return (
     <div className="space-y-6">
-      <Card>
-        <div className="p-6">
+      <div className="neo-card-glass neo-shadow-lg rounded-neo p-6">
+        <div>
           <div className="flex items-start justify-between mb-6">
             <div>
-              <h2 className="text-2xl font-bold text-text-primary mb-2">
+              <h2 className="neo-heading text-2xl mb-2">
                 Menu Setup
               </h2>
               <p className="text-text-secondary">
@@ -134,9 +134,9 @@ export const Step3Menu: React.FC<Step3MenuProps> = ({
 
           {/* Menu Items List */}
           {menuItems.length === 0 ? (
-            <div className="text-center py-12 border-2 border-dashed border-border rounded-lg">
+            <div className="text-center py-12 neo-border-thick border-dashed rounded-neo">
               <svg
-                className="mx-auto h-12 w-12 text-text-secondary mb-3"
+                className="mx-auto h-16 w-16 text-text-secondary mb-4"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -144,11 +144,11 @@ export const Step3Menu: React.FC<Step3MenuProps> = ({
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2}
+                  strokeWidth={3}
                   d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                 />
               </svg>
-              <p className="text-text-secondary mb-4">No menu items yet</p>
+              <p className="text-text-secondary font-bold mb-4">No menu items yet</p>
               <Button onClick={handleAdd} variant="secondary">
                 Add Your First Menu Item
               </Button>
@@ -158,15 +158,15 @@ export const Step3Menu: React.FC<Step3MenuProps> = ({
               {menuItems.map((item, index) => (
                 <div
                   key={item.id || index}
-                  className="border-2 border-border rounded-lg p-4 hover:border-primary/50 transition-colors"
+                  className="neo-border-thick rounded-neo p-4 bg-white hover:neo-shadow transition-all"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-start gap-3 mb-2">
-                        <h3 className="font-semibold text-text-primary text-lg">
+                        <h3 className="font-bold text-text-primary text-lg">
                           {item.name}
                         </h3>
-                        <span className="font-bold text-primary text-lg">
+                        <span className="font-black text-primary text-xl">
                           ${item.price.toFixed(2)}
                         </span>
                       </div>
@@ -186,13 +186,13 @@ export const Step3Menu: React.FC<Step3MenuProps> = ({
                     <div className="flex gap-2 ml-4">
                       <button
                         onClick={() => handleEdit(item, index)}
-                        className="text-primary hover:text-primary/80 font-medium text-sm"
+                        className="text-primary hover:text-primary/80 font-bold text-sm"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleDelete(index)}
-                        className="text-error hover:text-error/80 font-medium text-sm"
+                        className="text-error hover:text-error/80 font-bold text-sm"
                       >
                         Delete
                       </button>
@@ -205,7 +205,7 @@ export const Step3Menu: React.FC<Step3MenuProps> = ({
 
           {errors.menu && <p className="error-message mt-4">{errors.menu}</p>}
         </div>
-      </Card>
+      </div>
 
       {/* Add/Edit Modal */}
       <Modal
@@ -284,10 +284,10 @@ export const Step3Menu: React.FC<Step3MenuProps> = ({
                   key={tag}
                   type="button"
                   onClick={() => toggleDietaryTag(tag)}
-                  className={`px-3 py-2 rounded-md border-2 text-sm transition-colors ${
+                  className={`px-3 py-2 rounded-neo neo-border-thick text-sm font-bold transition-all ${
                     formData.dietaryTags.includes(tag)
-                      ? "border-success bg-success/10 text-success font-medium"
-                      : "border-border bg-white text-text-secondary hover:border-success/50"
+                      ? "neo-border bg-success/10 text-success neo-shadow"
+                      : "bg-white text-text-secondary hover:neo-shadow"
                   }`}
                 >
                   {tag.replace(/_/g, " ")}

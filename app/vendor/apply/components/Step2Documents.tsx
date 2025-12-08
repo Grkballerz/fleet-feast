@@ -164,9 +164,9 @@ export const Step2Documents: React.FC<Step2DocumentsProps> = ({
 
   return (
     <div className="space-y-6">
-      <Card>
-        <div className="p-6">
-          <h2 className="text-2xl font-bold text-text-primary mb-2">
+      <div className="neo-card-glass neo-shadow-lg rounded-neo p-6">
+        <div>
+          <h2 className="neo-heading text-2xl mb-2">
             Required Documents
           </h2>
           <p className="text-text-secondary mb-6">
@@ -185,11 +185,11 @@ export const Step2Documents: React.FC<Step2DocumentsProps> = ({
               const isUploading = uploading[type];
 
               return (
-                <div key={type} className="border-2 border-border rounded-lg">
-                  <div className="p-4">
+                <div key={type} className="neo-border-thick rounded-neo neo-shadow">
+                  <div className="p-4 bg-white">
                     <div className="flex items-start justify-between mb-3">
                       <div>
-                        <h3 className="font-semibold text-text-primary">
+                        <h3 className="font-bold text-text-primary">
                           {label} <span className="text-error">*</span>
                         </h3>
                         <p className="text-sm text-text-secondary">{description}</p>
@@ -197,7 +197,7 @@ export const Step2Documents: React.FC<Step2DocumentsProps> = ({
                       {doc && !isUploading && (
                         <button
                           onClick={() => removeDocument(type)}
-                          className="text-error hover:text-error/80 text-sm font-medium"
+                          className="text-error hover:text-error/80 text-sm font-bold"
                         >
                           Remove
                         </button>
@@ -210,14 +210,14 @@ export const Step2Documents: React.FC<Step2DocumentsProps> = ({
                         onDrop={(e) => handleDrop(e, type)}
                         onDragOver={(e) => handleDragOver(e, type)}
                         onDragLeave={handleDragLeave}
-                        className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                        className={`neo-border-thick border-dashed rounded-neo p-8 text-center transition-all ${
                           dragOver === type
-                            ? "border-primary bg-primary/5"
-                            : "border-border bg-background hover:border-primary/50"
+                            ? "neo-border-primary bg-primary/5 neo-shadow-primary"
+                            : "bg-background hover:neo-shadow"
                         }`}
                       >
                         <svg
-                          className="mx-auto h-12 w-12 text-text-secondary mb-3"
+                          className="mx-auto h-16 w-16 text-text-secondary mb-4"
                           stroke="currentColor"
                           fill="none"
                           viewBox="0 0 48 48"
@@ -225,12 +225,12 @@ export const Step2Documents: React.FC<Step2DocumentsProps> = ({
                         >
                           <path
                             d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                            strokeWidth={2}
+                            strokeWidth={3}
                             strokeLinecap="round"
                             strokeLinejoin="round"
                           />
                         </svg>
-                        <p className="text-text-primary mb-1">
+                        <p className="text-text-primary font-bold mb-3 text-lg">
                           Drag and drop your file here, or
                         </p>
                         <Button
@@ -260,10 +260,10 @@ export const Step2Documents: React.FC<Step2DocumentsProps> = ({
 
                     {/* Uploaded Document */}
                     {doc && !isUploading && (
-                      <div className="flex items-center gap-4 p-4 bg-success/10 border border-success/20 rounded-lg">
+                      <div className="flex items-center gap-4 p-4 bg-success/10 rounded-neo neo-border neo-shadow">
                         <div className="flex-shrink-0">
                           <svg
-                            className="h-10 w-10 text-success"
+                            className="h-12 w-12 text-success"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -271,16 +271,16 @@ export const Step2Documents: React.FC<Step2DocumentsProps> = ({
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
-                              strokeWidth={2}
+                              strokeWidth={3}
                               d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                             />
                           </svg>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-text-primary truncate">
+                          <p className="font-bold text-text-primary truncate">
                             {doc.fileName}
                           </p>
-                          <p className="text-sm text-text-secondary">
+                          <p className="text-sm text-text-secondary font-medium">
                             {(doc.fileSize / 1024).toFixed(1)} KB • Uploaded{" "}
                             {doc.uploadedAt &&
                               new Date(doc.uploadedAt).toLocaleDateString()}
@@ -298,7 +298,7 @@ export const Step2Documents: React.FC<Step2DocumentsProps> = ({
             })}
           </div>
         </div>
-      </Card>
+      </div>
 
       {/* Navigation */}
       <div className="flex justify-between">

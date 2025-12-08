@@ -126,7 +126,7 @@ function PaymentForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Order Summary */}
-      <Card>
+      <Card className="neo-card-glass neo-shadow rounded-neo">
         <CardHeader>
           <h2 className="heading-3">Order Summary</h2>
         </CardHeader>
@@ -237,7 +237,7 @@ function PaymentForm({
       </Card>
 
       {/* Payment Method */}
-      <Card>
+      <Card className="neo-card-glass neo-shadow rounded-neo">
         <CardHeader>
           <div className="flex items-center gap-2">
             <CreditCard className="h-5 w-5 text-primary" />
@@ -276,7 +276,7 @@ function PaymentForm({
       </Card>
 
       {/* Platform Fee Disclosure */}
-      <Card>
+      <Card className="neo-card-glass neo-shadow rounded-neo">
         <CardBody>
           <div className="flex items-start gap-2">
             <DollarSign className="h-5 w-5 text-primary shrink-0 mt-0.5" />
@@ -294,7 +294,7 @@ function PaymentForm({
       </Card>
 
       {/* Terms and Conditions */}
-      <Card>
+      <Card className="neo-card-glass neo-shadow rounded-neo">
         <CardBody>
           <label className="flex items-start gap-3 cursor-pointer">
             <input

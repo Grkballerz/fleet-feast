@@ -41,11 +41,11 @@ interface ReviewCardProps {
 
 const ReviewCard: React.FC<ReviewCardProps> = ({ review }) => {
   return (
-    <div className="border-b border-gray-200 py-4 last:border-0">
+    <div className="neo-border-thin border-b py-4 last:border-0">
       <div className="flex items-start gap-4">
         {/* Avatar */}
         <div className="flex-shrink-0">
-          <div className="w-10 h-10 bg-primary/10 text-primary rounded-full flex items-center justify-center font-semibold">
+          <div className="w-10 h-10 bg-primary/10 text-primary rounded-neo neo-border flex items-center justify-center font-black">
             {review.reviewer.name.charAt(0).toUpperCase()}
           </div>
         </div>
@@ -55,8 +55,8 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review }) => {
           {/* Header */}
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div>
-              <p className="font-semibold">{review.reviewer.name}</p>
-              <p className="text-xs text-text-secondary">
+              <p className="font-bold">{review.reviewer.name}</p>
+              <p className="text-xs text-text-secondary font-medium">
                 {formatRelativeTime(new Date(review.createdAt))}
               </p>
             </div>
@@ -65,7 +65,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review }) => {
 
           {/* Review Text */}
           {review.content && (
-            <p className="text-sm text-text-primary leading-relaxed">
+            <p className="text-sm text-text-primary leading-relaxed font-medium">
               {review.content}
             </p>
           )}
@@ -93,31 +93,27 @@ const Pagination: React.FC<PaginationProps> = ({
 
   return (
     <div className="flex items-center justify-center gap-2 mt-6">
-      <Button
-        variant="outline"
-        size="sm"
+      <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="flex items-center gap-1"
+        className="flex items-center gap-1 px-4 py-2 rounded-neo neo-border font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:neo-shadow transition-all bg-white"
       >
         <ChevronLeft className="h-4 w-4" />
         Previous
-      </Button>
+      </button>
 
-      <span className="text-sm text-text-secondary px-4">
+      <span className="text-sm text-text-primary font-bold px-4">
         Page {currentPage} of {totalPages}
       </span>
 
-      <Button
-        variant="outline"
-        size="sm"
+      <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="flex items-center gap-1"
+        className="flex items-center gap-1 px-4 py-2 rounded-neo neo-border font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:neo-shadow transition-all bg-white"
       >
         Next
         <ChevronRight className="h-4 w-4" />
-      </Button>
+      </button>
     </div>
   );
 };
@@ -161,11 +157,11 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold">Reviews</h2>
+          <h2 className="neo-heading text-2xl">Reviews</h2>
           <div className="flex items-center gap-2 mt-2">
             <Rating value={averageRating} readOnly size="md" />
-            <span className="font-semibold">{averageRating.toFixed(1)}</span>
-            <span className="text-sm text-text-secondary">
+            <span className="font-black">{averageRating.toFixed(1)}</span>
+            <span className="text-sm text-text-secondary font-medium">
               ({totalReviews.toLocaleString()} {totalReviews === 1 ? "review" : "reviews"})
             </span>
           </div>
@@ -173,7 +169,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
 
         {/* Rating Filter */}
         <div className="flex items-center gap-2">
-          <label htmlFor="rating-filter" className="text-sm font-medium">
+          <label htmlFor="rating-filter" className="text-sm font-bold">
             Filter by rating:
           </label>
           <select
@@ -183,7 +179,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
               setRatingFilter(e.target.value ? Number(e.target.value) : null);
               setPage(1); // Reset to page 1 when filter changes
             }}
-            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            className="neo-input px-3 py-2 rounded-neo text-sm font-medium"
           >
             <option value="">All ratings</option>
             {[5, 4, 3, 2, 1].map((rating) => (
@@ -196,18 +192,18 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
       </div>
 
       {/* Reviews List */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4 md:p-6">
+      <div className="neo-card-glass rounded-neo neo-shadow p-4 md:p-6">
         {isLoading ? (
           <div className="flex justify-center items-center py-12">
             <Spinner size="lg" />
           </div>
         ) : error ? (
           <div className="text-center py-12">
-            <p className="text-error">Failed to load reviews. Please try again later.</p>
+            <p className="text-error font-bold">Failed to load reviews. Please try again later.</p>
           </div>
         ) : data?.reviews?.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-text-secondary">
+            <p className="text-text-secondary font-medium">
               {ratingFilter
                 ? `No ${ratingFilter}-star reviews found.`
                 : "No reviews yet. Be the first to review!"}
@@ -233,8 +229,8 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
 
       {/* Rating Breakdown (optional enhancement) */}
       {data?.aggregate?.ratingBreakdown && (
-        <div className="bg-white rounded-lg border border-gray-200 p-4 md:p-6">
-          <h3 className="font-semibold mb-4">Rating Breakdown</h3>
+        <div className="neo-card-glass rounded-neo neo-shadow p-4 md:p-6">
+          <h3 className="font-black mb-4">Rating Breakdown</h3>
           <div className="space-y-2">
             {[5, 4, 3, 2, 1].map((rating) => {
               const count = data.aggregate.ratingBreakdown[rating] || 0;
@@ -242,14 +238,14 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
 
               return (
                 <div key={rating} className="flex items-center gap-3">
-                  <span className="text-sm font-medium w-12">{rating} star</span>
-                  <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <span className="text-sm font-bold w-12">{rating} star</span>
+                  <div className="flex-1 h-3 bg-gray-200 rounded-neo overflow-hidden neo-border-thin">
                     <div
-                      className="h-full bg-warning rounded-full transition-all"
+                      className="h-full bg-warning transition-all"
                       style={{ width: `${percentage}%` }}
                     />
                   </div>
-                  <span className="text-sm text-text-secondary w-12 text-right">
+                  <span className="text-sm text-text-secondary font-bold w-12 text-right">
                     {count}
                   </span>
                 </div>

@@ -124,24 +124,26 @@ export default function AnalyticsPage() {
     <AdminLayout title="Platform Analytics">
       <div className="space-y-6">
         {/* Timeframe Selector */}
-        <div className="flex items-center gap-4">
-          <p className="text-sm text-text-secondary">Timeframe:</p>
-          <div className="flex gap-2">
-            {["7d", "30d", "90d"].map((period) => (
-              <button
-                key={period}
-                onClick={() => setTimeframe(period as typeof timeframe)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  timeframe === period
-                    ? "bg-primary text-white"
-                    : "bg-secondary text-text-secondary hover:bg-border"
-                }`}
-              >
-                {period === "7d" && "Last 7 Days"}
-                {period === "30d" && "Last 30 Days"}
-                {period === "90d" && "Last 90 Days"}
-              </button>
-            ))}
+        <div className="neo-card-glass neo-shadow p-4 rounded-neo">
+          <div className="flex items-center gap-4">
+            <p className="text-sm text-text-secondary font-medium">Timeframe:</p>
+            <div className="flex gap-2">
+              {["7d", "30d", "90d"].map((period) => (
+                <button
+                  key={period}
+                  onClick={() => setTimeframe(period as typeof timeframe)}
+                  className={`px-4 py-2 rounded-neo text-sm font-bold transition-all ${
+                    timeframe === period
+                      ? "neo-btn-primary"
+                      : "neo-border bg-white hover:neo-shadow"
+                  }`}
+                >
+                  {period === "7d" && "Last 7 Days"}
+                  {period === "30d" && "Last 30 Days"}
+                  {period === "90d" && "Last 90 Days"}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -150,7 +152,7 @@ export default function AnalyticsPage() {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* GMV */}
-              <Card>
+              <div className="neo-card-glass neo-shadow p-6 rounded-neo">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium text-text-secondary">
@@ -158,17 +160,17 @@ export default function AnalyticsPage() {
                     </p>
                     {getGrowthBadge(analytics.gmv.growth)}
                   </div>
-                  <p className="text-3xl font-bold text-text-primary">
+                  <p className="text-3xl font-bold text-text-primary neo-heading">
                     {formatCurrency(analytics.gmv.thisMonth)}
                   </p>
                   <p className="text-xs text-text-secondary">
                     Total: {formatCurrency(analytics.gmv.total)}
                   </p>
                 </div>
-              </Card>
+              </div>
 
               {/* Revenue */}
-              <Card>
+              <div className="neo-card-glass neo-shadow p-6 rounded-neo">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium text-text-secondary">
@@ -176,17 +178,17 @@ export default function AnalyticsPage() {
                     </p>
                     {getGrowthBadge(analytics.revenue.growth)}
                   </div>
-                  <p className="text-3xl font-bold text-text-primary">
+                  <p className="text-3xl font-bold text-text-primary neo-heading">
                     {formatCurrency(analytics.revenue.thisMonth)}
                   </p>
                   <p className="text-xs text-text-secondary">
                     Total: {formatCurrency(analytics.revenue.total)}
                   </p>
                 </div>
-              </Card>
+              </div>
 
               {/* Bookings */}
-              <Card>
+              <div className="neo-card-glass neo-shadow p-6 rounded-neo">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium text-text-secondary">
@@ -194,17 +196,17 @@ export default function AnalyticsPage() {
                     </p>
                     {getGrowthBadge(analytics.bookings.growth)}
                   </div>
-                  <p className="text-3xl font-bold text-text-primary">
+                  <p className="text-3xl font-bold text-text-primary neo-heading">
                     {formatNumber(analytics.bookings.thisMonth)}
                   </p>
                   <p className="text-xs text-text-secondary">
                     Total: {formatNumber(analytics.bookings.total)}
                   </p>
                 </div>
-              </Card>
+              </div>
 
               {/* Users */}
-              <Card>
+              <div className="neo-card-glass neo-shadow p-6 rounded-neo">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium text-text-secondary">
@@ -212,17 +214,17 @@ export default function AnalyticsPage() {
                     </p>
                     {getGrowthBadge(analytics.users.growth)}
                   </div>
-                  <p className="text-3xl font-bold text-text-primary">
+                  <p className="text-3xl font-bold text-text-primary neo-heading">
                     {formatNumber(analytics.users.active)}
                   </p>
                   <p className="text-xs text-text-secondary">
                     New this month: {formatNumber(analytics.users.newThisMonth)}
                   </p>
                 </div>
-              </Card>
+              </div>
 
               {/* Vendors */}
-              <Card>
+              <div className="neo-card-glass neo-shadow p-6 rounded-neo">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium text-text-secondary">
@@ -230,24 +232,24 @@ export default function AnalyticsPage() {
                     </p>
                     {getGrowthBadge(analytics.vendors.growth)}
                   </div>
-                  <p className="text-3xl font-bold text-text-primary">
+                  <p className="text-3xl font-bold text-text-primary neo-heading">
                     {formatNumber(analytics.vendors.active)}
                   </p>
                   <p className="text-xs text-text-secondary">
                     New this month: {formatNumber(analytics.vendors.newThisMonth)}
                   </p>
                 </div>
-              </Card>
+              </div>
 
               {/* Conversion Rate */}
-              <Card>
+              <div className="neo-card-glass neo-shadow p-6 rounded-neo">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium text-text-secondary">
                       Avg Booking Value
                     </p>
                   </div>
-                  <p className="text-3xl font-bold text-text-primary">
+                  <p className="text-3xl font-bold text-text-primary neo-heading">
                     {analytics.bookings.thisMonth > 0
                       ? formatCurrency(
                           analytics.gmv.thisMonth / analytics.bookings.thisMonth
@@ -258,26 +260,23 @@ export default function AnalyticsPage() {
                     Per booking this month
                   </p>
                 </div>
-              </Card>
+              </div>
             </div>
 
             {/* Top Performing Vendors */}
-            <Card
-              header={
-                <h2 className="text-lg font-semibold text-text-primary">
-                  Top Performing Vendors
-                </h2>
-              }
-            >
+            <div className="neo-card-glass neo-shadow p-6 rounded-neo">
+              <h2 className="text-lg font-semibold text-text-primary neo-heading mb-6">
+                Top Performing Vendors
+              </h2>
               <div className="space-y-4">
                 {analytics.topVendors && analytics.topVendors.length > 0 ? (
                   analytics.topVendors.map((vendor, idx) => (
                     <div
                       key={vendor.id}
-                      className="flex items-center justify-between p-4 border border-border rounded-lg"
+                      className="flex items-center justify-between p-4 neo-border rounded-neo"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-white font-bold">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-full neo-border-primary bg-primary text-white font-bold">
                           #{idx + 1}
                         </div>
                         <div>
@@ -290,7 +289,7 @@ export default function AnalyticsPage() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-lg font-semibold text-primary">
+                        <p className="text-lg font-semibold text-primary neo-heading">
                           {formatCurrency(vendor.revenue)}
                         </p>
                         <p className="text-xs text-text-secondary">Revenue</p>
@@ -303,33 +302,30 @@ export default function AnalyticsPage() {
                   </p>
                 )}
               </div>
-            </Card>
+            </div>
 
             {/* Recent Bookings */}
-            <Card
-              header={
-                <h2 className="text-lg font-semibold text-text-primary">
-                  Recent Bookings
-                </h2>
-              }
-            >
+            <div className="neo-card-glass neo-shadow p-6 rounded-neo">
+              <h2 className="text-lg font-semibold text-text-primary neo-heading mb-6">
+                Recent Bookings
+              </h2>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-border">
-                      <th className="text-left py-3 px-4 text-sm font-medium text-text-secondary">
+                    <tr className="neo-border-thin border-b">
+                      <th className="text-left py-3 px-4 text-sm font-bold text-text-secondary">
                         Vendor
                       </th>
-                      <th className="text-left py-3 px-4 text-sm font-medium text-text-secondary">
+                      <th className="text-left py-3 px-4 text-sm font-bold text-text-secondary">
                         Customer
                       </th>
-                      <th className="text-left py-3 px-4 text-sm font-medium text-text-secondary">
+                      <th className="text-left py-3 px-4 text-sm font-bold text-text-secondary">
                         Date
                       </th>
-                      <th className="text-right py-3 px-4 text-sm font-medium text-text-secondary">
+                      <th className="text-right py-3 px-4 text-sm font-bold text-text-secondary">
                         Amount
                       </th>
-                      <th className="text-center py-3 px-4 text-sm font-medium text-text-secondary">
+                      <th className="text-center py-3 px-4 text-sm font-bold text-text-secondary">
                         Status
                       </th>
                     </tr>
@@ -340,7 +336,7 @@ export default function AnalyticsPage() {
                       analytics.recentBookings.map((booking) => (
                         <tr
                           key={booking.id}
-                          className="border-b border-border last:border-0"
+                          className="neo-border-thin border-b last:border-0"
                         >
                           <td className="py-3 px-4 text-sm text-text-primary">
                             {booking.vendorName}
@@ -354,7 +350,7 @@ export default function AnalyticsPage() {
                               day: "numeric",
                             })}
                           </td>
-                          <td className="py-3 px-4 text-sm text-right font-medium text-primary">
+                          <td className="py-3 px-4 text-sm text-right font-bold text-primary">
                             {formatCurrency(booking.amount)}
                           </td>
                           <td className="py-3 px-4 text-center">
@@ -386,7 +382,7 @@ export default function AnalyticsPage() {
                   </tbody>
                 </table>
               </div>
-            </Card>
+            </div>
           </>
         )}
       </div>

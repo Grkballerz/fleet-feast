@@ -120,7 +120,7 @@ export default async function TruckProfilePage({
   const photos = coverImageUrl ? [coverImageUrl] : [];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <TruckHero
         truck={{
@@ -140,10 +140,10 @@ export default async function TruckProfilePage({
         {/* Booking CTA - Sticky on mobile */}
         <div className="lg:hidden sticky top-4 z-10">
           <Link href={`/booking?vendorId=${id}`}>
-            <Button size="lg" className="w-full shadow-lg">
-              <Calendar className="h-5 w-5 mr-2" />
+            <button className="neo-btn-primary w-full px-6 py-3 flex items-center justify-center gap-2">
+              <Calendar className="h-5 w-5" />
               Book This Truck
-            </Button>
+            </button>
           </Link>
         </div>
 
@@ -153,22 +153,22 @@ export default async function TruckProfilePage({
           <div className="lg:col-span-2 space-y-12">
             {/* About Section */}
             <section>
-              <h2 className="text-2xl font-bold mb-4">About</h2>
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h2 className="neo-heading text-2xl mb-4">About</h2>
+              <div className="neo-card-glass rounded-neo p-6">
                 <p className="text-text-primary leading-relaxed">
                   {description || "No description available."}
                 </p>
 
-                <div className="mt-6 grid grid-cols-2 gap-4 pt-6 border-t border-gray-200">
+                <div className="mt-6 grid grid-cols-2 gap-4 pt-6 neo-border-thin border-t">
                   <div>
                     <p className="text-sm text-text-secondary">Capacity</p>
-                    <p className="font-semibold">
+                    <p className="font-bold">
                       {capacityMin} - {capacityMax} guests
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-text-secondary">Cuisine Type</p>
-                    <p className="font-semibold">{cuisineType}</p>
+                    <p className="font-bold">{cuisineType}</p>
                   </div>
                 </div>
               </div>
@@ -194,7 +194,7 @@ export default async function TruckProfilePage({
           <div className="space-y-8">
             {/* Desktop Booking CTA */}
             <div className="hidden lg:block sticky top-4">
-              <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
+              <div className="neo-card-glass rounded-neo neo-shadow p-6 space-y-4">
                 <div className="text-center">
                   <p className="text-3xl font-bold text-primary">
                     {priceRange}
@@ -203,10 +203,10 @@ export default async function TruckProfilePage({
                 </div>
 
                 <Link href={`/booking?vendorId=${id}`}>
-                  <Button size="lg" className="w-full">
-                    <Calendar className="h-5 w-5 mr-2" />
+                  <button className="neo-btn-primary w-full px-6 py-3 flex items-center justify-center gap-2">
+                    <Calendar className="h-5 w-5" />
                     Book This Truck
-                  </Button>
+                  </button>
                 </Link>
 
                 <p className="text-xs text-text-secondary text-center">

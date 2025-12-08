@@ -107,7 +107,7 @@ export default function AdminDashboardPage() {
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* GMV */}
-          <Card>
+          <div className="neo-card-glass neo-shadow p-6 rounded-neo">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-text-secondary">GMV</p>
@@ -125,15 +125,15 @@ export default function AdminDashboardPage() {
                   />
                 </svg>
               </div>
-              <p className="text-3xl font-bold text-text-primary">
+              <p className="text-3xl font-bold text-text-primary neo-heading">
                 {stats ? formatCurrency(stats.gmv) : "-"}
               </p>
               <p className="text-xs text-text-secondary">Gross Merchandise Value</p>
             </div>
-          </Card>
+          </div>
 
           {/* Revenue */}
-          <Card>
+          <div className="neo-card-glass neo-shadow p-6 rounded-neo">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-text-secondary">Revenue</p>
@@ -151,15 +151,15 @@ export default function AdminDashboardPage() {
                   />
                 </svg>
               </div>
-              <p className="text-3xl font-bold text-text-primary">
+              <p className="text-3xl font-bold text-text-primary neo-heading">
                 {stats ? formatCurrency(stats.revenue) : "-"}
               </p>
               <p className="text-xs text-text-secondary">Platform Commission</p>
             </div>
-          </Card>
+          </div>
 
           {/* Active Users */}
-          <Card>
+          <div className="neo-card-glass neo-shadow p-6 rounded-neo">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-text-secondary">Users</p>
@@ -177,15 +177,15 @@ export default function AdminDashboardPage() {
                   />
                 </svg>
               </div>
-              <p className="text-3xl font-bold text-text-primary">
+              <p className="text-3xl font-bold text-text-primary neo-heading">
                 {stats ? formatNumber(stats.activeUsers) : "-"}
               </p>
               <p className="text-xs text-text-secondary">Active Users</p>
             </div>
-          </Card>
+          </div>
 
           {/* Active Vendors */}
-          <Card>
+          <div className="neo-card-glass neo-shadow p-6 rounded-neo">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-text-secondary">Vendors</p>
@@ -203,25 +203,25 @@ export default function AdminDashboardPage() {
                   />
                 </svg>
               </div>
-              <p className="text-3xl font-bold text-text-primary">
+              <p className="text-3xl font-bold text-text-primary neo-heading">
                 {stats ? formatNumber(stats.activeVendors) : "-"}
               </p>
               <p className="text-xs text-text-secondary">Active Vendors</p>
             </div>
-          </Card>
+          </div>
         </div>
 
         {/* Pending Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Pending Applications */}
           <Link href="/admin/vendors">
-            <Card variant="interactive" className="h-full">
+            <div className="neo-card-glass neo-shadow neo-shadow-hover hover:neo-shadow-lg transition-all cursor-pointer h-full p-6 rounded-neo">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-text-secondary">
                     Pending Applications
                   </p>
-                  <p className="text-4xl font-bold text-primary mt-2">
+                  <p className="text-4xl font-bold text-primary mt-2 neo-heading">
                     {stats?.pendingApplications || 0}
                   </p>
                 </div>
@@ -229,18 +229,18 @@ export default function AdminDashboardPage() {
                   Action Required
                 </Badge>
               </div>
-            </Card>
+            </div>
           </Link>
 
           {/* Open Disputes */}
           <Link href="/admin/disputes">
-            <Card variant="interactive" className="h-full">
+            <div className="neo-card-glass neo-shadow neo-shadow-hover hover:neo-shadow-lg transition-all cursor-pointer h-full p-6 rounded-neo">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-text-secondary">
                     Open Disputes
                   </p>
-                  <p className="text-4xl font-bold text-error mt-2">
+                  <p className="text-4xl font-bold text-error mt-2 neo-heading">
                     {stats?.openDisputes || 0}
                   </p>
                 </div>
@@ -250,18 +250,18 @@ export default function AdminDashboardPage() {
                   </Badge>
                 )}
               </div>
-            </Card>
+            </div>
           </Link>
 
           {/* Pending Violations */}
           <Link href="/admin/violations">
-            <Card variant="interactive" className="h-full">
+            <div className="neo-card-glass neo-shadow neo-shadow-hover hover:neo-shadow-lg transition-all cursor-pointer h-full p-6 rounded-neo">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-text-secondary">
                     Pending Violations
                   </p>
-                  <p className="text-4xl font-bold text-warning mt-2">
+                  <p className="text-4xl font-bold text-warning mt-2 neo-heading">
                     {stats?.pendingViolations || 0}
                   </p>
                 </div>
@@ -271,23 +271,20 @@ export default function AdminDashboardPage() {
                   </Badge>
                 )}
               </div>
-            </Card>
+            </div>
           </Link>
         </div>
 
         {/* Recent Activity */}
-        <Card
-          header={
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-text-primary">
-                Recent Activity
-              </h2>
-              <Button variant="ghost" size="sm">
-                View All
-              </Button>
-            </div>
-          }
-        >
+        <div className="neo-card-glass neo-shadow p-6 rounded-neo">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-semibold text-text-primary neo-heading">
+              Recent Activity
+            </h2>
+            <Button variant="ghost" size="sm">
+              View All
+            </Button>
+          </div>
           <div className="space-y-4">
             {recentActivity.length === 0 ? (
               <p className="text-center text-text-secondary py-8">
@@ -297,7 +294,7 @@ export default function AdminDashboardPage() {
               recentActivity.map((activity) => (
                 <div
                   key={activity.id}
-                  className="flex items-start justify-between py-3 border-b border-border last:border-0"
+                  className="flex items-start justify-between py-3 neo-border-thin border-t first:border-0"
                 >
                   <div className="flex-1">
                     <p className="text-sm text-text-primary">
@@ -318,24 +315,24 @@ export default function AdminDashboardPage() {
               ))
             )}
           </div>
-        </Card>
+        </div>
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <Link href="/admin/vendors">
-            <Button variant="outline" className="w-full">
+            <button className="neo-btn-secondary w-full px-6 py-3">
               Review Applications
-            </Button>
+            </button>
           </Link>
           <Link href="/admin/disputes">
-            <Button variant="outline" className="w-full">
+            <button className="neo-btn-secondary w-full px-6 py-3">
               Manage Disputes
-            </Button>
+            </button>
           </Link>
           <Link href="/admin/analytics">
-            <Button variant="outline" className="w-full">
+            <button className="neo-btn-secondary w-full px-6 py-3">
               View Analytics
-            </Button>
+            </button>
           </Link>
         </div>
       </div>

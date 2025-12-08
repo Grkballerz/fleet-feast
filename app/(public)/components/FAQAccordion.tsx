@@ -63,32 +63,34 @@ export const FAQAccordion: React.FC<FAQAccordionProps> = ({
       {filteredItems.map((item, index) => (
         <div
           key={index}
-          className="border border-gray-200 rounded-lg overflow-hidden bg-white"
+          className="neo-card-glass rounded-neo neo-border overflow-hidden"
         >
           {/* Question Button */}
           <button
             onClick={() => toggleItem(index)}
-            className="w-full flex items-center justify-between p-5 text-left hover:bg-gray-50 transition-colors"
+            className="w-full flex items-center justify-between p-6 text-left hover:bg-white/50 transition-colors"
             aria-expanded={openIndex === index}
           >
-            <span className="font-semibold text-gray-900 pr-4">
+            <span className="neo-heading text-lg text-gray-900 pr-4">
               {item.question}
             </span>
-            <svg
-              className={`h-5 w-5 text-gray-500 flex-shrink-0 transition-transform duration-200 ${
-                openIndex === index ? "rotate-180" : ""
-              }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
+            <div className={`neo-border rounded-neo p-2 bg-white neo-shadow flex-shrink-0 transition-transform duration-200 ${
+              openIndex === index ? "rotate-180" : ""
+            }`}>
+              <svg
+                className="h-6 w-6 text-primary"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={3}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </div>
           </button>
 
           {/* Answer Panel */}
@@ -97,7 +99,7 @@ export const FAQAccordion: React.FC<FAQAccordionProps> = ({
               openIndex === index ? "max-h-96" : "max-h-0"
             }`}
           >
-            <div className="p-5 pt-0 text-gray-600 leading-relaxed border-t border-gray-100">
+            <div className="p-6 pt-0 text-gray-600 leading-relaxed border-t-4 border-black/10">
               {item.answer}
             </div>
           </div>

@@ -70,11 +70,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 
     // Base input styles
     const baseStyles =
-      "w-full rounded-lg border border-input bg-card px-4 py-2.5 text-text-primary transition-all duration-normal placeholder:text-text-secondary focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 hover:border-gray-300";
+      "neo-input w-full px-4 py-2.5 text-gray-900 transition-all duration-normal placeholder:text-gray-400 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100";
 
     // Error state styles
     const errorStyles = error
-      ? "border-error focus:border-error focus:ring-error"
+      ? "border-error focus:border-error focus:neo-shadow-primary"
       : "";
 
     return (
@@ -83,11 +83,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="mb-2 block text-sm font-medium text-text-primary"
+            className="mb-2 block text-sm font-bold text-white/90"
           >
             {label}
             {props.required && (
-              <span className="ml-1 text-error" aria-label="required">
+              <span className="ml-1 text-red-400" aria-label="required">
                 *
               </span>
             )}
@@ -119,7 +119,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-900 transition-colors focus:outline-none focus:ring-2 focus:ring-primary rounded"
               aria-label={showPassword ? "Hide password" : "Show password"}
               tabIndex={0}
             >
@@ -136,7 +136,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {error && (
           <p
             id={errorId}
-            className="mt-1 text-sm text-error"
+            className="mt-1 text-sm text-red-400 font-medium"
             role="alert"
             aria-live="polite"
           >
@@ -146,7 +146,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 
         {/* Helper text (only shown when no error) */}
         {!error && helperText && (
-          <p id={helperId} className="mt-1 text-sm text-text-secondary">
+          <p id={helperId} className="mt-1 text-sm text-white/60">
             {helperText}
           </p>
         )}

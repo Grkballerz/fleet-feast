@@ -6,8 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import { ApiResponses } from "@/lib/api-response";
 import { UserRole } from "@prisma/client";
 
@@ -74,7 +73,7 @@ export function withAuth(
   return async (req: AuthenticatedRequest, context?: any) => {
     try {
       // Get session from NextAuth
-      const session = await getServerSession(authOptions);
+      const session = await auth();
 
       // Attach user to request if session exists
       if (session?.user) {

@@ -27,9 +27,9 @@ export const FlaggedWarning: React.FC<FlaggedWarningProps> = ({ reason }) => {
   const defaultReason = "Potential contact information detected";
 
   return (
-    <div className="flex items-center gap-1 text-amber-600 text-sm mb-1">
+    <div className="flex items-center gap-1 text-amber-600 text-sm mb-1 neo-glass-card neo-border rounded-neo p-2">
       <AlertTriangle className="w-4 h-4" aria-hidden="true" />
-      <span>This message was flagged</span>
+      <span className="font-bold">This message was flagged</span>
       <SimpleTooltip
         content={
           <div className="max-w-xs">

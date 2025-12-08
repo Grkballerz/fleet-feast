@@ -56,6 +56,7 @@ export function trackWebVital(metric: {
 
   // Send to Sentry for performance monitoring
   if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { captureMessage } = require('./sentry');
     captureMessage(`Web Vital: ${metric.name}`, 'info', {
       metric: metric.name,
@@ -81,6 +82,7 @@ export function logPerformance(operationName: string, durationMs: number) {
   // Send to monitoring if duration exceeds threshold
   if (durationMs > 1000) {
     // Over 1 second
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { captureMessage } = require('./sentry');
     captureMessage(`Slow operation: ${operationName}`, 'warning', {
       operation: operationName,

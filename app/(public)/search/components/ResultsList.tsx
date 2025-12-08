@@ -122,7 +122,7 @@ export const ResultsList: React.FC<ResultsListProps> = ({
         <Link
           key={truck.id}
           href={`/trucks/${truck.id}`}
-          className="block bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden"
+          className="block neo-card-glass rounded-neo neo-shadow hover:neo-shadow-lg transition-all duration-300 overflow-hidden transform hover:-translate-y-1"
         >
           <div className="flex flex-col md:flex-row">
             {/* Image placeholder */}
@@ -135,14 +135,14 @@ export const ResultsList: React.FC<ResultsListProps> = ({
               {/* Header */}
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
-                  <h3 className="font-semibold text-xl text-gray-900 mb-1">
+                  <h3 className="font-bold text-xl text-gray-900 mb-1">
                     {truck.businessName}
                   </h3>
                   <div className="flex items-center gap-2 mb-2">
-                    <Badge variant="secondary" size="sm">
+                    <span className="neo-border-thin rounded-neo px-3 py-1 bg-gray-100 text-gray-700 font-bold text-xs">
                       {formatCuisineType(truck.cuisineType)}
-                    </Badge>
-                    <span className="text-sm font-medium text-gray-600">
+                    </span>
+                    <span className="text-sm font-bold text-gray-900">
                       {formatPriceRange(truck.priceRange)}
                     </span>
                   </div>

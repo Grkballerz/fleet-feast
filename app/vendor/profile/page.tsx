@@ -173,7 +173,7 @@ export default function VendorProfilePage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-text-primary">Profile Settings</h2>
+          <h2 className="text-2xl font-bold text-text-primary neo-heading">Profile Settings</h2>
           <p className="text-text-secondary mt-1">
             Manage your food truck profile and settings
           </p>
@@ -194,8 +194,8 @@ export default function VendorProfilePage() {
       )}
 
       {/* Basic Information */}
-      <Card>
-        <h3 className="text-lg font-semibold text-text-primary mb-4">
+      <div className="neo-card-glass neo-shadow rounded-neo p-6">
+        <h3 className="text-lg font-semibold text-text-primary neo-heading mb-4">
           Basic Information
         </h3>
         <div className="space-y-4">
@@ -221,11 +221,11 @@ export default function VendorProfilePage() {
             showCharCount
           />
         </div>
-      </Card>
+      </div>
 
       {/* Cuisine Types */}
-      <Card>
-        <h3 className="text-lg font-semibold text-text-primary mb-4">
+      <div className="neo-card-glass neo-shadow rounded-neo p-6">
+        <h3 className="text-lg font-semibold text-text-primary neo-heading mb-4">
           Cuisine Types
         </h3>
         <p className="text-sm text-text-secondary mb-4">
@@ -238,11 +238,11 @@ export default function VendorProfilePage() {
               type="button"
               onClick={() => toggleCuisine(cuisine)}
               className={`
-                px-4 py-3 rounded-lg border-2 font-medium text-sm transition-all
+                px-4 py-3 rounded-neo font-medium text-sm transition-all
                 ${
                   formData.cuisineType.includes(cuisine)
-                    ? "border-primary bg-primary text-white"
-                    : "border-border bg-white text-text-primary hover:border-primary/50"
+                    ? "neo-btn-primary"
+                    : "neo-btn-secondary"
                 }
               `}
             >
@@ -250,11 +250,11 @@ export default function VendorProfilePage() {
             </button>
           ))}
         </div>
-      </Card>
+      </div>
 
       {/* Pricing & Capacity */}
-      <Card>
-        <h3 className="text-lg font-semibold text-text-primary mb-4">
+      <div className="neo-card-glass neo-shadow rounded-neo p-6">
+        <h3 className="text-lg font-semibold text-text-primary neo-heading mb-4">
           Pricing & Capacity
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -306,11 +306,11 @@ export default function VendorProfilePage() {
             required
           />
         </div>
-      </Card>
+      </div>
 
       {/* Photos */}
-      <Card>
-        <h3 className="text-lg font-semibold text-text-primary mb-4">
+      <div className="neo-card-glass neo-shadow rounded-neo p-6">
+        <h3 className="text-lg font-semibold text-text-primary neo-heading mb-4">
           Photos
         </h3>
         <div className="space-y-4">
@@ -320,15 +320,15 @@ export default function VendorProfilePage() {
             </label>
             <div className="flex items-center gap-4">
               {profile?.logoUrl ? (
-                <div className="w-24 h-24 bg-background rounded-lg flex items-center justify-center border border-border">
+                <div className="w-24 h-24 bg-background rounded-neo flex items-center justify-center neo-border">
                   <img
                     src={profile.logoUrl}
                     alt="Logo"
-                    className="w-full h-full object-cover rounded-lg"
+                    className="w-full h-full object-cover rounded-neo"
                   />
                 </div>
               ) : (
-                <div className="w-24 h-24 bg-background rounded-lg flex items-center justify-center border border-border">
+                <div className="w-24 h-24 bg-background rounded-neo flex items-center justify-center neo-border">
                   <ImageIcon className="w-8 h-8 text-text-tertiary" />
                 </div>
               )}
@@ -347,7 +347,7 @@ export default function VendorProfilePage() {
               {profile?.truckPhotoUrls.map((url, index) => (
                 <div
                   key={index}
-                  className="aspect-square bg-background rounded-lg border border-border overflow-hidden"
+                  className="aspect-square bg-background rounded-neo neo-border overflow-hidden"
                 >
                   <img
                     src={url}
@@ -358,7 +358,7 @@ export default function VendorProfilePage() {
               ))}
               <button
                 type="button"
-                className="aspect-square bg-background rounded-lg border-2 border-dashed border-border hover:border-primary hover:bg-primary/5 flex items-center justify-center transition-colors"
+                className="aspect-square bg-background rounded-neo neo-border border-dashed hover:border-primary hover:bg-primary/5 flex items-center justify-center transition-colors"
               >
                 <div className="text-center">
                   <Upload className="w-6 h-6 mx-auto mb-2 text-text-tertiary" />
@@ -371,13 +371,13 @@ export default function VendorProfilePage() {
             </p>
           </div>
         </div>
-      </Card>
+      </div>
 
       {/* Menu Management */}
-      <Card>
+      <div className="neo-card-glass neo-shadow rounded-neo p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-lg font-semibold text-text-primary">Menu</h3>
+            <h3 className="text-lg font-semibold text-text-primary neo-heading">Menu</h3>
             <p className="text-sm text-text-secondary">
               Manage your menu items and pricing
             </p>
@@ -390,10 +390,10 @@ export default function VendorProfilePage() {
         <Alert variant="info">
           Click "Edit Menu" to manage your menu items, dietary tags, and pricing
         </Alert>
-      </Card>
+      </div>
 
       {/* Save Button */}
-      <div className="flex items-center justify-between pt-4 border-t border-border">
+      <div className="flex items-center justify-between pt-4 neo-border-thin border-t">
         <p className="text-sm text-text-secondary">
           <Info className="w-4 h-4 inline mr-1" />
           Changes will be visible to customers immediately

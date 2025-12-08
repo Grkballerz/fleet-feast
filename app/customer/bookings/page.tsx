@@ -186,7 +186,7 @@ export default function BookingsListPage() {
               placeholder="Search by vendor, event type, or location..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="input w-full pl-10"
+              className="neo-input w-full pl-10"
             />
           </div>
 
@@ -196,7 +196,7 @@ export default function BookingsListPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="input w-full pl-10"
+              className="neo-input w-full pl-10"
             >
               {STATUS_FILTERS.map((filter) => (
                 <option key={filter.value} value={filter.value}>

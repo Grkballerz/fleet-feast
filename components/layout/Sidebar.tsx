@@ -38,12 +38,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   return (
     <aside
-      className={`hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:border-border lg:bg-white ${className}`}
+      className={`hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r-3 lg:border-black neo-glass ${className}`}
     >
       {/* Logo */}
-      <div className="flex items-center gap-2 h-16 px-6 border-b border-border">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="h-10 w-10 bg-primary rounded-lg flex items-center justify-center">
+      <div className="flex items-center gap-2 h-16 px-6 border-b-3 border-black">
+        <Link href="/" className="flex items-center gap-2 group">
+          <div className="h-10 w-10 bg-primary rounded-neo neo-border flex items-center justify-center neo-shadow transition-all group-hover:neo-shadow-lg group-hover:-translate-y-0.5">
             <svg
               className="h-6 w-6 text-white"
               fill="currentColor"
@@ -53,7 +53,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1v-5a1 1 0 00-.293-.707l-2-2A1 1 0 0015 7h-1z" />
             </svg>
           </div>
-          <span className="text-xl font-bold text-text-primary">
+          <span className="neo-heading text-xl text-text-primary">
             Fleet<span className="text-primary">Feast</span>
           </span>
         </Link>
@@ -65,8 +65,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </nav>
 
       {/* Footer Info */}
-      <div className="p-4 border-t border-border">
-        <p className="text-xs text-text-secondary text-center">
+      <div className="p-4 border-t-3 border-black">
+        <p className="text-xs text-text-secondary text-center font-semibold">
           © 2024 FleetFeast
         </p>
       </div>

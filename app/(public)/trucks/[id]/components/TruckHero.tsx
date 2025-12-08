@@ -89,20 +89,20 @@ export const TruckHero: React.FC<TruckHeroProps> = ({ truck, className }) => {
             <Badge
               variant="primary"
               size="md"
-              className="bg-white/20 backdrop-blur-sm text-white border border-white/30"
+              className="neo-glass-brutal rounded-neo text-white neo-shadow-primary"
             >
               {cuisineTypeDisplay[truck.cuisineType]}
             </Badge>
           </div>
 
           {/* Truck Name */}
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3 drop-shadow-lg">
+          <h1 className="neo-heading-xl mb-3 drop-shadow-lg text-white">
             {truck.businessName}
           </h1>
 
           {/* Description (optional) */}
           {truck.description && (
-            <p className="text-base md:text-lg text-white/90 mb-4 max-w-3xl line-clamp-2 drop-shadow">
+            <p className="text-base md:text-lg text-white/90 mb-4 max-w-3xl line-clamp-2 drop-shadow font-medium">
               {truck.description}
             </p>
           )}
@@ -111,9 +111,9 @@ export const TruckHero: React.FC<TruckHeroProps> = ({ truck, className }) => {
           <div className="flex flex-wrap items-center gap-4 md:gap-6">
             {/* Rating */}
             {rating > 0 && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 neo-glass-brutal rounded-neo px-3 py-1 neo-shadow">
                 <Rating value={rating} readOnly size="md" />
-                <span className="text-sm md:text-base font-semibold">
+                <span className="text-sm md:text-base font-bold">
                   {rating.toFixed(1)}
                 </span>
               </div>
@@ -121,15 +121,15 @@ export const TruckHero: React.FC<TruckHeroProps> = ({ truck, className }) => {
 
             {/* Review Count */}
             {reviewCount > 0 && (
-              <span className="text-sm md:text-base text-white/90">
+              <span className="text-sm md:text-base text-white/90 font-semibold">
                 ({reviewCount.toLocaleString()} {reviewCount === 1 ? "review" : "reviews"})
               </span>
             )}
 
             {/* Price Range */}
-            <div className="flex items-center gap-2">
-              <span className="text-sm md:text-base text-white/70">Price Range:</span>
-              <span className="text-lg md:text-xl font-bold tracking-wider">
+            <div className="flex items-center gap-2 neo-glass-brutal rounded-neo px-3 py-1 neo-shadow">
+              <span className="text-sm md:text-base text-white/90 font-medium">Price:</span>
+              <span className="text-lg md:text-xl font-black tracking-wider">
                 {priceRangeDisplay[truck.priceRange]}
               </span>
             </div>

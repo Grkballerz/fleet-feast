@@ -132,11 +132,11 @@ export default function UsersPage() {
     <AdminLayout title="User Management">
       <div className="space-y-6">
         {/* Search and Filters */}
-        <Card>
+        <div className="neo-card-glass neo-shadow p-6 rounded-neo">
           <form onSubmit={handleSearch} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-text-secondary mb-2">
+                <label className="block text-sm font-bold text-text-secondary mb-2">
                   Search
                 </label>
                 <Input
@@ -144,10 +144,11 @@ export default function UsersPage() {
                   placeholder="Name, email, or ID..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  className="neo-input"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-text-secondary mb-2">
+                <label className="block text-sm font-bold text-text-secondary mb-2">
                   Role
                 </label>
                 <select
@@ -155,7 +156,7 @@ export default function UsersPage() {
                   onChange={(e) =>
                     setRoleFilter(e.target.value as typeof roleFilter)
                   }
-                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="neo-input w-full px-4 py-2"
                 >
                   <option value="ALL">All Roles</option>
                   <option value="CUSTOMER">Customers</option>
@@ -163,7 +164,7 @@ export default function UsersPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-text-secondary mb-2">
+                <label className="block text-sm font-bold text-text-secondary mb-2">
                   Status
                 </label>
                 <select
@@ -171,7 +172,7 @@ export default function UsersPage() {
                   onChange={(e) =>
                     setStatusFilter(e.target.value as typeof statusFilter)
                   }
-                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="neo-input w-full px-4 py-2"
                 >
                   <option value="ALL">All Status</option>
                   <option value="ACTIVE">Active</option>
@@ -180,53 +181,53 @@ export default function UsersPage() {
               </div>
             </div>
             <div className="flex justify-end">
-              <Button type="submit" variant="primary">
+              <button type="submit" className="neo-btn-primary px-6 py-2.5">
                 Search
-              </Button>
+              </button>
             </div>
           </form>
-        </Card>
+        </div>
 
         {/* User Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
+          <div className="neo-card-glass neo-shadow p-6 rounded-neo">
             <div className="space-y-2">
               <p className="text-sm font-medium text-text-secondary">
                 Total Users
               </p>
-              <p className="text-3xl font-bold text-text-primary">
+              <p className="text-3xl font-bold text-text-primary neo-heading">
                 {users.length}
               </p>
             </div>
-          </Card>
-          <Card>
+          </div>
+          <div className="neo-card-glass neo-shadow p-6 rounded-neo">
             <div className="space-y-2">
               <p className="text-sm font-medium text-text-secondary">
                 Customers
               </p>
-              <p className="text-3xl font-bold text-text-primary">
+              <p className="text-3xl font-bold text-text-primary neo-heading">
                 {users.filter((u) => u.role === "CUSTOMER").length}
               </p>
             </div>
-          </Card>
-          <Card>
+          </div>
+          <div className="neo-card-glass neo-shadow p-6 rounded-neo">
             <div className="space-y-2">
               <p className="text-sm font-medium text-text-secondary">Vendors</p>
-              <p className="text-3xl font-bold text-text-primary">
+              <p className="text-3xl font-bold text-text-primary neo-heading">
                 {users.filter((u) => u.role === "VENDOR").length}
               </p>
             </div>
-          </Card>
-          <Card>
+          </div>
+          <div className="neo-card-glass neo-shadow p-6 rounded-neo">
             <div className="space-y-2">
               <p className="text-sm font-medium text-text-secondary">
                 Suspended
               </p>
-              <p className="text-3xl font-bold text-error">
+              <p className="text-3xl font-bold text-error neo-heading">
                 {users.filter((u) => u.status === "SUSPENDED").length}
               </p>
             </div>
-          </Card>
+          </div>
         </div>
 
         {/* Users List */}
@@ -238,7 +239,7 @@ export default function UsersPage() {
             </div>
           </div>
         ) : filteredUsers.length === 0 ? (
-          <Card>
+          <div className="neo-card-glass neo-shadow p-6 rounded-neo">
             <div className="text-center py-12">
               <svg
                 className="mx-auto h-12 w-12 text-text-secondary"
@@ -253,39 +254,39 @@ export default function UsersPage() {
                   d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
                 />
               </svg>
-              <p className="mt-4 text-lg font-medium text-text-primary">
+              <p className="mt-4 text-lg font-medium text-text-primary neo-heading">
                 No users found
               </p>
               <p className="mt-2 text-sm text-text-secondary">
                 Try adjusting your search or filters
               </p>
             </div>
-          </Card>
+          </div>
         ) : (
-          <Card>
+          <div className="neo-card-glass neo-shadow p-6 rounded-neo">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-border">
-                    <th className="text-left py-3 px-4 text-sm font-medium text-text-secondary">
+                  <tr className="neo-border-thin border-b">
+                    <th className="text-left py-3 px-4 text-sm font-bold text-text-secondary">
                       User
                     </th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-text-secondary">
+                    <th className="text-left py-3 px-4 text-sm font-bold text-text-secondary">
                       Role
                     </th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-text-secondary">
+                    <th className="text-left py-3 px-4 text-sm font-bold text-text-secondary">
                       Status
                     </th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-text-secondary">
+                    <th className="text-left py-3 px-4 text-sm font-bold text-text-secondary">
                       Joined
                     </th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-text-secondary">
+                    <th className="text-left py-3 px-4 text-sm font-bold text-text-secondary">
                       Last Login
                     </th>
-                    <th className="text-center py-3 px-4 text-sm font-medium text-text-secondary">
+                    <th className="text-center py-3 px-4 text-sm font-bold text-text-secondary">
                       Activity
                     </th>
-                    <th className="text-right py-3 px-4 text-sm font-medium text-text-secondary">
+                    <th className="text-right py-3 px-4 text-sm font-bold text-text-secondary">
                       Actions
                     </th>
                   </tr>
@@ -294,7 +295,7 @@ export default function UsersPage() {
                   {filteredUsers.map((user) => (
                     <tr
                       key={user.id}
-                      className="border-b border-border last:border-0 hover:bg-secondary transition-colors"
+                      className="neo-border-thin border-b last:border-0 hover:bg-secondary/50 transition-colors"
                     >
                       <td className="py-3 px-4">
                         <div>
@@ -343,7 +344,7 @@ export default function UsersPage() {
                 </tbody>
               </table>
             </div>
-          </Card>
+          </div>
         )}
       </div>
     </AdminLayout>

@@ -5,7 +5,6 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { formatRelativeTime } from "@/lib/utils";
-import { Card } from "@/components/ui/Card";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 
@@ -87,11 +86,10 @@ export const ConversationCard: React.FC<ConversationCardProps> = ({
 
   return (
     <Link href={`/messages/${bookingId}`} className="block">
-      <Card
-        variant="interactive"
+      <div
         className={cn(
-          "transition-colors hover:bg-gray-50",
-          unreadCount > 0 && "border-l-4 border-l-primary"
+          "neo-card-glass rounded-neo p-4 transition-all hover:neo-shadow-hover",
+          unreadCount > 0 && "neo-border-primary"
         )}
       >
         <div className="flex gap-4 p-4">
@@ -152,7 +150,7 @@ export const ConversationCard: React.FC<ConversationCardProps> = ({
             </Badge>
           )}
         </div>
-      </Card>
+      </div>
     </Link>
   );
 };

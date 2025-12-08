@@ -55,14 +55,14 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
   const navItems = getNavItems();
 
   return (
-    <header className={`sticky top-0 z-30 bg-white border-b border-border shadow-sm ${className}`}>
+    <header className={`neo-glass-header sticky top-0 z-30 border-b-3 border-black ${className}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Left: Logo + Desktop Nav */}
           <div className="flex items-center gap-8">
             {/* Logo - WCAG 2.4.4, 4.1.2 */}
-            <Link href="/" aria-label="Fleet Feast home" className="flex items-center gap-2 shrink-0">
-              <div className="h-10 w-10 bg-primary rounded-lg flex items-center justify-center">
+            <Link href="/" aria-label="Fleet Feast home" className="flex items-center gap-2 shrink-0 group">
+              <div className="h-10 w-10 bg-primary rounded-neo neo-border flex items-center justify-center neo-shadow transition-all group-hover:neo-shadow-lg group-hover:-translate-y-0.5">
                 <svg
                   className="h-6 w-6 text-white"
                   fill="currentColor"
@@ -73,7 +73,7 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
                   <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1v-5a1 1 0 00-.293-.707l-2-2A1 1 0 0015 7h-1z" />
                 </svg>
               </div>
-              <span className="text-xl font-bold text-text-primary">
+              <span className="neo-heading text-xl text-text-primary">
                 Fleet<span className="text-primary">Feast</span>
               </span>
             </Link>
@@ -90,11 +90,11 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
               <input
                 type="search"
                 placeholder="Search food trucks..."
-                className="w-full px-4 py-2 pl-10 pr-4 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="neo-input w-full px-4 py-2 pl-10 pr-4 text-sm rounded-neo"
                 aria-label="Search food trucks"
               />
               <svg
-                className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-text-secondary"
+                className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-text-secondary pointer-events-none"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -117,7 +117,7 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
           {/* Mobile: Hamburger Button - WCAG 4.1.2 */}
           <button
             onClick={() => setMobileMenuOpen(true)}
-            className="lg:hidden p-2 rounded-lg hover:bg-secondary transition-colors"
+            className="lg:hidden p-2 rounded-neo hover:bg-secondary transition-all hover:neo-shadow active:translate-x-0.5 active:translate-y-0.5"
             aria-label="Open menu"
             aria-expanded={mobileMenuOpen}
             aria-controls="mobile-navigation-drawer"
@@ -145,11 +145,11 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
             <input
               type="search"
               placeholder="Search food trucks..."
-              className="w-full px-4 py-2 pl-10 pr-4 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="neo-input w-full px-4 py-2 pl-10 pr-4 text-sm rounded-neo"
               aria-label="Search food trucks"
             />
             <svg
-              className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-text-secondary"
+              className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-text-secondary pointer-events-none"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

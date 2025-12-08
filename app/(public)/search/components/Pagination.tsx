@@ -103,24 +103,22 @@ export const Pagination: React.FC<PaginationProps> = ({
   const pageNumbers = getPageNumbers();
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 pt-6 border-t border-gray-200">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 pt-6 border-t-4 border-black">
       {/* Result count */}
-      <div className="text-sm text-gray-600">
+      <div className="text-sm font-bold text-gray-700">
         Showing {startResult} to {endResult} of {totalResults} results
       </div>
 
       {/* Page controls */}
       <div className="flex items-center gap-2">
         {/* Previous button */}
-        <Button
-          variant="outline"
-          size="sm"
+        <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="px-3"
+          className="neo-btn-secondary px-4 py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:transform-none"
         >
           Previous
-        </Button>
+        </button>
 
         {/* Page numbers */}
         <div className="flex items-center gap-1">
@@ -129,7 +127,7 @@ export const Pagination: React.FC<PaginationProps> = ({
               return (
                 <span
                   key={`ellipsis-${index}`}
-                  className="px-2 text-gray-500"
+                  className="px-2 text-gray-500 font-bold"
                 >
                   ...
                 </span>
@@ -144,11 +142,11 @@ export const Pagination: React.FC<PaginationProps> = ({
                 key={pageNum}
                 onClick={() => onPageChange(pageNum)}
                 className={`
-                  min-w-[2.5rem] h-10 px-3 rounded-md text-sm font-medium transition-colors
+                  min-w-[2.5rem] h-10 px-3 rounded-neo text-sm font-bold transition-all
                   ${
                     isActive
-                      ? "bg-blue-600 text-white"
-                      : "text-gray-700 hover:bg-gray-100"
+                      ? "neo-btn-primary"
+                      : "neo-border bg-white text-gray-900 neo-shadow hover:neo-shadow-lg hover:-translate-y-0.5 active:translate-y-0"
                   }
                 `}
               >
@@ -159,15 +157,13 @@ export const Pagination: React.FC<PaginationProps> = ({
         </div>
 
         {/* Next button */}
-        <Button
-          variant="outline"
-          size="sm"
+        <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="px-3"
+          className="neo-btn-secondary px-4 py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:transform-none"
         >
           Next
-        </Button>
+        </button>
       </div>
     </div>
   );

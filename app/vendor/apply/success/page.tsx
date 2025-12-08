@@ -11,11 +11,11 @@ export const metadata: Metadata = {
 export default function ApplicationSuccessPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <Card className="max-w-2xl w-full">
-        <div className="p-8 text-center">
+      <div className="max-w-2xl w-full neo-card-glass neo-shadow-lg rounded-neo p-8">
+        <div className="text-center">
           {/* Success Icon */}
           <div className="mb-6">
-            <div className="mx-auto w-16 h-16 bg-success/10 rounded-full flex items-center justify-center">
+            <div className="mx-auto w-16 h-16 bg-success/10 rounded-neo neo-border neo-shadow flex items-center justify-center">
               <svg
                 className="w-10 h-10 text-success"
                 fill="none"
@@ -33,7 +33,7 @@ export default function ApplicationSuccessPage() {
           </div>
 
           {/* Success Message */}
-          <h1 className="text-3xl font-bold text-text-primary mb-4">
+          <h1 className="neo-heading text-3xl mb-4">
             Application Submitted!
           </h1>
           <p className="text-lg text-text-secondary mb-8">
@@ -42,39 +42,39 @@ export default function ApplicationSuccessPage() {
           </p>
 
           {/* What Happens Next */}
-          <div className="bg-background rounded-lg p-6 mb-8 text-left">
-            <h2 className="text-xl font-semibold text-text-primary mb-4">
+          <div className="neo-glass-card neo-border rounded-neo p-6 mb-8 text-left">
+            <h2 className="neo-heading text-xl mb-4">
               What happens next?
             </h2>
             <ol className="space-y-4">
               <li className="flex gap-3">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-sm font-semibold">
+                <span className="flex-shrink-0 w-8 h-8 rounded-neo bg-primary neo-border-thick text-white flex items-center justify-center text-sm font-bold neo-shadow">
                   1
                 </span>
                 <div>
-                  <p className="font-medium text-text-primary">Application Review</p>
+                  <p className="font-bold text-text-primary">Application Review</p>
                   <p className="text-sm text-text-secondary">
                     Our team will review your business information and documents
                   </p>
                 </div>
               </li>
               <li className="flex gap-3">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-sm font-semibold">
+                <span className="flex-shrink-0 w-8 h-8 rounded-neo bg-primary neo-border-thick text-white flex items-center justify-center text-sm font-bold neo-shadow">
                   2
                 </span>
                 <div>
-                  <p className="font-medium text-text-primary">Background Check</p>
+                  <p className="font-bold text-text-primary">Background Check</p>
                   <p className="text-sm text-text-secondary">
                     We'll verify your business license and insurance coverage
                   </p>
                 </div>
               </li>
               <li className="flex gap-3">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-sm font-semibold">
+                <span className="flex-shrink-0 w-8 h-8 rounded-neo bg-primary neo-border-thick text-white flex items-center justify-center text-sm font-bold neo-shadow">
                   3
                 </span>
                 <div>
-                  <p className="font-medium text-text-primary">Decision & Setup</p>
+                  <p className="font-bold text-text-primary">Decision & Setup</p>
                   <p className="text-sm text-text-secondary">
                     You'll receive an email with our decision and next steps for account
                     setup
@@ -104,7 +104,7 @@ export default function ApplicationSuccessPage() {
             </Link>
           </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

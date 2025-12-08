@@ -146,43 +146,39 @@ export const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
 
   return (
     <div className={cn("space-y-4", className)}>
-      <h2 className="text-2xl font-bold">Availability</h2>
+      <h2 className="neo-heading text-2xl">Availability</h2>
 
-      <div className="bg-white rounded-lg border border-gray-200 p-4 md:p-6">
+      <div className="neo-card-glass rounded-neo neo-shadow p-4 md:p-6">
         {/* Month Navigation */}
         <div className="flex justify-between items-center mb-6">
-          <Button
-            variant="ghost"
-            size="sm"
+          <button
             onClick={handlePrevMonth}
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 px-3 py-2 rounded-neo neo-border font-bold hover:neo-shadow transition-all bg-white"
           >
             <ChevronLeft className="h-4 w-4" />
             <span className="hidden sm:inline">Previous</span>
-          </Button>
+          </button>
 
-          <h3 className="text-lg font-semibold">
+          <h3 className="text-lg font-black">
             {monthNames[month]} {year}
           </h3>
 
-          <Button
-            variant="ghost"
-            size="sm"
+          <button
             onClick={handleNextMonth}
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 px-3 py-2 rounded-neo neo-border font-bold hover:neo-shadow transition-all bg-white"
           >
             <span className="hidden sm:inline">Next</span>
             <ChevronRight className="h-4 w-4" />
-          </Button>
+          </button>
         </div>
 
         {/* Calendar Grid */}
-        <div className="grid grid-cols-7 gap-1">
+        <div className="grid grid-cols-7 gap-2">
           {/* Day Headers */}
           {dayNames.map((day) => (
             <div
               key={day}
-              className="text-center text-xs md:text-sm font-medium text-text-secondary py-2"
+              className="text-center text-xs md:text-sm font-bold text-text-primary py-2"
             >
               {day}
             </div>
@@ -201,17 +197,17 @@ export const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
                 onClick={() => handleDateClick(date)}
                 disabled={status !== "available"}
                 className={cn(
-                  "aspect-square flex items-center justify-center rounded-lg text-sm md:text-base font-medium transition-all relative",
+                  "aspect-square min-w-[44px] min-h-[44px] flex items-center justify-center rounded-neo text-sm md:text-base font-bold transition-all relative",
                   // Other month
-                  status === "other-month" && "text-gray-300 cursor-default",
+                  status === "other-month" && "text-gray-300 cursor-default bg-white neo-border-thin",
                   // Past date
-                  status === "past" && "text-gray-400 cursor-not-allowed",
+                  status === "past" && "text-gray-400 cursor-not-allowed bg-gray-50 neo-border-thin",
                   // Blocked date
-                  status === "blocked" && "bg-gray-100 text-gray-500 cursor-not-allowed",
+                  status === "blocked" && "bg-gray-100 text-gray-500 cursor-not-allowed neo-border",
                   // Available date
-                  status === "available" && "bg-success/10 text-success hover:bg-success/20 cursor-pointer",
+                  status === "available" && "bg-success/10 text-success neo-border neo-shadow hover:neo-shadow-hover hover:bg-success/20 cursor-pointer",
                   // Focus styles
-                  isClickable && "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                  isClickable && "focus:outline-none"
                 )}
                 title={entry?.notes || undefined}
                 aria-label={`${monthNames[month]} ${date.getDate()}, ${year} - ${status}`}
@@ -221,7 +217,7 @@ export const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
                 {/* Tooltip for notes */}
                 {entry?.notes && (
                   <div className="absolute inset-0 group">
-                    <div className="hidden group-hover:block absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-black text-white text-xs rounded whitespace-nowrap z-10">
+                    <div className="hidden group-hover:block absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 neo-card rounded-neo text-xs whitespace-nowrap z-10 neo-shadow">
                       {entry.notes}
                     </div>
                   </div>
@@ -232,17 +228,17 @@ export const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
         </div>
 
         {/* Legend */}
-        <div className="mt-6 pt-6 border-t border-gray-200 flex flex-wrap gap-4 text-sm">
+        <div className="mt-6 pt-6 neo-border-thin border-t flex flex-wrap gap-4 text-sm font-medium">
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-success/10 border-2 border-success rounded" />
+            <div className="w-4 h-4 bg-success/10 neo-border-thick border-success rounded-neo" />
             <span className="text-text-secondary">Available</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-gray-100 border-2 border-gray-300 rounded" />
+            <div className="w-4 h-4 bg-gray-100 neo-border rounded-neo" />
             <span className="text-text-secondary">Blocked</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-white border-2 border-gray-300 rounded opacity-50" />
+            <div className="w-4 h-4 bg-white neo-border-thin rounded-neo opacity-50" />
             <span className="text-text-secondary">Past Date</span>
           </div>
         </div>

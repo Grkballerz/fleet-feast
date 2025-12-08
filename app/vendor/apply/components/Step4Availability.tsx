@@ -161,9 +161,9 @@ export const Step4Availability: React.FC<Step4AvailabilityProps> = ({
 
   return (
     <div className="space-y-6">
-      <Card>
-        <div className="p-6">
-          <h2 className="text-2xl font-bold text-text-primary mb-2">
+      <div className="neo-card-glass neo-shadow-lg rounded-neo p-6">
+        <div>
+          <h2 className="neo-heading text-2xl mb-2">
             Availability & Pricing
           </h2>
           <p className="text-text-secondary mb-6">
@@ -172,34 +172,34 @@ export const Step4Availability: React.FC<Step4AvailabilityProps> = ({
 
           {/* Pricing Model */}
           <div className="mb-8">
-            <label className="label mb-3">
+            <label className="label font-bold mb-3">
               Pricing Model <span className="text-error">*</span>
             </label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <button
                 type="button"
                 onClick={() => handlePricingModelChange(PricingModel.PER_PERSON)}
-                className={`p-4 border-2 rounded-lg text-left transition-colors ${
+                className={`p-4 neo-border-thick rounded-neo text-left transition-all ${
                   availabilityData.pricingModel === PricingModel.PER_PERSON
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:border-primary/50"
+                    ? "neo-border-primary bg-primary/5 neo-shadow-primary"
+                    : "bg-white hover:neo-shadow"
                 }`}
               >
                 <div className="flex items-center gap-3 mb-2">
                   <div
-                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                    className={`w-6 h-6 rounded-neo neo-border-thick flex items-center justify-center ${
                       availabilityData.pricingModel === PricingModel.PER_PERSON
-                        ? "border-primary"
-                        : "border-border"
+                        ? "neo-border-primary bg-primary"
+                        : ""
                     }`}
                   >
                     {availabilityData.pricingModel === PricingModel.PER_PERSON && (
-                      <div className="w-3 h-3 rounded-full bg-primary" />
+                      <div className="w-3 h-3 rounded-neo bg-white" />
                     )}
                   </div>
-                  <h3 className="font-semibold text-text-primary">Per Person</h3>
+                  <h3 className="font-bold text-text-primary">Per Person</h3>
                 </div>
-                <p className="text-sm text-text-secondary ml-8">
+                <p className="text-sm text-text-secondary ml-9">
                   Charge per guest attending the event
                 </p>
               </button>
@@ -207,27 +207,27 @@ export const Step4Availability: React.FC<Step4AvailabilityProps> = ({
               <button
                 type="button"
                 onClick={() => handlePricingModelChange(PricingModel.FLAT_RATE)}
-                className={`p-4 border-2 rounded-lg text-left transition-colors ${
+                className={`p-4 neo-border-thick rounded-neo text-left transition-all ${
                   availabilityData.pricingModel === PricingModel.FLAT_RATE
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:border-primary/50"
+                    ? "neo-border-primary bg-primary/5 neo-shadow-primary"
+                    : "bg-white hover:neo-shadow"
                 }`}
               >
                 <div className="flex items-center gap-3 mb-2">
                   <div
-                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                    className={`w-6 h-6 rounded-neo neo-border-thick flex items-center justify-center ${
                       availabilityData.pricingModel === PricingModel.FLAT_RATE
-                        ? "border-primary"
-                        : "border-border"
+                        ? "neo-border-primary bg-primary"
+                        : ""
                     }`}
                   >
                     {availabilityData.pricingModel === PricingModel.FLAT_RATE && (
-                      <div className="w-3 h-3 rounded-full bg-primary" />
+                      <div className="w-3 h-3 rounded-neo bg-white" />
                     )}
                   </div>
-                  <h3 className="font-semibold text-text-primary">Flat Rate</h3>
+                  <h3 className="font-bold text-text-primary">Flat Rate</h3>
                 </div>
-                <p className="text-sm text-text-secondary ml-8">
+                <p className="text-sm text-text-secondary ml-9">
                   Charge a fixed price per event
                 </p>
               </button>
@@ -239,17 +239,17 @@ export const Step4Availability: React.FC<Step4AvailabilityProps> = ({
 
           {/* Recurring Availability Pattern */}
           <div className="mb-8">
-            <label className="label mb-3">Recurring Availability (Optional)</label>
+            <label className="label font-bold mb-3">Recurring Availability (Optional)</label>
             <div className="space-y-3">
               <div className="flex flex-wrap gap-3">
                 <button
                   type="button"
                   onClick={() => handlePatternChange(AvailabilityPattern.WEEKDAYS)}
-                  className={`px-4 py-2 rounded-md border-2 transition-colors ${
+                  className={`px-4 py-2 rounded-neo neo-border-thick font-bold transition-all ${
                     availabilityData.recurringPattern ===
                     AvailabilityPattern.WEEKDAYS
-                      ? "border-primary bg-primary/10 text-primary font-medium"
-                      : "border-border hover:border-primary/50"
+                      ? "neo-border-primary bg-primary/10 text-primary neo-shadow"
+                      : "bg-white hover:neo-shadow"
                   }`}
                 >
                   Weekdays (Mon-Fri)
@@ -257,11 +257,11 @@ export const Step4Availability: React.FC<Step4AvailabilityProps> = ({
                 <button
                   type="button"
                   onClick={() => handlePatternChange(AvailabilityPattern.WEEKENDS)}
-                  className={`px-4 py-2 rounded-md border-2 transition-colors ${
+                  className={`px-4 py-2 rounded-neo neo-border-thick font-bold transition-all ${
                     availabilityData.recurringPattern ===
                     AvailabilityPattern.WEEKENDS
-                      ? "border-primary bg-primary/10 text-primary font-medium"
-                      : "border-border hover:border-primary/50"
+                      ? "neo-border-primary bg-primary/10 text-primary neo-shadow"
+                      : "bg-white hover:neo-shadow"
                   }`}
                 >
                   Weekends
@@ -271,11 +271,11 @@ export const Step4Availability: React.FC<Step4AvailabilityProps> = ({
                   onClick={() =>
                     handlePatternChange(AvailabilityPattern.SPECIFIC_DAYS)
                   }
-                  className={`px-4 py-2 rounded-md border-2 transition-colors ${
+                  className={`px-4 py-2 rounded-neo neo-border-thick font-bold transition-all ${
                     availabilityData.recurringPattern ===
                     AvailabilityPattern.SPECIFIC_DAYS
-                      ? "border-primary bg-primary/10 text-primary font-medium"
-                      : "border-border hover:border-primary/50"
+                      ? "neo-border-primary bg-primary/10 text-primary neo-shadow"
+                      : "bg-white hover:neo-shadow"
                   }`}
                 >
                   Specific Days
@@ -290,10 +290,10 @@ export const Step4Availability: React.FC<Step4AvailabilityProps> = ({
                       key={value}
                       type="button"
                       onClick={() => handleDayToggle(value)}
-                      className={`px-2 py-2 text-sm rounded-md border-2 transition-colors ${
+                      className={`px-2 py-2 text-sm rounded-neo neo-border-thick font-bold transition-all ${
                         availabilityData.recurringDays?.includes(value)
-                          ? "border-primary bg-primary/10 text-primary font-medium"
-                          : "border-border hover:border-primary/50"
+                          ? "neo-border-primary bg-primary/10 text-primary neo-shadow"
+                          : "bg-white hover:neo-shadow"
                       }`}
                     >
                       {label.slice(0, 3)}
@@ -306,7 +306,7 @@ export const Step4Availability: React.FC<Step4AvailabilityProps> = ({
 
           {/* Calendar */}
           <div>
-            <label className="label mb-3">Select Specific Dates</label>
+            <label className="label font-bold mb-3">Select Specific Dates</label>
             <p className="text-sm text-text-secondary mb-4">
               Click on dates to mark them as available or unavailable
             </p>
@@ -315,7 +315,7 @@ export const Step4Availability: React.FC<Step4AvailabilityProps> = ({
               {daysOfWeek.map(({ label }) => (
                 <div
                   key={label}
-                  className="text-center text-sm font-semibold text-text-secondary py-2"
+                  className="text-center text-sm font-black text-text-primary py-2"
                 >
                   {label.slice(0, 3)}
                 </div>
@@ -334,15 +334,15 @@ export const Step4Availability: React.FC<Step4AvailabilityProps> = ({
                     <button
                       type="button"
                       onClick={() => handleDateToggle(dateStr)}
-                      className={`w-full aspect-square rounded-md border-2 text-sm transition-colors relative ${
+                      className={`w-full aspect-square rounded-neo neo-border-thick text-sm font-bold transition-all relative ${
                         isSelected
-                          ? "border-success bg-success/10 text-success font-semibold"
-                          : "border-border hover:border-primary/50"
-                      } ${isToday ? "ring-2 ring-primary ring-offset-2" : ""}`}
+                          ? "bg-success/10 text-success neo-shadow neo-border-primary"
+                          : "bg-white hover:neo-shadow"
+                      } ${isToday ? "neo-border-primary neo-shadow-primary" : ""}`}
                     >
                       {date.getDate()}
                       {note && (
-                        <span className="absolute top-0 right-0 w-2 h-2 bg-warning rounded-full" />
+                        <span className="absolute top-0 right-0 w-2 h-2 bg-warning rounded-full neo-border" />
                       )}
                     </button>
                     {isSelected && (
@@ -364,15 +364,15 @@ export const Step4Availability: React.FC<Step4AvailabilityProps> = ({
           {/* Note Modal */}
           {noteDate && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-lg max-w-md w-full p-6">
-                <h3 className="font-semibold text-lg mb-4">
+              <div className="bg-white rounded-neo neo-border-thick neo-shadow-lg max-w-md w-full p-6">
+                <h3 className="font-bold text-lg mb-4">
                   Add Note for {noteDate}
                 </h3>
                 <textarea
                   value={noteText}
                   onChange={(e) => setNoteText(e.target.value)}
                   placeholder="e.g., Only available after 3 PM"
-                  className="textarea w-full mb-4"
+                  className="neo-input w-full mb-4 min-h-[80px]"
                   rows={3}
                 />
                 <div className="flex gap-3">
@@ -395,7 +395,7 @@ export const Step4Availability: React.FC<Step4AvailabilityProps> = ({
             </div>
           )}
         </div>
-      </Card>
+      </div>
 
       {/* Navigation */}
       <div className="flex justify-between">

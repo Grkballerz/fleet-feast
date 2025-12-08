@@ -75,11 +75,11 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
 
     // Base textarea styles
     const baseStyles =
-      "w-full rounded-lg border border-input bg-card px-4 py-2.5 text-text-primary transition-all duration-normal placeholder:text-text-secondary focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 hover:border-gray-300 resize-none";
+      "neo-input w-full px-4 py-2.5 text-text-primary transition-all duration-normal placeholder:text-text-secondary disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 resize-none";
 
     // Error state styles
     const errorStyles = error
-      ? "border-error focus:border-error focus:ring-error"
+      ? "border-error focus:border-error focus:neo-shadow-primary"
       : "";
 
     return (

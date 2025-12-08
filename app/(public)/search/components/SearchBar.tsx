@@ -54,25 +54,24 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="w-full">
-      <div className="flex gap-2">
+      <div className="flex gap-3">
         <div className="flex-1">
-          <Input
+          <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
-            className="w-full"
+            className="w-full neo-input px-4 py-3 text-base font-medium rounded-neo focus:neo-shadow-primary transition-shadow"
             aria-label="Search food trucks"
           />
         </div>
-        <Button
+        <button
           type="submit"
-          variant="primary"
-          className="px-8"
+          className="neo-btn-primary px-8 py-3 text-base whitespace-nowrap"
         >
           Search
-        </Button>
+        </button>
       </div>
     </form>
   );

@@ -1,4 +1,4 @@
-import { NextAuthOptions } from "next-auth";
+import NextAuth, { NextAuthConfig } from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "./prisma";
@@ -18,7 +18,7 @@ import { UserRole, UserStatus } from "@prisma/client";
  *
  * Reference: https://next-auth.js.org/configuration/options
  */
-export const authOptions: NextAuthOptions = {
+export const authOptions: NextAuthConfig = {
   adapter: PrismaAdapter(prisma) as any,
 
   session: {
@@ -139,3 +139,23 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === "development",
 };
+
+// Create NextAuth instance and export auth function
+const { auth, handlers, signIn, signOut } = NextAuth(authOptions);
+export { auth, handlers, signIn, signOut };
+
+/**
+ * Get current user from session
+ * Helper function to get authenticated user in API routes and server components
+ */
+export async function getCurrentUser() {
+  const session = await auth();
+  return session?.user ?? null;
+}
+
+/**
+ * Get server session (alias for auth() for backwards compatibility)
+ */
+export async function getServerSession() {
+  return auth();
+}

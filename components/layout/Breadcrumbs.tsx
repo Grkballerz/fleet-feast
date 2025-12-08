@@ -61,14 +61,14 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
             <li key={item.href} className="flex items-center gap-2">
               {/* Breadcrumb Item */}
               {isLast ? (
-                <span className="text-text-primary font-medium" aria-current="page">
+                <span className="text-text-primary font-bold" aria-current="page">
                   {item.label}
                 </span>
               ) : (
                 <>
                   <Link
                     href={item.href}
-                    className="text-text-secondary hover:text-primary transition-colors"
+                    className="text-text-secondary font-semibold hover:text-primary transition-all hover:translate-x-0.5"
                   >
                     {item.label}
                   </Link>
@@ -76,6 +76,7 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
                   <svg
                     className="h-4 w-4 text-text-secondary shrink-0"
                     fill="currentColor"
+                    strokeWidth={3}
                     viewBox="0 0 20 20"
                   >
                     <path

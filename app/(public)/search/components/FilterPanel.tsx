@@ -128,35 +128,33 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
     (filters.availableDate ? 1 : 0);
 
   return (
-    <div className={`bg-white ${variant === "sidebar" ? "rounded-lg shadow-sm p-6" : "p-4"}`}>
+    <div className={`${variant === "sidebar" ? "p-6" : "p-4"}`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
+        <h2 className="text-lg font-bold text-gray-900">Filters</h2>
         {activeFilterCount > 0 && (
-          <Button
-            variant="ghost"
-            size="sm"
+          <button
             onClick={onClearFilters}
-            className="text-blue-600 hover:text-blue-700"
+            className="text-sm font-bold text-primary hover:underline"
           >
             Clear all ({activeFilterCount})
-          </Button>
+          </button>
         )}
       </div>
 
       {/* Cuisine Type */}
       <div className="mb-6">
-        <h3 className="text-sm font-medium text-gray-900 mb-3">Cuisine Type</h3>
+        <h3 className="text-sm font-bold text-gray-900 mb-3">Cuisine Type</h3>
         <div className="space-y-2">
           {CUISINE_OPTIONS.map((option) => (
-            <label key={option.value} className="flex items-center gap-2 cursor-pointer">
+            <label key={option.value} className="flex items-center gap-3 cursor-pointer group">
               <input
                 type="checkbox"
                 checked={filters.cuisineType?.includes(option.value) || false}
                 onChange={() => toggleCuisineType(option.value)}
-                className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                className="w-5 h-5 neo-border-thin rounded-neo checked:bg-primary checked:border-primary focus:ring-0 focus:ring-offset-0 cursor-pointer"
               />
-              <span className="text-sm text-gray-700">{option.label}</span>
+              <span className="text-sm text-gray-700 font-medium group-hover:text-primary transition-colors">{option.label}</span>
             </label>
           ))}
         </div>
@@ -164,18 +162,18 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
 
       {/* Price Range */}
       <div className="mb-6">
-        <h3 className="text-sm font-medium text-gray-900 mb-3">Price Range</h3>
+        <h3 className="text-sm font-bold text-gray-900 mb-3">Price Range</h3>
         <div className="space-y-2">
           {PRICE_OPTIONS.map((option) => (
-            <label key={option.value} className="flex items-center gap-2 cursor-pointer">
+            <label key={option.value} className="flex items-center gap-3 cursor-pointer group">
               <input
                 type="checkbox"
                 checked={filters.priceRange?.includes(option.value) || false}
                 onChange={() => togglePriceRange(option.value)}
-                className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                className="w-5 h-5 neo-border-thin rounded-neo checked:bg-primary checked:border-primary focus:ring-0 focus:ring-offset-0 cursor-pointer"
               />
-              <span className="text-sm text-gray-700">
-                {option.label} <span className="text-xs text-gray-500">({option.description})</span>
+              <span className="text-sm text-gray-700 font-medium group-hover:text-primary transition-colors">
+                {option.label} <span className="text-xs text-gray-500 font-normal">({option.description})</span>
               </span>
             </label>
           ))}
@@ -184,34 +182,34 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
 
       {/* Guest Capacity */}
       <div className="mb-6">
-        <h3 className="text-sm font-medium text-gray-900 mb-3">Guest Capacity</h3>
+        <h3 className="text-sm font-bold text-gray-900 mb-3">Guest Capacity</h3>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label htmlFor="capacityMin" className="text-xs text-gray-600 mb-1 block">
+            <label htmlFor="capacityMin" className="text-xs font-bold text-gray-600 mb-1 block">
               Minimum
             </label>
-            <Input
+            <input
               id="capacityMin"
               type="number"
               min="1"
               value={filters.capacityMin || ""}
               onChange={(e) => updateCapacity("capacityMin", e.target.value)}
               placeholder="Min"
-              className="w-full"
+              className="neo-input w-full px-3 py-2 text-sm font-medium rounded-neo"
             />
           </div>
           <div>
-            <label htmlFor="capacityMax" className="text-xs text-gray-600 mb-1 block">
+            <label htmlFor="capacityMax" className="text-xs font-bold text-gray-600 mb-1 block">
               Maximum
             </label>
-            <Input
+            <input
               id="capacityMax"
               type="number"
               min="1"
               value={filters.capacityMax || ""}
               onChange={(e) => updateCapacity("capacityMax", e.target.value)}
               placeholder="Max"
-              className="w-full"
+              className="neo-input w-full px-3 py-2 text-sm font-medium rounded-neo"
             />
           </div>
         </div>
@@ -219,20 +217,20 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
 
       {/* Minimum Rating */}
       <div className="mb-6">
-        <h3 className="text-sm font-medium text-gray-900 mb-3">Minimum Rating</h3>
+        <h3 className="text-sm font-bold text-gray-900 mb-3">Minimum Rating</h3>
         <div className="flex flex-col gap-2">
           {[5, 4, 3, 2, 1].map((rating) => (
             <button
               key={rating}
               onClick={() => updateRating(rating)}
-              className={`flex items-center gap-2 p-2 rounded-md transition-colors ${
+              className={`flex items-center gap-2 p-2 rounded-neo font-medium text-sm transition-all ${
                 filters.minRating === rating
-                  ? "bg-blue-50 border border-blue-200"
-                  : "hover:bg-gray-50"
+                  ? "neo-border-primary bg-primary/10 neo-shadow"
+                  : "neo-border-thin hover:bg-gray-50"
               }`}
             >
               <Rating value={rating} readOnly size="sm" />
-              <span className="text-sm text-gray-700">& up</span>
+              <span className="text-gray-700">& up</span>
             </button>
           ))}
         </div>
@@ -240,13 +238,13 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
 
       {/* Available Date */}
       <div className="mb-6">
-        <h3 className="text-sm font-medium text-gray-900 mb-3">Available Date</h3>
-        <Input
+        <h3 className="text-sm font-bold text-gray-900 mb-3">Available Date</h3>
+        <input
           type="date"
           value={filters.availableDate || ""}
           onChange={(e) => updateDate(e.target.value)}
           min={new Date().toISOString().split("T")[0]}
-          className="w-full"
+          className="neo-input w-full px-3 py-2 text-sm font-medium rounded-neo"
         />
       </div>
     </div>

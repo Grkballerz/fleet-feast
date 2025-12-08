@@ -207,7 +207,7 @@ export default function ReviewsPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {pendingReviews.map((booking) => (
-              <Card key={booking.bookingId} className="p-6">
+              <Card key={booking.bookingId} className="neo-card-glass p-6 neo-shadow rounded-neo">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <h3 className="font-semibold text-text-primary text-lg">
@@ -246,7 +246,7 @@ export default function ReviewsPage() {
         </div>
 
         {submittedReviews.length === 0 ? (
-          <Card className="p-12 text-center">
+          <Card className="neo-card-glass p-12 text-center neo-shadow rounded-neo">
             <Star className="w-16 h-16 text-text-tertiary mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-text-primary mb-2">
               No reviews yet
@@ -260,7 +260,7 @@ export default function ReviewsPage() {
         ) : (
           <div className="space-y-4">
             {submittedReviews.map((review) => (
-              <Card key={review.id} className="p-6">
+              <Card key={review.id} className="neo-card-glass p-6 neo-shadow rounded-neo">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
@@ -282,7 +282,7 @@ export default function ReviewsPage() {
                       </span>
                     </div>
                     <div className="mb-3">
-                      <Rating value={review.rating} readonly size="medium" />
+                      <Rating value={review.rating} readOnly size="medium" />
                     </div>
                     {review.comment && (
                       <p className="text-text-secondary">{review.comment}</p>

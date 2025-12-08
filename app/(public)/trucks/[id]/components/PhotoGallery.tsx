@@ -152,31 +152,31 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
     <>
       {/* Photo Grid */}
       <div className={cn("space-y-4", className)}>
-        <h2 className="text-2xl font-bold">Photos</h2>
+        <h2 className="neo-heading text-2xl">Photos</h2>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3">
           {photos.map((photo, index) => (
             <button
               key={index}
               onClick={() => setSelectedIndex(index)}
-              className="aspect-square relative overflow-hidden rounded-lg group cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              className="aspect-square relative overflow-hidden rounded-neo neo-border-thick group cursor-pointer focus:outline-none neo-shadow hover:neo-shadow-hover transition-all"
               aria-label={`View photo ${index + 1}`}
             >
               <Image
                 src={photo}
                 alt={`${businessName} photo ${index + 1}`}
                 fill
-                className="object-cover transition-transform duration-300 group-hover:scale-110"
+                className="object-cover transition-transform duration-300 group-hover:scale-105"
                 sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
               />
               {/* Hover Overlay */}
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
             </button>
           ))}
         </div>
 
         {/* Photo Count */}
-        <p className="text-sm text-text-secondary">
+        <p className="text-sm text-text-secondary font-medium">
           {photos.length} {photos.length === 1 ? "photo" : "photos"}
         </p>
       </div>

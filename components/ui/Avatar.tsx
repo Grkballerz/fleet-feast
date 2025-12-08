@@ -65,7 +65,7 @@ export const Avatar: React.FC<AvatarProps> = ({
   };
 
   const baseStyles =
-    "relative inline-flex items-center justify-center rounded-full bg-primary text-white font-semibold overflow-hidden ring-2 ring-white";
+    "relative inline-flex items-center justify-center rounded-full bg-primary text-white font-semibold overflow-hidden neo-border-thick border-black";
 
   // Show image if available and not errored
   if (src && !imageError) {

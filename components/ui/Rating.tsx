@@ -153,7 +153,7 @@ export const Rating = forwardRef<HTMLDivElement, RatingProps>(
                 onMouseLeave={handleMouseLeave}
                 disabled={readOnly}
                 className={cn(
-                  "relative transition-transform",
+                  "relative transition-transform drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)]",
                   !readOnly && "hover:scale-110 cursor-pointer",
                   readOnly && "cursor-default"
                 )}

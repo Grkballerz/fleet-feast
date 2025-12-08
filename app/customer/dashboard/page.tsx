@@ -143,7 +143,7 @@ export default function DashboardPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="p-6 hover:shadow-md transition-shadow">
+        <Card className="neo-card-glass p-6 neo-shadow hover:neo-shadow-lg transition-all rounded-neo">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-text-secondary text-sm font-medium">
@@ -163,7 +163,7 @@ export default function DashboardPage() {
           </div>
         </Card>
 
-        <Card className="p-6 hover:shadow-md transition-shadow">
+        <Card className="neo-card-glass p-6 neo-shadow hover:neo-shadow-lg transition-all rounded-neo">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-text-secondary text-sm font-medium">
@@ -186,7 +186,7 @@ export default function DashboardPage() {
           </Link>
         </Card>
 
-        <Card className="p-6 hover:shadow-md transition-shadow">
+        <Card className="neo-card-glass p-6 neo-shadow hover:neo-shadow-lg transition-all rounded-neo">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-text-secondary text-sm font-medium">
@@ -209,7 +209,7 @@ export default function DashboardPage() {
           </Link>
         </Card>
 
-        <Card className="p-6 hover:shadow-md transition-shadow">
+        <Card className="neo-card-glass p-6 neo-shadow hover:neo-shadow-lg transition-all rounded-neo">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-text-secondary text-sm font-medium">
@@ -236,7 +236,7 @@ export default function DashboardPage() {
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Upcoming Bookings (2 columns on desktop) */}
-        <Card className="lg:col-span-2 p-6">
+        <Card className="neo-card-glass lg:col-span-2 p-6 neo-shadow rounded-neo">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-text-primary">
               Upcoming Bookings
@@ -263,7 +263,7 @@ export default function DashboardPage() {
                 <div
                   key={booking.id}
                   onClick={() => router.push(`/customer/bookings/${booking.id}`)}
-                  className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-surface-hover cursor-pointer transition-colors"
+                  className="flex items-center justify-between p-4 neo-border rounded-neo neo-shadow hover:neo-shadow-lg cursor-pointer transition-all bg-white"
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
@@ -307,7 +307,7 @@ export default function DashboardPage() {
         </Card>
 
         {/* Action Items (1 column on desktop) */}
-        <Card className="p-6">
+        <Card className="neo-card-glass p-6 neo-shadow rounded-neo">
           <h2 className="text-xl font-semibold text-text-primary mb-6">
             Action Items
           </h2>
@@ -321,7 +321,7 @@ export default function DashboardPage() {
             <div className="space-y-4">
               {MOCK_ACTION_ITEMS.map((item) => (
                 <Link key={item.id} href={item.link}>
-                  <div className="p-4 border border-border rounded-lg hover:bg-surface-hover cursor-pointer transition-colors">
+                  <div className="p-4 neo-border rounded-neo neo-shadow hover:neo-shadow-lg cursor-pointer transition-all bg-white">
                     <div className="flex items-start gap-3">
                       <div
                         className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
@@ -367,7 +367,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Recent Messages */}
-      <Card className="p-6">
+      <Card className="neo-card-glass p-6 neo-shadow rounded-neo">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-text-primary">
             Recent Messages
@@ -389,7 +389,7 @@ export default function DashboardPage() {
           <div className="space-y-3">
             {MOCK_RECENT_MESSAGES.map((message) => (
               <Link key={message.id} href={`/messages/${message.bookingId}`}>
-                <div className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-surface-hover cursor-pointer transition-colors">
+                <div className="flex items-center justify-between p-4 neo-border rounded-neo neo-shadow hover:neo-shadow-lg cursor-pointer transition-all bg-white">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
                       <MessageSquare className="w-5 h-5 text-primary" />
@@ -424,7 +424,7 @@ export default function DashboardPage() {
       </Card>
 
       {/* Quick Actions */}
-      <Card className="p-6">
+      <Card className="neo-card-glass p-6 neo-shadow rounded-neo">
         <h2 className="text-xl font-semibold text-text-primary mb-4">
           Quick Actions
         </h2>

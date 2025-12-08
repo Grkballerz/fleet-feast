@@ -222,7 +222,7 @@ export default function VendorAnalyticsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-text-primary">Analytics</h2>
+        <h2 className="text-2xl font-bold text-text-primary neo-heading">Analytics</h2>
         <p className="text-text-secondary mt-1">
           Track your performance and business insights
         </p>
@@ -230,7 +230,7 @@ export default function VendorAnalyticsPage() {
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="card-compact">
+        <div className="neo-card-glass neo-shadow rounded-neo p-4">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-text-secondary">Total Revenue</p>
@@ -238,13 +238,13 @@ export default function VendorAnalyticsPage() {
                 ${(stats.totalRevenue / 100).toFixed(2)}
               </p>
             </div>
-            <div className="p-3 bg-success/10 rounded-lg">
+            <div className="p-3 bg-success/10 rounded-neo">
               <DollarSign className="w-5 h-5 text-success" />
             </div>
           </div>
-        </Card>
+        </div>
 
-        <Card className="card-compact">
+        <div className="neo-card-glass neo-shadow rounded-neo p-4">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-text-secondary">Total Bookings</p>
@@ -252,13 +252,13 @@ export default function VendorAnalyticsPage() {
                 {stats.totalBookings}
               </p>
             </div>
-            <div className="p-3 bg-primary/10 rounded-lg">
+            <div className="p-3 bg-primary/10 rounded-neo">
               <Calendar className="w-5 h-5 text-primary" />
             </div>
           </div>
-        </Card>
+        </div>
 
-        <Card className="card-compact">
+        <div className="neo-card-glass neo-shadow rounded-neo p-4">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-text-secondary">Average Rating</p>
@@ -266,13 +266,13 @@ export default function VendorAnalyticsPage() {
                 {stats.averageRating.toFixed(1)}
               </p>
             </div>
-            <div className="p-3 bg-warning/10 rounded-lg">
+            <div className="p-3 bg-warning/10 rounded-neo">
               <Star className="w-5 h-5 text-warning" />
             </div>
           </div>
-        </Card>
+        </div>
 
-        <Card className="card-compact">
+        <div className="neo-card-glass neo-shadow rounded-neo p-4">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-text-secondary">Completion Rate</p>
@@ -280,18 +280,18 @@ export default function VendorAnalyticsPage() {
                 {stats.completionRate.toFixed(0)}%
               </p>
             </div>
-            <div className="p-3 bg-primary/10 rounded-lg">
+            <div className="p-3 bg-primary/10 rounded-neo">
               <TrendingUp className="w-5 h-5 text-primary" />
             </div>
           </div>
-        </Card>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Revenue Chart */}
-        <Card>
+        <div className="neo-card-glass neo-shadow rounded-neo p-6">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-text-primary">
+            <h3 className="text-lg font-semibold text-text-primary neo-heading">
               Revenue Trend
             </h3>
             <Badge variant="neutral">Last 6 Months</Badge>
@@ -304,12 +304,12 @@ export default function VendorAnalyticsPage() {
           ) : (
             renderRevenueChart()
           )}
-        </Card>
+        </div>
 
         {/* Popular Menu Items */}
-        <Card>
+        <div className="neo-card-glass neo-shadow rounded-neo p-6">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-text-primary">
+            <h3 className="text-lg font-semibold text-text-primary neo-heading">
               Popular Menu Items
             </h3>
             <Badge variant="neutral">Top 5</Badge>
@@ -322,16 +322,16 @@ export default function VendorAnalyticsPage() {
           ) : (
             renderPopularItems()
           )}
-        </Card>
+        </div>
       </div>
 
       {/* Additional Insights */}
-      <Card>
-        <h3 className="text-lg font-semibold text-text-primary mb-4">
+      <div className="neo-card-glass neo-shadow rounded-neo p-6">
+        <h3 className="text-lg font-semibold text-text-primary neo-heading mb-4">
           Business Insights
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="p-4 bg-background rounded-lg">
+          <div className="p-4 bg-background rounded-neo neo-border">
             <div className="flex items-center gap-3 mb-2">
               <Users className="w-5 h-5 text-primary" />
               <span className="font-medium text-text-primary">
@@ -346,7 +346,7 @@ export default function VendorAnalyticsPage() {
             </p>
           </div>
 
-          <div className="p-4 bg-background rounded-lg">
+          <div className="p-4 bg-background rounded-neo neo-border">
             <div className="flex items-center gap-3 mb-2">
               <DollarSign className="w-5 h-5 text-success" />
               <span className="font-medium text-text-primary">
@@ -363,7 +363,7 @@ export default function VendorAnalyticsPage() {
             </p>
           </div>
 
-          <div className="p-4 bg-background rounded-lg">
+          <div className="p-4 bg-background rounded-neo neo-border">
             <div className="flex items-center gap-3 mb-2">
               <TrendingUp className="w-5 h-5 text-primary" />
               <span className="font-medium text-text-primary">
@@ -378,7 +378,7 @@ export default function VendorAnalyticsPage() {
             </p>
           </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

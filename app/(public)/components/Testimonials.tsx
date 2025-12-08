@@ -1,53 +1,24 @@
 "use client";
 
-import React from "react";
-import { Card } from "@/components/ui/Card";
+import React, { useState, useEffect, useCallback } from "react";
 import { Rating } from "@/components/ui/Rating";
 import { Avatar } from "@/components/ui/Avatar";
 
 export interface Testimonial {
-  /**
-   * Testimonial ID
-   */
   id: string;
-  /**
-   * Customer name
-   */
   name: string;
-  /**
-   * Customer role/company
-   */
   role?: string;
-  /**
-   * Customer avatar URL
-   */
   avatar?: string;
-  /**
-   * Rating (1-5)
-   */
   rating: number;
-  /**
-   * Testimonial text
-   */
   text: string;
-  /**
-   * Event type
-   */
   eventType?: string;
 }
 
 export interface TestimonialsProps {
-  /**
-   * Array of testimonials to display
-   */
   testimonials?: Testimonial[];
-  /**
-   * Section title
-   */
   title?: string;
 }
 
-// Default testimonials for demo
 const defaultTestimonials: Testimonial[] = [
   {
     id: "1",
@@ -69,111 +40,203 @@ const defaultTestimonials: Testimonial[] = [
     id: "3",
     name: "Emily Rodriguez",
     role: "HR Manager, StartupXYZ",
-    rating: 4.5,
+    rating: 5,
     text: "Great selection of food trucks and easy booking process. Our employees look forward to our monthly food truck Fridays thanks to Fleet Feast!",
     eventType: "Company Lunch",
   },
+  {
+    id: "4",
+    name: "James Wilson",
+    role: "Festival Organizer",
+    rating: 5,
+    text: "Managing multiple food trucks for our street festival was a breeze with Fleet Feast. The platform's coordination tools are exactly what event organizers need.",
+    eventType: "Street Festival",
+  },
+  {
+    id: "5",
+    name: "Lisa Park",
+    role: "Private Party Host",
+    rating: 5,
+    text: "Booked a taco truck for my daughter's graduation party. Everyone raved about the food! The booking process was simple and the truck arrived exactly on time.",
+    eventType: "Graduation Party",
+  },
 ];
 
-/**
- * Testimonials Component
- *
- * Displays customer testimonials in a grid layout with ratings and customer info.
- * Social proof section for homepage.
- *
- * @example
- * ```tsx
- * <Testimonials
- *   title="What Our Customers Say"
- *   testimonials={testimonials}
- * />
- * ```
- */
 export const Testimonials: React.FC<TestimonialsProps> = ({
   testimonials = defaultTestimonials,
   title = "What Our Customers Say",
 }) => {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+
+  const nextSlide = useCallback(() => {
+    setActiveIndex((prev) => (prev + 1) % testimonials.length);
+  }, [testimonials.length]);
+
+  const prevSlide = useCallback(() => {
+    setActiveIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+  }, [testimonials.length]);
+
+  useEffect(() => {
+    if (!isAutoPlaying) return;
+    const interval = setInterval(nextSlide, 5000);
+    return () => clearInterval(interval);
+  }, [isAutoPlaying, nextSlide]);
+
   return (
-    <section className="py-16 md:py-24 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-20 md:py-28 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="absolute inset-0">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
+      </div>
+
+      {/* Stars Pattern */}
+      <div className="absolute inset-0 overflow-hidden opacity-20">
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute text-yellow-400 animate-pulse"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 2}s`,
+              fontSize: `${12 + Math.random() * 12}px`,
+            }}
+          >
+            ★
+          </div>
+        ))}
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         {/* Section Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+        <div className="text-center mb-16">
+          <span className="inline-block px-4 py-1.5 rounded-neo neo-glass-brutal-primary neo-shadow-primary bg-white/10 text-white/90 text-sm font-bold mb-4">
+            ⭐ Customer Reviews
+          </span>
+          <h2 className="neo-heading-xl text-white mb-4">
             {title}
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-white/70 max-w-2xl mx-auto font-medium">
             Join thousands of satisfied customers who trust Fleet Feast for their event catering
           </p>
         </div>
 
-        {/* Testimonials Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {testimonials.map((testimonial) => (
-            <Card key={testimonial.id} className="p-6">
-              {/* Rating */}
-              <div className="mb-4">
-                <Rating value={testimonial.rating} readonly size="sm" />
-              </div>
+        {/* Testimonials Carousel */}
+        <div
+          className="relative"
+          onMouseEnter={() => setIsAutoPlaying(false)}
+          onMouseLeave={() => setIsAutoPlaying(true)}
+        >
+          {/* Main Testimonial Card */}
+          <div className="flex justify-center">
+            <div className="max-w-4xl w-full">
+              <div className="relative neo-glass-brutal-primary rounded-neo p-8 md:p-12 neo-shadow-primary-lg">
+                {/* Quote Icon */}
+                <div className="absolute -top-6 left-8 text-6xl text-primary/30 neo-heading">"</div>
 
-              {/* Testimonial Text */}
-              <blockquote className="text-gray-700 mb-6 leading-relaxed">
-                "{testimonial.text}"
-              </blockquote>
-
-              {/* Customer Info */}
-              <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
-                <Avatar
-                  src={testimonial.avatar}
-                  alt={testimonial.name}
-                  size="md"
-                  fallback={testimonial.name.charAt(0)}
-                />
-                <div>
-                  <div className="font-semibold text-gray-900">
-                    {testimonial.name}
-                  </div>
-                  {testimonial.role && (
-                    <div className="text-sm text-gray-600">
-                      {testimonial.role}
-                    </div>
-                  )}
-                  {testimonial.eventType && (
-                    <div className="text-xs text-gray-500 mt-1">
-                      {testimonial.eventType}
-                    </div>
-                  )}
+                {/* Rating Stars */}
+                <div className="flex justify-center mb-6">
+                  <Rating
+                    value={testimonials[activeIndex].rating}
+                    readOnly
+                    size="lg"
+                  />
                 </div>
+
+                {/* Testimonial Text */}
+                <blockquote className="text-xl md:text-2xl text-white text-center leading-relaxed mb-8 font-medium">
+                  "{testimonials[activeIndex].text}"
+                </blockquote>
+
+                {/* Customer Info */}
+                <div className="flex flex-col items-center">
+                  <Avatar
+                    src={testimonials[activeIndex].avatar}
+                    alt={testimonials[activeIndex].name}
+                    size="lg"
+                    fallback={testimonials[activeIndex].name.charAt(0)}
+                    className="ring-4 ring-white/20 mb-4"
+                  />
+                  <div className="text-center">
+                    <div className="neo-heading text-white text-lg">
+                      {testimonials[activeIndex].name}
+                    </div>
+                    {testimonials[activeIndex].role && (
+                      <div className="text-white/60 text-sm font-medium">
+                        {testimonials[activeIndex].role}
+                      </div>
+                    )}
+                    {testimonials[activeIndex].eventType && (
+                      <div className="inline-block mt-2 px-3 py-1 rounded-neo bg-primary/20 text-primary text-xs font-bold neo-border-thin">
+                        {testimonials[activeIndex].eventType}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Quote Icon End */}
+                <div className="absolute -bottom-6 right-8 text-6xl text-primary/30 rotate-180 neo-heading">"</div>
               </div>
-            </Card>
-          ))}
+            </div>
+          </div>
+
+          {/* Navigation Arrows */}
+          <button
+            onClick={prevSlide}
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-12 h-12 rounded-neo neo-glass-brutal neo-shadow flex items-center justify-center text-white hover:neo-shadow-lg transition-all duration-300 hover:scale-110"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button
+            onClick={nextSlide}
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-12 h-12 rounded-neo neo-glass-brutal neo-shadow flex items-center justify-center text-white hover:neo-shadow-lg transition-all duration-300 hover:scale-110"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+
+          {/* Dots Indicator */}
+          <div className="flex justify-center gap-2 mt-8">
+            {testimonials.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setActiveIndex(index)}
+                className={`transition-all duration-300 rounded-neo neo-border-thin ${
+                  index === activeIndex
+                    ? "w-8 h-2 bg-primary neo-shadow"
+                    : "w-2 h-2 bg-white/30 hover:bg-white/50"
+                }`}
+              />
+            ))}
+          </div>
         </div>
 
         {/* Bottom Stats */}
-        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-          <div>
-            <div className="text-3xl md:text-4xl font-bold text-primary mb-2">
-              500+
+        <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-6">
+          {[
+            { value: "500+", label: "Events Booked", icon: "🎉" },
+            { value: "100+", label: "Food Trucks", icon: "🚚" },
+            { value: "4.8", label: "Average Rating", icon: "⭐" },
+            { value: "98%", label: "Satisfaction", icon: "💯" },
+          ].map((stat, index) => (
+            <div
+              key={index}
+              className="text-center p-6 rounded-neo neo-glass-brutal neo-shadow hover:neo-shadow-lg transition-all duration-300 group"
+            >
+              <div className="text-3xl mb-2 group-hover:scale-125 transition-transform duration-300">
+                {stat.icon}
+              </div>
+              <div className="text-3xl md:text-4xl neo-heading text-white mb-1">
+                {stat.value}
+              </div>
+              <div className="text-white/60 text-sm font-bold">{stat.label}</div>
             </div>
-            <div className="text-gray-600">Events Booked</div>
-          </div>
-          <div>
-            <div className="text-3xl md:text-4xl font-bold text-primary mb-2">
-              100+
-            </div>
-            <div className="text-gray-600">Food Trucks</div>
-          </div>
-          <div>
-            <div className="text-3xl md:text-4xl font-bold text-primary mb-2">
-              4.8
-            </div>
-            <div className="text-gray-600">Average Rating</div>
-          </div>
-          <div>
-            <div className="text-3xl md:text-4xl font-bold text-primary mb-2">
-              98%
-            </div>
-            <div className="text-gray-600">Satisfaction Rate</div>
-          </div>
+          ))}
         </div>
       </div>
     </section>

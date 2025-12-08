@@ -154,7 +154,7 @@ export default function FAQPage() {
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-gray-50 to-white py-16 md:py-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+          <h1 className="neo-heading-xl text-gray-900 mb-6">
             Frequently Asked Questions
           </h1>
           <p className="text-xl text-gray-600">
@@ -188,10 +188,10 @@ export default function FAQPage() {
                     category.value as typeof selectedCategory
                   )
                 }
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                className={`px-4 py-2 rounded-neo font-bold transition-all ${
                   selectedCategory === category.value
-                    ? "bg-primary text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    ? "neo-btn-primary"
+                    : "neo-btn-secondary"
                 }`}
               >
                 {category.label}
@@ -220,7 +220,7 @@ export default function FAQPage() {
       {/* Contact CTA */}
       <section className="py-16 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+          <h2 className="neo-heading text-3xl text-gray-900 mb-4">
             Still have questions?
           </h2>
           <p className="text-lg text-gray-600 mb-8">
@@ -229,7 +229,7 @@ export default function FAQPage() {
           </p>
           <a
             href="/contact"
-            className="inline-block px-8 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-colors"
+            className="neo-btn-primary inline-block px-8 py-3"
           >
             Contact Support
           </a>

@@ -145,6 +145,19 @@ const config: Config = {
         xl: "1rem", // 16px
         "2xl": "1.5rem", // 24px
         full: "9999px",
+        // Neo-Brutalist radius (sharp to minimal)
+        "neo": "4px",
+        "neo-sharp": "0px",
+        "neo-minimal": "2px",
+      },
+      borderWidth: {
+        DEFAULT: "1px",
+        0: "0px",
+        2: "2px",
+        // Neo-Brutalist border widths
+        3: "3px",
+        4: "4px",
+        8: "8px",
       },
       fontFamily: {
         sans: ["var(--font-inter)", "Inter", "system-ui", "-apple-system", "sans-serif"],
@@ -199,6 +212,13 @@ const config: Config = {
         "2xl": "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
         inner: "inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)",
         none: "none",
+        // Neo-Brutalist shadows (harsh offset, no blur)
+        "brutal": "4px 4px 0px #000000",
+        "brutal-sm": "2px 2px 0px #000000",
+        "brutal-lg": "6px 6px 0px #000000",
+        "brutal-xl": "8px 8px 0px #000000",
+        "brutal-primary": "4px 4px 0px #DC2626",
+        "brutal-primary-lg": "6px 6px 0px #DC2626",
       },
       keyframes: {
         // Radix UI animations
@@ -269,6 +289,12 @@ const config: Config = {
         in: "cubic-bezier(0.4, 0, 1, 1)",
         out: "cubic-bezier(0, 0, 0.2, 1)",
         "in-out": "cubic-bezier(0.4, 0, 0.2, 1)",
+      },
+      // Neo-Brutalist backdrop blur values
+      backdropBlur: {
+        "neo": "12px",
+        "neo-md": "16px",
+        "neo-lg": "20px",
       },
     },
   },

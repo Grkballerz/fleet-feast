@@ -16,9 +16,9 @@ export function reportWebVitals(metric: {
   // Send to analytics service (Google Analytics, Sentry, etc.)
   if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
     // Example: Send to Google Analytics
-    // @ts-ignore
+    // @ts-expect-error - gtag is injected by Google Analytics script
     if (window.gtag) {
-      // @ts-ignore
+      // @ts-expect-error - gtag is injected by Google Analytics script
       window.gtag('event', metric.name, {
         event_category: metric.label === 'web-vital' ? 'Web Vitals' : 'Custom Metrics',
         value: Math.round(metric.name === 'CLS' ? metric.value * 1000 : metric.value),

@@ -68,8 +68,8 @@ export default function MessagesPage() {
   return (
     <div className="max-w-4xl mx-auto p-6">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-text-primary">Messages</h1>
+      <div className="mb-6 neo-card-glass rounded-neo p-6">
+        <h1 className="text-3xl font-bold text-text-primary neo-heading">Messages</h1>
         <p className="text-text-secondary mt-2">
           Your conversations with customers
         </p>

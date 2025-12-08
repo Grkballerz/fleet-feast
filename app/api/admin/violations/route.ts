@@ -4,8 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { auth } from "@/lib/auth";
 import { listViolations } from "@/modules/violation/violation.service";
 import { violationListFiltersSchema } from "@/modules/violation/violation.validation";
 import { UserRole } from "@prisma/client";
@@ -13,7 +12,7 @@ import { UserRole } from "@prisma/client";
 export async function GET(req: NextRequest) {
   try {
     // Verify authentication and admin role
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session?.user) {
       return NextResponse.json(

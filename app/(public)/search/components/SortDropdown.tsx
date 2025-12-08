@@ -71,7 +71,7 @@ export const SortDropdown: React.FC<SortDropdownProps> = ({
   return (
     <Dropdown
       trigger={
-        <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <button className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-gray-900 bg-white neo-border rounded-neo neo-shadow hover:neo-shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all focus:outline-none focus:neo-shadow-primary">
           <span>Sort: {currentLabel}</span>
           <svg
             className="w-4 h-4"

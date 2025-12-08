@@ -1,5 +1,4 @@
-import NextAuth from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { handlers } from "@/lib/auth";
 
 /**
  * NextAuth.js API route handler
@@ -14,11 +13,4 @@ import { authOptions } from "@/lib/auth";
  * the handler functionality. NextAuth has built-in protection mechanisms.
  */
 
-// Create NextAuth handler object (v5 returns object with GET/POST methods)
-const authHandler = NextAuth(authOptions);
-
-// Extract GET and POST from the handler object
-const GET = authHandler.handlers?.GET ?? authHandler.GET;
-const POST = authHandler.handlers?.POST ?? authHandler.POST;
-
-export { GET, POST };
+export const { GET, POST } = handlers;
