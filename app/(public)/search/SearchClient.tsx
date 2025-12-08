@@ -30,13 +30,14 @@ interface TruckSearchResult {
 }
 
 interface SearchResponse {
-  success: boolean;
   data: TruckSearchResult[];
-  pagination: {
+  meta: {
     page: number;
     limit: number;
     total: number;
     totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
   };
 }
 
@@ -180,10 +181,10 @@ export function SearchClient() {
       const response = await fetch(`/api/trucks?${params.toString()}`);
       const data: SearchResponse = await response.json();
 
-      if (data.success && data.data) {
+      if (data.data && Array.isArray(data.data)) {
         setTrucks(data.data);
-        setTotalResults(data.pagination.total);
-        setTotalPages(data.pagination.totalPages);
+        setTotalResults(data.meta?.total ?? 0);
+        setTotalPages(data.meta?.totalPages ?? 0);
       } else {
         setTrucks([]);
         setTotalResults(0);
