@@ -59,7 +59,8 @@ export default function VendorAnalyticsPage() {
       const bookingsRes = await fetch("/api/bookings");
       if (!bookingsRes.ok) throw new Error("Failed to fetch bookings");
       const bookingsData = await bookingsRes.json();
-      const bookings = bookingsData.data || [];
+      // Ensure bookings is always an array
+      const bookings = Array.isArray(bookingsData.data) ? bookingsData.data : [];
 
       // Calculate monthly revenue (last 6 months)
       const months = eachMonthOfInterval({

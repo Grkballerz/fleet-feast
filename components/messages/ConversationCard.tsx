@@ -2,11 +2,13 @@
 
 import React from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { formatRelativeTime } from "@/lib/utils";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
+import { UserRole } from "@/types";
 
 export interface ConversationCardProps {
   /**
@@ -76,6 +78,8 @@ export const ConversationCard: React.FC<ConversationCardProps> = ({
   lastMessage,
   unreadCount,
 }) => {
+  const { data: session } = useSession();
+
   const eventDate = typeof booking.eventDate === "string"
     ? new Date(booking.eventDate)
     : booking.eventDate;
@@ -88,8 +92,13 @@ export const ConversationCard: React.FC<ConversationCardProps> = ({
   const partyName = otherParty?.name || "Unknown";
   const partyAvatar = otherParty?.avatarUrl;
 
+  // Determine the correct path based on user role
+  const messagesBasePath = session?.user?.role === UserRole.VENDOR
+    ? "/vendor/messages"
+    : "/customer/messages";
+
   return (
-    <Link href={`/messages/${bookingId}`} className="block">
+    <Link href={`${messagesBasePath}/${bookingId}`} className="block">
       <div
         className={cn(
           "neo-card-glass rounded-neo p-4 transition-all hover:neo-shadow-hover",

@@ -132,23 +132,23 @@ export default function MessageThreadPage() {
         {/* Conversation info */}
         <div className="flex-1 min-w-0">
           <h2 className="font-semibold text-text-primary truncate">
-            {conversation.booking.customer.name}
+            {conversation.booking?.customer?.name || "Customer"}
           </h2>
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm text-gray-500">
-              Event: {new Date(conversation.booking.eventDate).toLocaleDateString()}
+              Event: {conversation.booking?.eventDate ? new Date(conversation.booking.eventDate).toLocaleDateString() : "N/A"}
             </span>
             <Badge
               variant={
-                conversation.booking.status === "CONFIRMED"
+                conversation.booking?.status === "CONFIRMED"
                   ? "success"
-                  : conversation.booking.status === "CANCELLED"
+                  : conversation.booking?.status === "CANCELLED"
                   ? "error"
                   : "warning"
               }
               size="sm"
             >
-              {conversation.booking.status}
+              {conversation.booking?.status || "Unknown"}
             </Badge>
           </div>
         </div>
@@ -158,9 +158,9 @@ export default function MessageThreadPage() {
       <div className="flex-1 overflow-hidden">
         <MessageThread
           bookingId={bookingId}
-          messages={conversation.messages}
+          messages={conversation.messages || []}
           currentUserId={currentUserId}
-          bookingStatus={conversation.booking.status}
+          bookingStatus={conversation.booking?.status || "PENDING"}
           onRefresh={fetchConversation}
         />
       </div>
