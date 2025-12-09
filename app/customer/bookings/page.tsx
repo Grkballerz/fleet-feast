@@ -7,6 +7,7 @@ import { Card, CardBody } from "@/components/ui/Card";
 import { Alert } from "@/components/ui/Alert";
 import { Spinner } from "@/components/ui/Spinner";
 import { Badge } from "@/components/ui/Badge";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import {
   Calendar,
   MapPin,
@@ -100,8 +101,9 @@ export default function BookingsListPage() {
         throw new Error("Failed to fetch bookings");
       }
       const data = await res.json();
-      setBookings(data);
-      setFilteredBookings(data);
+      const bookingsList = data.bookings || [];
+      setBookings(bookingsList);
+      setFilteredBookings(bookingsList);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to load bookings"
@@ -151,13 +153,16 @@ export default function BookingsListPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Spinner />
-      </div>
+      <DashboardLayout title="My Bookings">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Spinner />
+        </div>
+      </DashboardLayout>
     );
   }
 
   return (
+    <DashboardLayout title="My Bookings">
     <div className="container-custom py-8">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
@@ -296,6 +301,7 @@ export default function BookingsListPage() {
         )}
       </div>
     </div>
+    </DashboardLayout>
   );
 }
 

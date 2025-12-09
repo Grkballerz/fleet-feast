@@ -92,13 +92,13 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items, className }) => {
             <span className="text-xs text-text-secondary mt-1 font-bold">Search</span>
           </Link>
 
-          {/* Messages */}
-          {session && (
+          {/* Messages - only show for Customer and Vendor (not Admin) */}
+          {session && session.user.role !== UserRole.ADMIN && (
             <Link
               href={
                 session.user.role === UserRole.VENDOR
                   ? "/vendor/messages"
-                  : "/dashboard/messages"
+                  : "/customer/messages"
               }
               aria-current={pathname?.includes("/messages") ? "page" : undefined}
               aria-label="Messages"

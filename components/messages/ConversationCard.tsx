@@ -84,6 +84,10 @@ export const ConversationCard: React.FC<ConversationCardProps> = ({
     ? new Date(lastMessage.createdAt)
     : lastMessage.createdAt;
 
+  // Safely access otherParty properties with fallbacks
+  const partyName = otherParty?.name || "Unknown";
+  const partyAvatar = otherParty?.avatarUrl;
+
   return (
     <Link href={`/messages/${bookingId}`} className="block">
       <div
@@ -95,8 +99,8 @@ export const ConversationCard: React.FC<ConversationCardProps> = ({
         <div className="flex gap-4 p-4">
           {/* Avatar */}
           <Avatar
-            src={otherParty.avatarUrl}
-            name={otherParty.name}
+            src={partyAvatar}
+            name={partyName}
             size="md"
           />
 
@@ -105,7 +109,7 @@ export const ConversationCard: React.FC<ConversationCardProps> = ({
             {/* Header row - name and timestamp */}
             <div className="flex justify-between items-start gap-2 mb-1">
               <h4 className="font-medium text-text-primary truncate">
-                {otherParty.name}
+                {partyName}
               </h4>
               <span className="text-sm text-gray-500 shrink-0">
                 {formatRelativeTime(messageDate)}

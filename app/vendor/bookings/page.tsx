@@ -8,6 +8,7 @@ import { Spinner } from "@/components/ui/Spinner";
 import { Alert } from "@/components/ui/Alert";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import {
   Calendar,
   Users,
@@ -79,7 +80,9 @@ export default function VendorBookingsPage() {
   };
 
   const applyFilters = () => {
-    let filtered = [...bookings];
+    // Ensure bookings is an array before filtering
+    const safeBookingsArr = Array.isArray(bookings) ? bookings : [];
+    let filtered = [...safeBookingsArr];
 
     // Status filter
     if (statusFilter !== "ALL") {
@@ -91,10 +94,10 @@ export default function VendorBookingsPage() {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
         (b) =>
-          b.customer.name.toLowerCase().includes(query) ||
-          b.eventType.toLowerCase().includes(query) ||
-          b.eventLocation.toLowerCase().includes(query) ||
-          b.id.toLowerCase().includes(query)
+          b.customer?.name?.toLowerCase().includes(query) ||
+          b.eventType?.toLowerCase().includes(query) ||
+          b.eventLocation?.toLowerCase().includes(query) ||
+          b.id?.toLowerCase().includes(query)
       );
     }
 
@@ -153,32 +156,40 @@ export default function VendorBookingsPage() {
     return <Badge variant={variant}>{label}</Badge>;
   };
 
+  // Ensure bookings is always an array for filter operations
+  const safeBookings = Array.isArray(bookings) ? bookings : [];
+
   const statusCounts = {
-    ALL: bookings.length,
-    PENDING: bookings.filter((b) => b.status === "PENDING").length,
-    ACCEPTED: bookings.filter((b) => b.status === "ACCEPTED").length,
-    CONFIRMED: bookings.filter((b) => b.status === "CONFIRMED").length,
-    COMPLETED: bookings.filter((b) => b.status === "COMPLETED").length,
-    CANCELLED: bookings.filter((b) => b.status === "CANCELLED").length,
+    ALL: safeBookings.length,
+    PENDING: safeBookings.filter((b) => b.status === "PENDING").length,
+    ACCEPTED: safeBookings.filter((b) => b.status === "ACCEPTED").length,
+    CONFIRMED: safeBookings.filter((b) => b.status === "CONFIRMED").length,
+    COMPLETED: safeBookings.filter((b) => b.status === "COMPLETED").length,
+    CANCELLED: safeBookings.filter((b) => b.status === "CANCELLED").length,
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Spinner size="lg" />
-      </div>
+      <DashboardLayout title="Manage Bookings">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Spinner size="lg" />
+        </div>
+      </DashboardLayout>
     );
   }
 
   if (error) {
     return (
-      <Alert variant="error" title="Error">
-        {error}
-      </Alert>
+      <DashboardLayout title="Manage Bookings">
+        <Alert variant="error" title="Error">
+          {error}
+        </Alert>
+      </DashboardLayout>
     );
   }
 
   return (
+    <DashboardLayout title="Manage Bookings">
     <div className="space-y-6">
       {/* Header */}
       <div>
@@ -419,5 +430,6 @@ export default function VendorBookingsPage() {
         </Modal>
       )}
     </div>
+    </DashboardLayout>
   );
 }
