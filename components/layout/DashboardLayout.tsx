@@ -51,7 +51,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   showBreadcrumbs = true,
   className,
 }) => {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   // Get navigation items based on user role
   const getNavItems = () => {
@@ -68,6 +68,18 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         return customerNavItems;
     }
   };
+
+  // Show loading state to prevent FOIC
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+          <p className="mt-4 text-text-secondary">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   const navItems = getNavItems();
 

@@ -52,7 +52,29 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
     }
   };
 
+  // Get role-specific items for authenticated users
+  const getRoleNavItems = () => {
+    if (!session) return [];
+
+    switch (session.user.role) {
+      case UserRole.CUSTOMER:
+        return customerNavItems;
+      case UserRole.VENDOR:
+        return vendorNavItems;
+      case UserRole.ADMIN:
+        return adminNavItems;
+      default:
+        return [];
+    }
+  };
+
+  // Desktop: role-specific only (existing behavior)
   const navItems = getNavItems();
+
+  // Mobile: public items + role items (for authenticated users)
+  const mobileNavItems = session
+    ? [...publicNavItems, ...getRoleNavItems()]
+    : publicNavItems;
 
   return (
     <header className={`neo-glass-header sticky top-0 z-30 border-b-3 border-black ${className}`}>
@@ -173,16 +195,48 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
       >
         <div className="flex flex-col gap-6">
           {/* Navigation Links */}
-          <NavMenu
-            items={navItems}
-            userRole={session?.user.role}
-            mobile
-            onItemClick={() => setMobileMenuOpen(false)}
-          />
+          {session ? (
+            <>
+              {/* Public Navigation Section */}
+              <div>
+                <div className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2 px-3">
+                  Explore
+                </div>
+                <NavMenu
+                  items={publicNavItems}
+                  userRole={session?.user.role}
+                  mobile
+                  onItemClick={() => setMobileMenuOpen(false)}
+                />
+              </div>
+
+              {/* Role-Specific Navigation Section */}
+              <div className="pt-4 border-t border-border">
+                <div className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2 px-3">
+                  {session.user.role === UserRole.CUSTOMER && "My Account"}
+                  {session.user.role === UserRole.VENDOR && "Vendor Tools"}
+                  {session.user.role === UserRole.ADMIN && "Admin"}
+                </div>
+                <NavMenu
+                  items={getRoleNavItems()}
+                  userRole={session?.user.role}
+                  mobile
+                  onItemClick={() => setMobileMenuOpen(false)}
+                />
+              </div>
+            </>
+          ) : (
+            <NavMenu
+              items={mobileNavItems}
+              userRole={session?.user.role}
+              mobile
+              onItemClick={() => setMobileMenuOpen(false)}
+            />
+          )}
 
           {/* User Section */}
           <div className="pt-4 border-t border-border">
-            <UserMenu />
+            <UserMenu compact />
           </div>
         </div>
       </MobileDrawer>
