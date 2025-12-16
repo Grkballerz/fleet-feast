@@ -76,6 +76,7 @@ export interface PublicTruckProfile {
   status: VendorStatus;
   approvedAt: Date | null;
   createdAt: Date;
+  coverImageUrl?: string | null;
   // Calculated fields
   averageRating?: number;
   totalReviews?: number;

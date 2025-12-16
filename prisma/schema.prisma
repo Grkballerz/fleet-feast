@@ -98,17 +98,17 @@ enum TokenType {
 }
 
 enum NotificationType {
-  BOOKING_REQUEST        // Vendor: New booking request received
-  BOOKING_ACCEPTED       // Customer: Booking was accepted
-  BOOKING_DECLINED       // Customer: Booking was declined
-  BOOKING_CANCELLED      // Both: Booking was cancelled
-  PAYMENT_CONFIRMED      // Both: Payment was successful
-  NEW_MESSAGE            // Both: New message in booking conversation
-  EVENT_REMINDER         // Both: Event happening in 24 hours
-  REVIEW_PROMPT          // Both: Time to leave a review (7 days after event)
-  DISPUTE_CREATED        // Both: Dispute was created
-  DISPUTE_RESOLVED       // Both: Dispute was resolved
-  VIOLATION_WARNING      // User: Received a violation warning
+  BOOKING_REQUEST // Vendor: New booking request received
+  BOOKING_ACCEPTED // Customer: Booking was accepted
+  BOOKING_DECLINED // Customer: Booking was declined
+  BOOKING_CANCELLED // Both: Booking was cancelled
+  PAYMENT_CONFIRMED // Both: Payment was successful
+  NEW_MESSAGE // Both: New message in booking conversation
+  EVENT_REMINDER // Both: Event happening in 24 hours
+  REVIEW_PROMPT // Both: Time to leave a review (7 days after event)
+  DISPUTE_CREATED // Both: Dispute was created
+  DISPUTE_RESOLVED // Both: Dispute was resolved
+  VIOLATION_WARNING // User: Received a violation warning
   ACCOUNT_STATUS_CHANGED // User: Account status changed
 }
 
@@ -160,19 +160,19 @@ model User {
   deletedAt DateTime? @map("deleted_at") // Soft delete
 
   // Relations
-  vendor             Vendor?
-  bookingsAsCustomer Booking[]           @relation("CustomerBookings")
-  bookingsAsVendor   Booking[]           @relation("VendorBookings")
-  sentMessages       Message[]           @relation("SentMessages")
-  reviewsGiven       Review[]            @relation("ReviewsGiven")
-  reviewsReceived    Review[]            @relation("ReviewsReceived")
+  vendor                  Vendor?
+  bookingsAsCustomer      Booking[]                @relation("CustomerBookings")
+  bookingsAsVendor        Booking[]                @relation("VendorBookings")
+  sentMessages            Message[]                @relation("SentMessages")
+  reviewsGiven            Review[]                 @relation("ReviewsGiven")
+  reviewsReceived         Review[]                 @relation("ReviewsReceived")
   violations              Violation[]
   disputesInitiated       Dispute[]
   verificationTokens      VerificationToken[]
-  quoteRequests           QuoteRequest[]              @relation("CustomerQuoteRequests")
-  quotes                  Quote[]                     @relation("VendorQuotes")
-  notifications           Notification[]              @relation("UserNotifications")
-  notificationPreferences NotificationPreferences?    @relation("UserNotificationPreferences")
+  quoteRequests           QuoteRequest[]           @relation("CustomerQuoteRequests")
+  quotes                  Quote[]                  @relation("VendorQuotes")
+  notifications           Notification[]           @relation("UserNotifications")
+  notificationPreferences NotificationPreferences? @relation("UserNotificationPreferences")
 
   @@index([email])
   @@index([role, status])
@@ -185,10 +185,11 @@ model Vendor {
   userId String @unique @map("user_id")
 
   // Business Information
-  businessName String      @map("business_name")
-  cuisineType  CuisineType @map("cuisine_type")
-  description  String?     @db.Text
-  priceRange   PriceRange  @map("price_range")
+  businessName  String      @map("business_name")
+  cuisineType   CuisineType @map("cuisine_type")
+  description   String?     @db.Text
+  coverImageUrl String?     @map("cover_image_url")
+  priceRange    PriceRange  @map("price_range")
 
   // Capacity
   capacityMin Int @map("capacity_min") // Minimum guest count
@@ -313,9 +314,9 @@ model Booking {
   specialRequests String?   @map("special_requests") @db.Text
 
   // Financial
-  totalAmount  Decimal @map("total_amount") @db.Decimal(10, 2)
-  discountAmount Decimal? @map("discount_amount") @db.Decimal(10, 2) @default(0) // 5% loyalty discount
-  loyaltyApplied Boolean  @map("loyalty_applied") @default(false) // Whether loyalty discount was applied
+  totalAmount    Decimal  @map("total_amount") @db.Decimal(10, 2)
+  discountAmount Decimal? @default(0) @map("discount_amount") @db.Decimal(10, 2) // 5% loyalty discount
+  loyaltyApplied Boolean  @default(false) @map("loyalty_applied") // Whether loyalty discount was applied
 
   platformFee  Decimal @map("platform_fee") @db.Decimal(10, 2) // 15% default, 10% for loyalty
   vendorPayout Decimal @map("vendor_payout") @db.Decimal(10, 2) // totalAmount - platformFee
@@ -571,7 +572,7 @@ model QuoteRequest {
   location   String    @db.Text
 
   // Requirements
-  requirements String  @db.Text // Custom requirements/description
+  requirements String   @db.Text // Custom requirements/description
   budget       Decimal? @db.Decimal(10, 2) // Optional budget indication
 
   // Status

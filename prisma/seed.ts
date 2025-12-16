@@ -133,6 +133,7 @@ async function main() {
       status: 'APPROVED',
       approvedAt: new Date('2024-10-15'),
       stripeConnected: true,
+      coverImageUrl: '/images/generated/tacos-loco-truck.webp',
     },
     {
       email: 'bbq.masters@fleetfeast.com',
@@ -146,6 +147,7 @@ async function main() {
       status: 'APPROVED',
       approvedAt: new Date('2024-09-20'),
       stripeConnected: true,
+      coverImageUrl: '/images/generated/bbq-masters-truck.webp',
     },
     {
       email: 'asian.fusion@fleetfeast.com',
@@ -159,6 +161,7 @@ async function main() {
       status: 'APPROVED',
       approvedAt: new Date('2024-11-01'),
       stripeConnected: true,
+      coverImageUrl: '/images/generated/asian-fusion-truck.webp',
     },
     {
       email: 'italian.delight@fleetfeast.com',
@@ -172,6 +175,7 @@ async function main() {
       status: 'APPROVED',
       approvedAt: new Date('2024-08-10'),
       stripeConnected: true,
+      coverImageUrl: '/images/generated/italian-delight-truck.webp',
     },
     {
       email: 'vegan.vibes@fleetfeast.com',
@@ -198,6 +202,7 @@ async function main() {
       status: 'APPROVED',
       approvedAt: new Date('2024-09-15'),
       stripeConnected: true,
+      coverImageUrl: '/images/generated/seafood-shack-truck.webp',
     },
     {
       email: 'coffee.cart@fleetfeast.com',
@@ -282,6 +287,7 @@ async function main() {
         approvedBy: vendor.approvedAt ? admins[0].id : null,
         stripeAccountId: vendor.stripeConnected ? `acct_${user.id.substring(0, 16)}` : null,
         stripeConnected: vendor.stripeConnected,
+        coverImageUrl: (vendor as any).coverImageUrl || null,
       },
     });
 
