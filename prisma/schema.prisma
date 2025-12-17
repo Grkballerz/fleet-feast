@@ -196,8 +196,11 @@ model Vendor {
   capacityMax Int @map("capacity_max") // Maximum guest count
 
   // Service Area
-  serviceArea String? @map("service_area") // e.g., "Manhattan, Brooklyn"
-  location    String? // Stored as "lat,lng" for proximity searches
+  serviceArea   String? @map("service_area") // e.g., "Manhattan, Brooklyn"
+  location      String? // Stored as "lat,lng" for proximity searches
+  serviceRadius Int?    @map("service_radius") // Miles: 5, 10, 25, 50, 100
+  latitude      Float?
+  longitude     Float?
 
   // Stripe Connect
   stripeAccountId String? @unique @map("stripe_account_id")

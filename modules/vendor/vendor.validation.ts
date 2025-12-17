@@ -54,6 +54,27 @@ export const vendorApplicationSchema = z.object({
     .string()
     .regex(/^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/, "Location must be in 'lat,lng' format")
     .optional(),
+
+  serviceRadius: z
+    .number()
+    .int("Service radius must be a whole number")
+    .refine(
+      (val) => [5, 10, 25, 50, 100].includes(val),
+      "Service radius must be 5, 10, 25, 50, or 100 miles"
+    )
+    .optional(),
+
+  latitude: z
+    .number()
+    .min(-90, "Latitude must be between -90 and 90")
+    .max(90, "Latitude must be between -90 and 90")
+    .optional(),
+
+  longitude: z
+    .number()
+    .min(-180, "Longitude must be between -180 and 180")
+    .max(180, "Longitude must be between -180 and 180")
+    .optional(),
 }).refine(
   (data) => data.capacityMax >= data.capacityMin,
   {
@@ -108,6 +129,27 @@ export const vendorProfileUpdateSchema = z.object({
   location: z
     .string()
     .regex(/^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/, "Location must be in 'lat,lng' format")
+    .optional(),
+
+  serviceRadius: z
+    .number()
+    .int("Service radius must be a whole number")
+    .refine(
+      (val) => [5, 10, 25, 50, 100].includes(val),
+      "Service radius must be 5, 10, 25, 50, or 100 miles"
+    )
+    .optional(),
+
+  latitude: z
+    .number()
+    .min(-90, "Latitude must be between -90 and 90")
+    .max(90, "Latitude must be between -90 and 90")
+    .optional(),
+
+  longitude: z
+    .number()
+    .min(-180, "Longitude must be between -180 and 180")
+    .max(180, "Longitude must be between -180 and 180")
     .optional(),
 }).refine(
   (data) => {

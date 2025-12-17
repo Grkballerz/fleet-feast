@@ -31,6 +31,9 @@ export interface VendorProfileUpdateData {
   capacityMax?: number;
   serviceArea?: string;
   location?: string;
+  serviceRadius?: number;
+  latitude?: number;
+  longitude?: number;
 }
 
 /**
@@ -78,6 +81,9 @@ export interface PublicVendorProfile {
 export interface VendorProfile extends PublicVendorProfile {
   userId: string;
   location: string | null;
+  serviceRadius: number | null;
+  latitude: number | null;
+  longitude: number | null;
   stripeAccountId: string | null;
   stripeConnected: boolean;
   rejectionReason: string | null;

@@ -16,6 +16,8 @@ import {
   Users,
   Info,
   ExternalLink,
+  MapPin,
+  Navigation,
 } from "lucide-react";
 
 interface VendorProfile {
@@ -29,6 +31,9 @@ interface VendorProfile {
   logoUrl?: string;
   truckPhotoUrls: string[];
   status: string;
+  serviceRadius?: number;
+  latitude?: number;
+  longitude?: number;
 }
 
 const CUISINE_OPTIONS = [
@@ -56,6 +61,9 @@ export default function VendorProfilePage() {
     pricePerPerson: 0,
     minimumGuests: 0,
     maximumGuests: 0,
+    serviceRadius: undefined as number | undefined,
+    latitude: undefined as number | undefined,
+    longitude: undefined as number | undefined,
   });
 
   useEffect(() => {
@@ -81,6 +89,9 @@ export default function VendorProfilePage() {
         pricePerPerson: profileData.pricePerPerson || 0,
         minimumGuests: profileData.minimumGuests || 0,
         maximumGuests: profileData.maximumGuests || 0,
+        serviceRadius: profileData.serviceRadius,
+        latitude: profileData.latitude,
+        longitude: profileData.longitude,
       });
     } catch (err: any) {
       setError(err.message || "Failed to load profile");
@@ -140,6 +151,28 @@ export default function VendorProfilePage() {
         ? prev.cuisineType.filter((c) => c !== cuisine)
         : [...prev.cuisineType, cuisine],
     }));
+  };
+
+  const getCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setError("Geolocation is not supported by your browser");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setFormData((prev) => ({
+          ...prev,
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        }));
+        setSuccessMessage("Location detected successfully!");
+        setTimeout(() => setSuccessMessage(null), 3000);
+      },
+      (error) => {
+        setError(`Unable to get location: ${error.message}`);
+      }
+    );
   };
 
   const getStatusBadge = (status: string) => {
@@ -305,6 +338,96 @@ export default function VendorProfilePage() {
             min={formData.minimumGuests}
             required
           />
+        </div>
+      </div>
+
+      {/* Service Area */}
+      <div className="neo-card-glass neo-shadow rounded-neo p-6">
+        <h3 className="text-lg font-semibold text-text-primary neo-heading mb-4">
+          Service Area
+        </h3>
+        <p className="text-sm text-text-secondary mb-4">
+          Set your base location and service radius to help customers find you
+        </p>
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <Input
+                label="Latitude"
+                type="number"
+                step="0.000001"
+                value={formData.latitude || ""}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    latitude: e.target.value ? parseFloat(e.target.value) : undefined,
+                  })
+                }
+                icon={<MapPin className="w-4 h-4" />}
+                placeholder="40.7128"
+              />
+            </div>
+            <div>
+              <Input
+                label="Longitude"
+                type="number"
+                step="0.000001"
+                value={formData.longitude || ""}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    longitude: e.target.value ? parseFloat(e.target.value) : undefined,
+                  })
+                }
+                icon={<MapPin className="w-4 h-4" />}
+                placeholder="-74.0060"
+              />
+            </div>
+          </div>
+
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={getCurrentLocation}
+            type="button"
+          >
+            <Navigation className="w-4 h-4 mr-2" />
+            Use Current Location
+          </Button>
+
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-2">
+              Service Radius
+            </label>
+            <div className="grid grid-cols-5 gap-2">
+              {[5, 10, 25, 50, 100].map((radius) => (
+                <button
+                  key={radius}
+                  type="button"
+                  onClick={() => setFormData({ ...formData, serviceRadius: radius })}
+                  className={`
+                    px-3 py-2 rounded-neo font-medium text-sm transition-all
+                    ${
+                      formData.serviceRadius === radius
+                        ? "neo-btn-primary"
+                        : "neo-btn-secondary"
+                    }
+                  `}
+                >
+                  {radius}mi
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-text-secondary mt-2">
+              Select how far you're willing to travel to serve customers
+            </p>
+          </div>
+
+          {formData.latitude && formData.longitude && formData.serviceRadius && (
+            <Alert variant="info">
+              Service area: {formData.serviceRadius} miles from ({formData.latitude.toFixed(4)}, {formData.longitude.toFixed(4)})
+            </Alert>
+          )}
         </div>
       </div>
 
