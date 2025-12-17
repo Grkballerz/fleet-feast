@@ -1,0 +1,134 @@
+
+> fleet-feast@0.1.0 dev
+> next dev
+
+  ▲ Next.js 14.2.33
+  - Local:        http://localhost:3000
+  - Environments: .env
+
+ ✓ Starting...
+ ✓ Ready in 2.2s
+ ○ Compiling /middleware ...
+ ✓ Compiled /middleware in 1341ms (220 modules)
+[33m[auth][warn][debug-enabled][0m Read more: https://warnings.authjs.dev
+(node:27556) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ ○ Compiling / ...
+ ✓ Compiled / in 5.2s (811 modules)
+ ○ Compiling /api/trucks ...
+ ✓ Compiled /api/trucks in 5.4s (832 modules)
+prisma:query 
+    SELECT
+      v.*,
+      COALESCE(AVG(r.rating), 0) as avg_rating,
+      COUNT(r.id) as total_reviews
+    FROM vendors v
+    LEFT JOIN users u ON v.user_id = u.id
+    LEFT JOIN reviews r ON r.reviewee_id = u.id AND r.hidden = false AND r.deleted_at IS NULL
+    WHERE v.status = 'APPROVED' AND v.deleted_at IS NULL
+    GROUP BY v.id
+    HAVING true
+    ORDER BY v.approved_at DESC
+    LIMIT $1
+    OFFSET $2
+  
+prisma:query 
+    SELECT COUNT(DISTINCT v.id) as count
+    FROM vendors v
+    LEFT JOIN users u ON v.user_id = u.id
+    LEFT JOIN reviews r ON r.reviewee_id = u.id AND r.hidden = false AND r.deleted_at IS NULL
+    WHERE v.status = 'APPROVED' AND v.deleted_at IS NULL
+    GROUP BY v.id
+    HAVING true
+  
+ GET /api/trucks?limit=5 200 in 4969ms
+ GET / 200 in 10901ms
+ ○ Compiling /icon ...
+ ✓ Compiled /icon in 1081ms (375 modules)
+[33m[auth][warn][debug-enabled][0m Read more: https://warnings.authjs.dev
+ GET /icon?8d6d157290823def 200 in 1713ms
+ ○ Compiling /api/auth/[...nextauth] ...
+ ✓ Compiled /api/auth/[...nextauth] in 680ms (579 modules)
+prisma:query 
+    SELECT
+      v.*,
+      COALESCE(AVG(r.rating), 0) as avg_rating,
+      COUNT(r.id) as total_reviews
+    FROM vendors v
+    LEFT JOIN users u ON v.user_id = u.id
+    LEFT JOIN reviews r ON r.reviewee_id = u.id AND r.hidden = false AND r.deleted_at IS NULL
+    WHERE v.status = 'APPROVED' AND v.deleted_at IS NULL
+    GROUP BY v.id
+    HAVING true
+    ORDER BY v.approved_at DESC
+    LIMIT $1
+    OFFSET $2
+  
+prisma:query 
+    SELECT COUNT(DISTINCT v.id) as count
+    FROM vendors v
+    LEFT JOIN users u ON v.user_id = u.id
+    LEFT JOIN reviews r ON r.reviewee_id = u.id AND r.hidden = false AND r.deleted_at IS NULL
+    WHERE v.status = 'APPROVED' AND v.deleted_at IS NULL
+    GROUP BY v.id
+    HAVING true
+  
+ GET /api/trucks?limit=5 200 in 34ms
+ GET /api/auth/session 200 in 1181ms
+ GET / 200 in 343ms
+[33m[auth][warn][debug-enabled][0m Read more: https://warnings.authjs.dev
+ GET /api/auth/session 200 in 34ms
+ GET /api/auth/session 200 in 27ms
+ GET /api/auth/session 200 in 25ms
+ GET /api/auth/session 200 in 24ms
+prisma:query SELECT 1
+prisma:query 
+    SELECT
+      v.*,
+      COALESCE(AVG(r.rating), 0) as avg_rating,
+      COUNT(r.id) as total_reviews
+    FROM vendors v
+    LEFT JOIN users u ON v.user_id = u.id
+    LEFT JOIN reviews r ON r.reviewee_id = u.id AND r.hidden = false AND r.deleted_at IS NULL
+    WHERE v.status = 'APPROVED' AND v.deleted_at IS NULL
+    GROUP BY v.id
+    HAVING true
+    ORDER BY v.approved_at DESC
+    LIMIT $1
+    OFFSET $2
+  
+prisma:query 
+    SELECT COUNT(DISTINCT v.id) as count
+    FROM vendors v
+    LEFT JOIN users u ON v.user_id = u.id
+    LEFT JOIN reviews r ON r.reviewee_id = u.id AND r.hidden = false AND r.deleted_at IS NULL
+    WHERE v.status = 'APPROVED' AND v.deleted_at IS NULL
+    GROUP BY v.id
+    HAVING true
+  
+ GET /api/trucks?limit=5 200 in 24ms
+ ○ Compiling /trucks/[id] ...
+ ✓ Compiled /trucks/[id] in 853ms (1025 modules)
+ ✓ Compiled /api/trucks/[id] in 146ms (627 modules)
+prisma:query SELECT "public"."vendors"."id", "public"."vendors"."user_id", "public"."vendors"."business_name", "public"."vendors"."cuisine_type"::text, "public"."vendors"."description", "public"."vendors"."cover_image_url", "public"."vendors"."price_range"::text, "public"."vendors"."capacity_min", "public"."vendors"."capacity_max", "public"."vendors"."service_area", "public"."vendors"."location", "public"."vendors"."stripe_account_id", "public"."vendors"."stripe_connected", "public"."vendors"."status"::text, "public"."vendors"."approved_at", "public"."vendors"."approved_by", "public"."vendors"."rejection_reason", "public"."vendors"."created_at", "public"."vendors"."updated_at", "public"."vendors"."deleted_at" FROM "public"."vendors" WHERE ("public"."vendors"."id" = $1 AND "public"."vendors"."deleted_at" IS NULL) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."vendor_menus"."id", "public"."vendor_menus"."vendor_id", "public"."vendor_menus"."items", "public"."vendor_menus"."pricing_model", "public"."vendor_menus"."created_at", "public"."vendor_menus"."updated_at" FROM "public"."vendor_menus" WHERE "public"."vendor_menus"."vendor_id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."availability"."id", "public"."availability"."vendor_id", "public"."availability"."date", "public"."availability"."is_available", "public"."availability"."notes", "public"."availability"."created_at", "public"."availability"."updated_at" FROM "public"."availability" WHERE ("public"."availability"."date" >= $1 AND "public"."availability"."vendor_id" IN ($2)) ORDER BY "public"."availability"."date" ASC LIMIT $3 OFFSET $4
+prisma:query SELECT "public"."users"."id", "public"."users"."email", "public"."users"."password_hash", "public"."users"."role"::text, "public"."users"."status"::text, "public"."users"."status_expires_at", "public"."users"."created_at", "public"."users"."updated_at", "public"."users"."deleted_at" FROM "public"."users" WHERE "public"."users"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."reviews"."id", "public"."reviews"."booking_id", "public"."reviews"."reviewer_id", "public"."reviews"."reviewee_id", "public"."reviews"."rating", "public"."reviews"."content", "public"."reviews"."flagged", "public"."reviews"."hidden", "public"."reviews"."created_at", "public"."reviews"."updated_at", "public"."reviews"."deleted_at" FROM "public"."reviews" WHERE (("public"."reviews"."hidden" = $1 AND "public"."reviews"."deleted_at" IS NULL) AND "public"."reviews"."reviewee_id" IN ($2)) ORDER BY "public"."reviews"."created_at" DESC LIMIT $3 OFFSET $4
+ GET /api/trucks/647dd17a-da06-4ecd-a4ad-4be95687e2c7 200 in 672ms
+Error handling upgrade request TypeError: Cannot read properties of undefined (reading 'bind')
+    at DevServer.handleRequestImpl (C:\Users\grkba\.claude\projects\Fleet-Feast\node_modules\next\dist\server\base-server.js:476:50)
+ ✓ Compiled /_not-found in 381ms (868 modules)
+ GET /sw.js 404 in 558ms
+Error handling upgrade request TypeError: Cannot read properties of undefined (reading 'bind')
+    at DevServer.handleRequestImpl (C:\Users\grkba\.claude\projects\Fleet-Feast\node_modules\next\dist\server\base-server.js:476:50)
+ GET /sw.js 404 in 46ms
+Error handling upgrade request TypeError: Cannot read properties of undefined (reading 'bind')
+    at DevServer.handleRequestImpl (C:\Users\grkba\.claude\projects\Fleet-Feast\node_modules\next\dist\server\base-server.js:476:50)
+Error handling upgrade request TypeError: Cannot read properties of undefined (reading 'bind')
+    at DevServer.handleRequestImpl (C:\Users\grkba\.claude\projects\Fleet-Feast\node_modules\next\dist\server\base-server.js:476:50)
+ GET /sw.js 404 in 25ms
+Error handling upgrade request TypeError: Cannot read properties of undefined (reading 'bind')
+    at DevServer.handleRequestImpl (C:\Users\grkba\.claude\projects\Fleet-Feast\node_modules\next\dist\server\base-server.js:476:50)
+ GET /sw.js 404 in 29ms
+[?25h

@@ -27,6 +27,7 @@ interface TruckSearchResult {
   distance?: number;
   capacityMin?: number;
   capacityMax?: number;
+  coverImageUrl?: string | null;
 }
 
 interface SearchResponse {
@@ -447,9 +448,15 @@ export function SearchClient() {
               {/* Results */}
               <div className="animate-fade-in-up delay-100">
                 {viewMode === "grid" ? (
-                  <ResultsGrid trucks={trucks} isLoading={isLoading} />
+                  <ResultsGrid
+                    trucks={trucks.map(t => ({ ...t, imageUrl: t.coverImageUrl }))}
+                    isLoading={isLoading}
+                  />
                 ) : (
-                  <ResultsList trucks={trucks} isLoading={isLoading} />
+                  <ResultsList
+                    trucks={trucks.map(t => ({ ...t, imageUrl: t.coverImageUrl }))}
+                    isLoading={isLoading}
+                  />
                 )}
               </div>
 

@@ -28,7 +28,7 @@ async function getTruckProfile(id: string) {
     }
 
     const data = await res.json();
-    return data.truck;
+    return data.data?.truck;
   } catch (error) {
     console.error("Error fetching truck profile:", error);
     return null;
@@ -138,8 +138,8 @@ export default async function TruckProfilePage({
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
         {/* Booking CTA - Sticky on mobile */}
-        <div className="lg:hidden sticky top-4 z-10">
-          <Link href={`/booking?vendorId=${id}`}>
+        <div className="lg:hidden sticky top-20 z-10">
+          <Link href={`/customer/booking?vendorId=${id}`}>
             <button className="neo-btn-primary w-full px-6 py-3 flex items-center justify-center gap-2">
               <Calendar className="h-5 w-5" />
               Book This Truck
@@ -159,16 +159,16 @@ export default async function TruckProfilePage({
                   {description || "No description available."}
                 </p>
 
-                <div className="mt-6 grid grid-cols-2 gap-4 pt-6 neo-border-thin border-t">
+                <div className="mt-6 grid grid-cols-2 gap-6 pt-6 border-t border-gray-200">
                   <div>
-                    <p className="text-sm text-text-secondary">Capacity</p>
-                    <p className="font-bold">
+                    <p className="text-sm text-text-secondary mb-1">Capacity</p>
+                    <p className="font-bold text-text-primary">
                       {capacityMin} - {capacityMax} guests
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-text-secondary">Cuisine Type</p>
-                    <p className="font-bold">{cuisineType}</p>
+                    <p className="text-sm text-text-secondary mb-1">Cuisine Type</p>
+                    <p className="font-bold text-text-primary">{cuisineType}</p>
                   </div>
                 </div>
               </div>
@@ -193,7 +193,7 @@ export default async function TruckProfilePage({
           {/* Sidebar - Right Column (1/3 width) */}
           <div className="space-y-8">
             {/* Desktop Booking CTA */}
-            <div className="hidden lg:block sticky top-4">
+            <div className="hidden lg:block sticky top-20">
               <div className="neo-card-glass rounded-neo neo-shadow p-6 space-y-4">
                 <div className="text-center">
                   <p className="text-3xl font-bold text-primary">
@@ -202,7 +202,7 @@ export default async function TruckProfilePage({
                   <p className="text-sm text-text-secondary">per person</p>
                 </div>
 
-                <Link href={`/booking?vendorId=${id}`}>
+                <Link href={`/customer/booking?vendorId=${id}`}>
                   <button className="neo-btn-primary w-full px-6 py-3 flex items-center justify-center gap-2">
                     <Calendar className="h-5 w-5" />
                     Book This Truck
@@ -219,10 +219,6 @@ export default async function TruckProfilePage({
             <AvailabilityCalendar
               vendorId={id}
               availability={availability}
-              onDateSelect={(date) => {
-                // Navigate to booking page with selected date
-                window.location.href = `/booking?vendorId=${id}&date=${date}`;
-              }}
             />
           </div>
         </div>

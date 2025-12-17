@@ -19,6 +19,7 @@ export default auth((request) => {
     publicRoutes.includes(pathname) ||
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/api/trucks") ||
+    pathname.startsWith("/api/test-db") ||
     pathname.startsWith("/trucks") ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/static") ||

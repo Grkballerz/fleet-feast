@@ -190,14 +190,14 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ menu, className }) => 
       {/* Menu Items */}
       {displayCategory && (
         <div className="neo-card-glass rounded-neo neo-shadow p-4 md:p-6">
-          <div className="divide-y neo-border-thin">
+          <div className="divide-y divide-gray-200">
             {displayCategory.items.map((item, idx) => (
               <MenuItemCard key={idx} item={item} />
             ))}
           </div>
 
           {/* Item Count */}
-          <p className="text-sm text-text-secondary font-medium mt-4 pt-4 neo-border-thin border-t">
+          <p className="text-sm text-text-secondary font-medium mt-4 pt-4 border-t border-gray-200">
             {displayCategory.items.length} {displayCategory.items.length === 1 ? "item" : "items"}
           </p>
         </div>

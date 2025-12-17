@@ -63,8 +63,19 @@ export function LoginClient() {
       if (result?.error) {
         setError("Invalid email or password. Please try again.");
       } else if (result?.ok) {
+        // Fetch session to get user role for redirect
+        const sessionRes = await fetch("/api/auth/session");
+        const session = await sessionRes.json();
+
         // Redirect to dashboard based on user role
-        router.push("/customer");
+        const role = session?.user?.role;
+        if (role === "ADMIN") {
+          router.push("/admin/dashboard");
+        } else if (role === "VENDOR") {
+          router.push("/vendor/dashboard");
+        } else {
+          router.push("/customer/dashboard");
+        }
         router.refresh();
       }
     } catch (err) {

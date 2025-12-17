@@ -91,34 +91,41 @@ export const Testimonials: React.FC<TestimonialsProps> = ({
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
       </div>
 
-      {/* Stars Pattern */}
+      {/* Stars Pattern - using deterministic positions based on index */}
       <div className="absolute inset-0 overflow-hidden opacity-20">
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute text-yellow-400 animate-pulse"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 2}s`,
-              fontSize: `${12 + Math.random() * 12}px`,
-            }}
-          >
-            ★
-          </div>
-        ))}
+        {[...Array(20)].map((_, i) => {
+          // Deterministic pseudo-random based on index to avoid hydration mismatch
+          const left = ((i * 37 + 13) % 100);
+          const top = ((i * 53 + 7) % 100);
+          const delay = (i * 0.1) % 2;
+          const size = 12 + (i % 5) * 3;
+          return (
+            <div
+              key={i}
+              className="absolute text-yellow-400 animate-pulse"
+              style={{
+                left: `${left}%`,
+                top: `${top}%`,
+                animationDelay: `${delay}s`,
+                fontSize: `${size}px`,
+              }}
+            >
+              ★
+            </div>
+          );
+        })}
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <span className="inline-block px-4 py-1.5 rounded-neo neo-glass-brutal-primary neo-shadow-primary bg-white/10 text-white/90 text-sm font-bold mb-4">
+          <span className="inline-block px-4 py-1.5 rounded-neo neo-glass-brutal-primary neo-shadow-primary bg-white/10 text-gray-900 text-sm font-bold mb-4">
             ⭐ Customer Reviews
           </span>
           <h2 className="neo-heading-xl text-white mb-4">
             {title}
           </h2>
-          <p className="text-lg text-white/70 max-w-2xl mx-auto font-medium">
+          <p className="text-lg text-white max-w-2xl mx-auto font-medium">
             Join thousands of satisfied customers who trust Fleet Feast for their event catering
           </p>
         </div>
@@ -146,7 +153,7 @@ export const Testimonials: React.FC<TestimonialsProps> = ({
                 </div>
 
                 {/* Testimonial Text */}
-                <blockquote className="text-xl md:text-2xl text-white text-center leading-relaxed mb-8 font-medium">
+                <blockquote className="text-xl md:text-2xl text-gray-900 text-center leading-relaxed mb-8 font-medium">
                   "{testimonials[activeIndex].text}"
                 </blockquote>
 
@@ -160,11 +167,11 @@ export const Testimonials: React.FC<TestimonialsProps> = ({
                     className="ring-4 ring-white/20 mb-4"
                   />
                   <div className="text-center">
-                    <div className="neo-heading text-white text-lg">
+                    <div className="neo-heading text-gray-900 text-lg">
                       {testimonials[activeIndex].name}
                     </div>
                     {testimonials[activeIndex].role && (
-                      <div className="text-white/60 text-sm font-medium">
+                      <div className="text-gray-700 text-sm font-medium">
                         {testimonials[activeIndex].role}
                       </div>
                     )}
@@ -185,7 +192,8 @@ export const Testimonials: React.FC<TestimonialsProps> = ({
           {/* Navigation Arrows */}
           <button
             onClick={prevSlide}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-12 h-12 rounded-neo neo-glass-brutal neo-shadow flex items-center justify-center text-white hover:neo-shadow-lg transition-all duration-300 hover:scale-110"
+            aria-label="Previous testimonial"
+            className="absolute -left-4 xl:-left-14 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-neo neo-card-glass neo-shadow flex items-center justify-center text-gray-600 hover:text-primary hover:neo-shadow-lg transition-all duration-300 hover:scale-110"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -193,7 +201,8 @@ export const Testimonials: React.FC<TestimonialsProps> = ({
           </button>
           <button
             onClick={nextSlide}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-12 h-12 rounded-neo neo-glass-brutal neo-shadow flex items-center justify-center text-white hover:neo-shadow-lg transition-all duration-300 hover:scale-110"
+            aria-label="Next testimonial"
+            className="absolute -right-4 xl:-right-14 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-neo neo-card-glass neo-shadow flex items-center justify-center text-gray-600 hover:text-primary hover:neo-shadow-lg transition-all duration-300 hover:scale-110"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -231,10 +240,10 @@ export const Testimonials: React.FC<TestimonialsProps> = ({
               <div className="text-3xl mb-2 group-hover:scale-125 transition-transform duration-300">
                 {stat.icon}
               </div>
-              <div className="text-3xl md:text-4xl neo-heading text-white mb-1">
+              <div className="text-3xl md:text-4xl neo-heading text-gray-900 mb-1">
                 {stat.value}
               </div>
-              <div className="text-white/60 text-sm font-bold">{stat.label}</div>
+              <div className="text-gray-900 text-sm font-bold">{stat.label}</div>
             </div>
           ))}
         </div>

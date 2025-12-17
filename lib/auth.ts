@@ -1,5 +1,4 @@
 import NextAuth, { NextAuthConfig } from "next-auth";
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "./prisma";
 import bcrypt from "bcryptjs";
@@ -17,9 +16,11 @@ import { UserRole, UserStatus } from "@prisma/client";
  * - Account status checking (Active, Suspended, Banned)
  *
  * Reference: https://next-auth.js.org/configuration/options
+ *
+ * Note: PrismaAdapter removed - not needed for JWT strategy with Credentials provider
  */
 export const authOptions: NextAuthConfig = {
-  adapter: PrismaAdapter(prisma) as any,
+  // No adapter needed for JWT + Credentials
 
   session: {
     strategy: "jwt",

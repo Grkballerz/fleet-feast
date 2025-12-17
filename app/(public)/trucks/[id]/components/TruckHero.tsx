@@ -89,7 +89,7 @@ export const TruckHero: React.FC<TruckHeroProps> = ({ truck, className }) => {
             <Badge
               variant="primary"
               size="md"
-              className="neo-glass-brutal rounded-neo text-white neo-shadow-primary"
+              className="neo-glass-brutal rounded-neo text-black neo-shadow-primary"
             >
               {cuisineTypeDisplay[truck.cuisineType]}
             </Badge>
@@ -113,7 +113,7 @@ export const TruckHero: React.FC<TruckHeroProps> = ({ truck, className }) => {
             {rating > 0 && (
               <div className="flex items-center gap-2 neo-glass-brutal rounded-neo px-3 py-1 neo-shadow">
                 <Rating value={rating} readOnly size="md" />
-                <span className="text-sm md:text-base font-bold">
+                <span className="text-sm md:text-base font-bold text-black">
                   {rating.toFixed(1)}
                 </span>
               </div>
@@ -128,8 +128,8 @@ export const TruckHero: React.FC<TruckHeroProps> = ({ truck, className }) => {
 
             {/* Price Range */}
             <div className="flex items-center gap-2 neo-glass-brutal rounded-neo px-3 py-1 neo-shadow">
-              <span className="text-sm md:text-base text-white/90 font-medium">Price:</span>
-              <span className="text-lg md:text-xl font-black tracking-wider">
+              <span className="text-sm md:text-base text-black font-medium">Price:</span>
+              <span className="text-lg md:text-xl font-black tracking-wider text-black">
                 {priceRangeDisplay[truck.priceRange]}
               </span>
             </div>

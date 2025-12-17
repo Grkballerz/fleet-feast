@@ -1,9 +1,14 @@
 "use client";
 
 import React, { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 
 export interface MobileDrawerProps {
+  /**
+   * Unique ID for accessibility
+   */
+  id?: string;
   /**
    * Whether the drawer is open
    */
@@ -36,11 +41,19 @@ export interface MobileDrawerProps {
  * ```
  */
 export const MobileDrawer: React.FC<MobileDrawerProps> = ({
+  id,
   isOpen,
   onClose,
   children,
   className,
 }) => {
+  const [mounted, setMounted] = React.useState(false);
+
+  // Ensure component is mounted (client-side only)
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Lock body scroll when drawer is open
   useEffect(() => {
     if (isOpen) {
@@ -66,23 +79,24 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
     return () => document.removeEventListener("keydown", handleEscape);
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!mounted || !isOpen) return null;
 
-  return (
+  const drawerContent = (
     <>
       {/* Overlay */}
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998] lg:hidden"
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* Drawer */}
+      {/* Drawer - Slides in from RIGHT */}
       <div
+        id={id}
         className={cn(
-          "fixed top-0 left-0 bottom-0 w-[280px] neo-glass-brutal z-50 lg:hidden border-r-3 border-black",
+          "fixed top-0 right-0 bottom-0 w-[280px] neo-glass-brutal z-[9999] lg:hidden border-l-3 border-black",
           "transform transition-transform duration-300 ease-in-out",
-          isOpen ? "translate-x-0" : "-translate-x-full",
+          isOpen ? "translate-x-0" : "translate-x-full",
           className
         )}
         role="dialog"
@@ -120,4 +134,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
       </div>
     </>
   );
+
+  // Render drawer using Portal to escape Header's stacking context
+  return createPortal(drawerContent, document.body);
 };

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
@@ -14,7 +15,6 @@ export interface AvailabilityEntry {
 export interface AvailabilityCalendarProps {
   vendorId: string;
   availability: AvailabilityEntry[];
-  onDateSelect?: (date: string) => void;
   className?: string;
 }
 
@@ -77,9 +77,9 @@ const isPastDate = (date: Date): boolean => {
 export const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
   vendorId,
   availability,
-  onDateSelect,
   className,
 }) => {
+  const router = useRouter();
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
   const year = currentMonth.getFullYear();
@@ -129,9 +129,9 @@ export const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
   // Handle date selection
   const handleDateClick = (date: Date) => {
     const status = getDayStatus(date);
-    if (status === "available" && onDateSelect) {
+    if (status === "available") {
       const dateStr = formatDateISO(date);
-      onDateSelect(dateStr);
+      router.push(`/customer/booking?vendorId=${vendorId}&date=${dateStr}`);
     }
   };
 
@@ -189,7 +189,7 @@ export const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
             const status = getDayStatus(date);
             const dateStr = formatDateISO(date);
             const entry = availabilityMap.get(dateStr);
-            const isClickable = status === "available" && onDateSelect;
+            const isClickable = status === "available";
 
             return (
               <button
@@ -228,7 +228,7 @@ export const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
         </div>
 
         {/* Legend */}
-        <div className="mt-6 pt-6 neo-border-thin border-t flex flex-wrap gap-4 text-sm font-medium">
+        <div className="mt-6 pt-6 border-t border-gray-200 flex flex-wrap gap-4 text-sm font-medium">
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 bg-success/10 neo-border-thick border-success rounded-neo" />
             <span className="text-text-secondary">Available</span>

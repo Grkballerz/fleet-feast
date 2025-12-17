@@ -68,16 +68,16 @@ export const FeaturedTrucksClient: React.FC<FeaturedTrucksClientProps> = ({
           </p>
         </div>
 
-        {/* Trucks Grid/Carousel with Navigation */}
+        {/* Trucks Carousel with Navigation */}
         <div className="relative">
-          {/* Navigation Arrows - positioned at edges of container, centered on card images */}
+          {/* Navigation Arrows - visible on tablet (md) and desktop, hidden on mobile */}
           <button
             onClick={() => scroll("left")}
             aria-label="Scroll left"
-            className="hidden lg:flex absolute -left-4 xl:-left-14 top-28 z-20 w-12 h-12 rounded-neo neo-card-glass neo-shadow items-center justify-center text-gray-600 hover:text-primary hover:neo-shadow-lg transition-all duration-300 hover:scale-110"
+            className="hidden md:flex absolute -left-2 lg:-left-4 xl:-left-14 top-28 z-20 w-10 h-10 lg:w-12 lg:h-12 rounded-neo neo-card-glass neo-shadow items-center justify-center text-gray-600 hover:text-primary hover:neo-shadow-lg transition-all duration-300 hover:scale-110"
           >
             <svg
-              className="w-6 h-6"
+              className="w-5 h-5 lg:w-6 lg:h-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -93,10 +93,10 @@ export const FeaturedTrucksClient: React.FC<FeaturedTrucksClientProps> = ({
           <button
             onClick={() => scroll("right")}
             aria-label="Scroll right"
-            className="hidden lg:flex absolute -right-4 xl:-right-14 top-28 z-20 w-12 h-12 rounded-neo neo-card-glass neo-shadow items-center justify-center text-gray-600 hover:text-primary hover:neo-shadow-lg transition-all duration-300 hover:scale-110"
+            className="hidden md:flex absolute -right-2 lg:-right-4 xl:-right-14 top-28 z-20 w-10 h-10 lg:w-12 lg:h-12 rounded-neo neo-card-glass neo-shadow items-center justify-center text-gray-600 hover:text-primary hover:neo-shadow-lg transition-all duration-300 hover:scale-110"
           >
             <svg
-              className="w-6 h-6"
+              className="w-5 h-5 lg:w-6 lg:h-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -110,16 +110,16 @@ export const FeaturedTrucksClient: React.FC<FeaturedTrucksClientProps> = ({
             </svg>
           </button>
 
-          {/* Trucks Grid/Carousel */}
+          {/* Trucks Carousel - horizontal scroll at all breakpoints */}
           <div
             ref={scrollRef}
-            className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 overflow-x-auto md:overflow-visible pb-4 md:pb-0 snap-x snap-mandatory scrollbar-hide"
+            className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide scroll-smooth"
           >
             {trucks.map((truck, index) => (
               <Link
                 key={truck.id}
                 href={`/trucks/${truck.id}`}
-                className="group flex-shrink-0 w-[280px] md:w-auto snap-center"
+                className="group flex-shrink-0 w-[280px] md:w-[320px] lg:w-[300px] snap-center"
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
               >

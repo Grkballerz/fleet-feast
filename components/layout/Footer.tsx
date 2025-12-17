@@ -167,7 +167,7 @@ export const Footer: React.FC<FooterProps> = ({ className }) => {
         {/* Bottom Bar */}
         <div className="pt-8 border-t-3 border-gray-800">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-gray-400 font-semibold">
+            <p className="text-sm text-gray-400 font-semibold" suppressHydrationWarning>
               © {currentYear} FleetFeast. All rights reserved.
             </p>
             <p className="text-sm text-gray-400 font-medium">

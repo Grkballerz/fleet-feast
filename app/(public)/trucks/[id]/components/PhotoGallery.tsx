@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -45,9 +46,23 @@ const Lightbox: React.FC<LightboxProps> = ({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [onClose, onNext, onPrev]);
 
-  return (
+  // Use portal to render at document body level
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+    // Prevent body scroll when lightbox is open
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
+  if (!mounted) return null;
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
+      className="fixed inset-0 z-[9999] bg-black flex items-center justify-center"
       onClick={onClose}
     >
       {/* Close Button */}
@@ -75,7 +90,7 @@ const Lightbox: React.FC<LightboxProps> = ({
 
       {/* Image */}
       <div
-        className="relative max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center p-4"
+        className="relative w-[95vw] h-[90vh] flex items-center justify-center"
         onClick={(e) => e.stopPropagation()}
       >
         <Image
@@ -106,7 +121,8 @@ const Lightbox: React.FC<LightboxProps> = ({
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 px-4 py-2 rounded-full bg-black/50 text-white text-sm">
         {currentIndex + 1} / {photos.length}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

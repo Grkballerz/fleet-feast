@@ -189,6 +189,7 @@ async function main() {
       status: 'APPROVED',
       approvedAt: new Date('2024-10-05'),
       stripeConnected: true,
+      coverImageUrl: '/images/generated/vegan-vibes-truck.webp',
     },
     {
       email: 'seafood.shack@fleetfeast.com',
@@ -216,6 +217,7 @@ async function main() {
       status: 'APPROVED',
       approvedAt: new Date('2024-11-10'),
       stripeConnected: true,
+      coverImageUrl: '/images/generated/artisan-coffee-truck.webp',
     },
     {
       email: 'dessert.dreams@fleetfeast.com',
@@ -229,6 +231,7 @@ async function main() {
       status: 'APPROVED',
       approvedAt: new Date('2024-10-25'),
       stripeConnected: true,
+      coverImageUrl: '/images/generated/dessert-dreams-truck.webp',
     },
     {
       email: 'pending.vendor@fleetfeast.com',

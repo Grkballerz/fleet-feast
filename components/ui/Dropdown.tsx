@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 
 export interface DropdownItem {
@@ -58,11 +59,32 @@ export const Dropdown: React.FC<DropdownProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(0);
+  const [mounted, setMounted] = useState(false);
+  const [position, setPosition] = useState({ top: 0, left: 0, right: 0 });
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLElement | null)[]>([]);
 
   // Get valid (non-divider) items
   const validItems = items.filter(item => !item.divider);
+
+  // Ensure component is mounted (client-side only for Portal)
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Calculate position when dropdown opens
+  useEffect(() => {
+    if (isOpen && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      setPosition({
+        top: rect.bottom + window.scrollY + 8, // 8px gap (mt-2)
+        left: rect.left + window.scrollX,
+        right: window.innerWidth - rect.right - window.scrollX,
+      });
+    }
+  }, [isOpen]);
 
   // Focus management when dropdown opens
   useEffect(() => {
@@ -74,10 +96,11 @@ export const Dropdown: React.FC<DropdownProps> = ({
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+      const target = event.target as Node;
+      const isOutsideTrigger = triggerRef.current && !triggerRef.current.contains(target);
+      const isOutsideMenu = menuRef.current && !menuRef.current.contains(target);
+
+      if (isOutsideTrigger && isOutsideMenu) {
         setIsOpen(false);
       }
     };
@@ -128,10 +151,93 @@ export const Dropdown: React.FC<DropdownProps> = ({
     }
   };
 
+  // Dropdown menu content
+  const dropdownMenu = isOpen && mounted ? (
+    <div
+      ref={menuRef}
+      className={cn(
+        "fixed z-[9999] min-w-[200px] neo-glass-brutal rounded-neo bg-white neo-shadow-lg",
+        className
+      )}
+      style={{
+        top: position.top,
+        ...(align === "right" ? { right: position.right } : { left: position.left }),
+      }}
+      role="menu"
+      onKeyDown={handleMenuKeyDown}
+    >
+      <div className="py-1">
+        {items.map((item, index) => {
+          // Divider
+          if (item.divider) {
+            return (
+              <div
+                key={`divider-${index}`}
+                className="my-1 border-t border-border"
+              />
+            );
+          }
+
+          // Get valid item index for ref array
+          const validItemIndex = validItems.findIndex(vi => vi.label === item.label);
+
+          // Menu item
+          const itemClasses = cn(
+            "flex items-center gap-3 px-4 py-2.5 text-sm transition-colors",
+            "hover:bg-secondary focus:bg-secondary focus:outline-none",
+            item.destructive
+              ? "text-error hover:bg-error/10 focus:bg-error/10"
+              : "text-text-primary"
+          );
+
+          if (item.href) {
+            return (
+              <a
+                key={index}
+                ref={(el) => (itemRefs.current[validItemIndex] = el)}
+                href={item.href}
+                className={itemClasses}
+                role="menuitem"
+                tabIndex={-1}
+                onClick={() => setIsOpen(false)}
+              >
+                {item.icon && (
+                  <span className="inline-flex shrink-0 h-5 w-5">
+                    {item.icon}
+                  </span>
+                )}
+                <span>{item.label}</span>
+              </a>
+            );
+          }
+
+          return (
+            <button
+              key={index}
+              ref={(el) => (itemRefs.current[validItemIndex] = el)}
+              className={cn(itemClasses, "w-full text-left")}
+              role="menuitem"
+              tabIndex={-1}
+              onClick={() => handleItemClick(item)}
+            >
+              {item.icon && (
+                <span className="inline-flex shrink-0 h-5 w-5">
+                  {item.icon}
+                </span>
+              )}
+              <span>{item.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  ) : null;
+
   return (
     <div className="relative inline-block" ref={dropdownRef}>
       {/* Trigger */}
       <div
+        ref={triggerRef}
         onClick={() => setIsOpen(!isOpen)}
         className="cursor-pointer"
         role="button"
@@ -148,83 +254,8 @@ export const Dropdown: React.FC<DropdownProps> = ({
         {trigger}
       </div>
 
-      {/* Dropdown Menu */}
-      {isOpen && (
-        <div
-          className={cn(
-            "absolute z-50 mt-2 min-w-[200px] neo-glass-brutal rounded-neo bg-white neo-shadow-lg",
-            align === "right" ? "right-0" : "left-0",
-            className
-          )}
-          role="menu"
-          onKeyDown={handleMenuKeyDown}
-        >
-          <div className="py-1">
-            {items.map((item, index) => {
-              // Divider
-              if (item.divider) {
-                return (
-                  <div
-                    key={`divider-${index}`}
-                    className="my-1 border-t border-border"
-                  />
-                );
-              }
-
-              // Get valid item index for ref array
-              const validItemIndex = validItems.findIndex(vi => vi.label === item.label);
-
-              // Menu item
-              const itemClasses = cn(
-                "flex items-center gap-3 px-4 py-2.5 text-sm transition-colors",
-                "hover:bg-secondary focus:bg-secondary focus:outline-none",
-                item.destructive
-                  ? "text-error hover:bg-error/10 focus:bg-error/10"
-                  : "text-text-primary"
-              );
-
-              if (item.href) {
-                return (
-                  <a
-                    key={index}
-                    ref={(el) => (itemRefs.current[validItemIndex] = el)}
-                    href={item.href}
-                    className={itemClasses}
-                    role="menuitem"
-                    tabIndex={-1}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {item.icon && (
-                      <span className="inline-flex shrink-0 h-5 w-5">
-                        {item.icon}
-                      </span>
-                    )}
-                    <span>{item.label}</span>
-                  </a>
-                );
-              }
-
-              return (
-                <button
-                  key={index}
-                  ref={(el) => (itemRefs.current[validItemIndex] = el)}
-                  className={cn(itemClasses, "w-full text-left")}
-                  role="menuitem"
-                  tabIndex={-1}
-                  onClick={() => handleItemClick(item)}
-                >
-                  {item.icon && (
-                    <span className="inline-flex shrink-0 h-5 w-5">
-                      {item.icon}
-                    </span>
-                  )}
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      {/* Dropdown Menu - rendered via Portal to escape overflow clipping */}
+      {mounted && dropdownMenu && createPortal(dropdownMenu, document.body)}
     </div>
   );
 };

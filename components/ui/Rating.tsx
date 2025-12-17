@@ -136,30 +136,40 @@ export const Rating = forwardRef<HTMLDivElement, RatingProps>(
             const starIndex = i + 1;
             const fill = getStarFill(starIndex);
 
+            // Use span for readonly, button for interactive
+            const StarWrapper = readOnly ? "span" : "button";
+
             return (
-              <button
+              <StarWrapper
                 key={starIndex}
-                type="button"
-                onClick={(e) => {
-                  if (!allowHalf || readOnly || !onChange) {
-                    handleClick(starIndex, false);
-                  } else {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const isLeftHalf = e.clientX - rect.left < rect.width / 2;
-                    handleClick(starIndex, isLeftHalf);
-                  }
-                }}
-                onMouseMove={(e) => handleMouseMove(starIndex, e)}
-                onMouseLeave={handleMouseLeave}
-                disabled={readOnly}
+                {...(!readOnly && { type: "button" })}
+                onClick={
+                  readOnly
+                    ? undefined
+                    : (e: React.MouseEvent<HTMLButtonElement>) => {
+                        if (!allowHalf || !onChange) {
+                          handleClick(starIndex, false);
+                        } else {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          const isLeftHalf = e.clientX - rect.left < rect.width / 2;
+                          handleClick(starIndex, isLeftHalf);
+                        }
+                      }
+                }
+                onMouseMove={
+                  readOnly
+                    ? undefined
+                    : (e: React.MouseEvent<HTMLButtonElement>) => handleMouseMove(starIndex, e)
+                }
+                onMouseLeave={readOnly ? undefined : handleMouseLeave}
                 className={cn(
                   "relative transition-transform drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)]",
                   !readOnly && "hover:scale-110 cursor-pointer",
                   readOnly && "cursor-default"
                 )}
-                aria-label={`Rate ${starIndex} stars`}
-                role={readOnly ? "presentation" : "radio"}
-                aria-checked={!readOnly && value === starIndex}
+                aria-label={readOnly ? undefined : `Rate ${starIndex} stars`}
+                role={readOnly ? undefined : "radio"}
+                aria-checked={readOnly ? undefined : value === starIndex}
               >
                 {/* Background star (empty) */}
                 <Star
@@ -181,7 +191,7 @@ export const Rating = forwardRef<HTMLDivElement, RatingProps>(
                     />
                   </div>
                 )}
-              </button>
+              </StarWrapper>
             );
           })}
         </div>
