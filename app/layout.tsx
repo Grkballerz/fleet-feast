@@ -16,11 +16,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Fleet Feast - Food Truck Marketplace",
   description:
-    "Connect with NYC's best food trucks for corporate events and private parties. Easy booking, secure payments, and verified vendors.",
+    "Connect with top food trucks for corporate events and private parties. Easy booking, secure payments, and verified vendors.",
   keywords: [
     "food truck",
     "catering",
-    "NYC",
+    "event catering",
     "corporate events",
     "private parties",
     "food truck booking",
@@ -31,13 +31,13 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://fleetfeast.com",
     title: "Fleet Feast - Food Truck Marketplace",
-    description: "Book verified food trucks for your events in NYC",
+    description: "Book verified food trucks for your events",
     siteName: "Fleet Feast",
   },
   twitter: {
     card: "summary_large_image",
     title: "Fleet Feast - Food Truck Marketplace",
-    description: "Book verified food trucks for your events in NYC",
+    description: "Book verified food trucks for your events",
   },
   robots: {
     index: true,

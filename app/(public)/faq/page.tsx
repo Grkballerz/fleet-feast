@@ -100,7 +100,7 @@ const faqItems: FAQItem[] = [
   {
     question: "What areas do you serve?",
     answer:
-      "Fleet Feast currently operates in New York City and surrounding areas. We're expanding to new cities regularly. Sign up for our newsletter to be notified when we launch in your area.",
+      "Fleet Feast operates nationwide with vendors in major cities across the country. Search your area to see available food trucks near you. We're continuously expanding our vendor network.",
     category: "general",
   },
   {

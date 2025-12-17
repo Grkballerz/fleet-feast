@@ -310,9 +310,9 @@ export default function ContactPage() {
                     <div>
                       <div className="font-medium text-gray-900">Office</div>
                       <p className="text-gray-600">
-                        123 Broadway
+                        Contact us for our
                         <br />
-                        New York, NY 10001
+                        office locations
                       </p>
                     </div>
                   </div>

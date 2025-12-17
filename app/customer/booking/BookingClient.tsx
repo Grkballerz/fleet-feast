@@ -432,7 +432,7 @@ export function BookingClient() {
                     }
                     error={formErrors.city}
                     required
-                    placeholder="New York"
+                    placeholder="Enter city"
                   />
 
                   <Input

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     "about fleet feast",
     "food truck marketplace",
     "company mission",
-    "NYC catering",
+    "event catering",
   ],
   openGraph: {
     title: "About Fleet Feast",

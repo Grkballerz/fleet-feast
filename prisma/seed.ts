@@ -123,7 +123,7 @@ async function main() {
   const vendorData = [
     {
       email: 'tacos.loco@fleetfeast.com',
-      businessName: "Tacos Loco NYC",
+      businessName: "Tacos Loco",
       cuisineType: 'MEXICAN',
       description: 'Authentic Mexican street tacos with homemade tortillas and fresh ingredients. Family recipes passed down for generations.',
       priceRange: 'MODERATE',

@@ -63,7 +63,7 @@ export const FeaturedTrucksClient: React.FC<FeaturedTrucksClientProps> = ({
           </span>
           <h2 className="neo-heading-xl text-gray-900 mb-4">{title}</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto font-medium">
-            Discover NYC&apos;s most popular food trucks, ready to make your event
+            Discover the most popular food trucks, ready to make your event
             unforgettable
           </p>
         </div>

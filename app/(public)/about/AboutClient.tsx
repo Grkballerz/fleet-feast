@@ -53,7 +53,7 @@ export function AboutClient() {
     { value: "500+", label: "Food Trucks", icon: TruckIcon },
     { value: "10K+", label: "Events Catered", icon: Heart },
     { value: "4.8", label: "Average Rating", icon: Star },
-    { value: "NYC", label: "Service Area", icon: MapPin },
+    { value: "50+", label: "Cities", icon: MapPin },
   ];
 
   const team = [
@@ -81,7 +81,7 @@ export function AboutClient() {
         <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 mb-8 animate-fade-in-up">
             <TruckIcon className="w-5 h-5 text-primary" />
-            <span className="text-white/90 text-sm font-medium">NYC's #1 Food Truck Marketplace</span>
+            <span className="text-white/90 text-sm font-medium">#1 Food Truck Marketplace</span>
           </div>
 
           <h1 className="neo-heading-xl text-white mb-6 animate-fade-in-up delay-100">
@@ -92,7 +92,7 @@ export function AboutClient() {
           </h1>
 
           <p className="text-xl md:text-2xl text-white/80 leading-relaxed max-w-2xl mx-auto animate-fade-in-up delay-200">
-            We're on a mission to make event catering delicious, easy, and stress-free by connecting you with NYC's best food trucks.
+            We're on a mission to make event catering delicious, easy, and stress-free by connecting you with the best food trucks.
           </p>
 
           <div className="mt-12 flex flex-wrap justify-center gap-4 animate-fade-in-up delay-300">
@@ -199,7 +199,7 @@ export function AboutClient() {
                 <div className="relative">
                   <div className="absolute -left-10 top-2 w-4 h-4 rounded-full bg-yellow-500 shadow-lg shadow-yellow-500/50" />
                   <p className="text-lg text-gray-600 leading-relaxed">
-                    Today, Fleet Feast connects hundreds of event planners with verified food truck vendors across New York City, making every event unforgettable. Our platform handles everything from discovery to payment.
+                    Today, Fleet Feast connects hundreds of event planners with verified food truck vendors across the country, making every event unforgettable. Our platform handles everything from discovery to payment.
                   </p>
                 </div>
               </div>
@@ -279,7 +279,7 @@ export function AboutClient() {
               </span>
             </h2>
             <p className="text-xl text-white/70 max-w-2xl mx-auto">
-              We're a passionate team dedicated to revolutionizing event catering in New York City.
+              We're a passionate team dedicated to revolutionizing event catering nationwide.
             </p>
           </div>
 

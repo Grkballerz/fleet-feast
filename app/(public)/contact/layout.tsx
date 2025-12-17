@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     "customer support",
     "food truck help",
     "vendor support",
-    "NYC food truck contact",
+    "food truck contact",
   ],
   openGraph: {
     title: "Contact Us | Fleet Feast",

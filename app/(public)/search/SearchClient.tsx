@@ -256,7 +256,7 @@ export function SearchClient() {
                 <TruckIcon className="w-6 h-6 text-white" />
               </div>
               <span className="text-white/60 text-sm font-medium uppercase tracking-wider">
-                NYC Food Truck Marketplace
+                Food Truck Marketplace
               </span>
             </div>
 
