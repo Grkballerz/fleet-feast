@@ -3,7 +3,7 @@
  * Performance-optimized query builders with selective field loading
  */
 
-import { Prisma } from '@prisma/client';
+import { Prisma, PrismaClient, CuisineType, PriceRange, BookingStatus } from '@prisma/client';
 
 /**
  * Selective field loading to reduce payload size
@@ -109,11 +109,11 @@ export function buildTruckSearchQuery(
 
   // Add filters
   if (filters.cuisineType?.length) {
-    where.cuisineType = { in: filters.cuisineType as any };
+    where.cuisineType = { in: filters.cuisineType as CuisineType[] };
   }
 
   if (filters.priceRange?.length) {
-    where.priceRange = { in: filters.priceRange as any };
+    where.priceRange = { in: filters.priceRange as PriceRange[] };
   }
 
   if (filters.capacityMin !== undefined) {
@@ -148,7 +148,7 @@ export function buildUserBookingsQuery(
       : { vendorId: userId };
 
   if (status?.length) {
-    whereClause.status = { in: status as any };
+    whereClause.status = { in: status as BookingStatus[] };
   }
 
   return {
@@ -198,11 +198,20 @@ export function buildUnreadNotificationsQuery(
 }
 
 /**
+ * Type for grouped review rating results
+ */
+type RatingGroup = {
+  revieweeId: string;
+  _avg: { rating: number | null };
+  _count: { id: number };
+};
+
+/**
  * Batch loading helper for N+1 query prevention
  * Use with DataLoader pattern if needed
  */
 export async function batchLoadVendorRatings(
-  prisma: any,
+  prisma: PrismaClient,
   vendorIds: string[]
 ): Promise<Map<string, { average: number; count: number }>> {
   const ratings = await prisma.review.groupBy({
@@ -217,7 +226,7 @@ export async function batchLoadVendorRatings(
   });
 
   return new Map(
-    ratings.map((r: any) => [
+    ratings.map((r: RatingGroup) => [
       r.revieweeId,
       {
         average: r._avg.rating || 0,

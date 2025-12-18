@@ -28,9 +28,9 @@ export interface ValidationSchemas {
  * Extended request with validated data
  */
 export interface ValidatedRequest<
-  TBody = any,
-  TQuery = any,
-  TParams = any
+  TBody = unknown,
+  TQuery = unknown,
+  TParams = unknown
 > extends NextRequest {
   validatedBody?: TBody;
   validatedQuery?: TQuery;
@@ -60,10 +60,10 @@ function formatZodErrors(error: ZodError): Record<string, string[]> {
 /**
  * Parse and validate request body (internal)
  */
-async function parseAndValidateBody(
+async function parseAndValidateBody<T = unknown>(
   req: NextRequest,
-  schema: ZodSchema
-): Promise<{ success: true; data: any } | { success: false; error: NextResponse }> {
+  schema: ZodSchema<T>
+): Promise<{ success: true; data: T } | { success: false; error: NextResponse }> {
   try {
     // Parse JSON body
     let body;
@@ -99,14 +99,14 @@ async function parseAndValidateBody(
 /**
  * Parse and validate query parameters (internal)
  */
-function parseAndValidateQuery(
+function parseAndValidateQuery<T = unknown>(
   req: NextRequest,
-  schema: ZodSchema
-): { success: true; data: any } | { success: false; error: NextResponse } {
+  schema: ZodSchema<T>
+): { success: true; data: T } | { success: false; error: NextResponse } {
   try {
     // Extract query parameters
     const searchParams = req.nextUrl.searchParams;
-    const query: Record<string, any> = {};
+    const query: Record<string, string | string[]> = {};
 
     searchParams.forEach((value, key) => {
       // Handle array params (key[]=value)
@@ -115,7 +115,7 @@ function parseAndValidateQuery(
         if (!query[arrayKey]) {
           query[arrayKey] = [];
         }
-        query[arrayKey].push(value);
+        (query[arrayKey] as string[]).push(value);
       } else {
         query[key] = value;
       }
@@ -144,10 +144,10 @@ function parseAndValidateQuery(
 /**
  * Validate route parameters (internal)
  */
-function parseAndValidateParams(
-  params: any,
-  schema: ZodSchema
-): { success: true; data: any } | { success: false; error: NextResponse } {
+function parseAndValidateParams<T = unknown>(
+  params: Record<string, unknown>,
+  schema: ZodSchema<T>
+): { success: true; data: T } | { success: false; error: NextResponse } {
   try {
     const result = schema.safeParse(params);
 
@@ -200,21 +200,21 @@ function parseAndValidateParams(
  *   }
  * );
  */
-export function validate<TBody = any, TQuery = any, TParams = any>(
+export function validate<TBody = unknown, TQuery = unknown, TParams = unknown>(
   schemas: ValidationSchemas,
   handler: (
     req: ValidatedRequest<TBody, TQuery, TParams>,
-    context?: any
+    context?: { params?: Record<string, unknown> }
   ) => Promise<NextResponse> | NextResponse
-): (req: NextRequest, context?: any) => Promise<NextResponse> {
-  return async (req: NextRequest, context?: any) => {
+): (req: NextRequest, context?: { params?: Record<string, unknown> }) => Promise<NextResponse> {
+  return async (req: NextRequest, context?: { params?: Record<string, unknown> }) => {
     const validatedReq = req as ValidatedRequest<TBody, TQuery, TParams>;
 
     try {
       // Validate body if schema provided
       if (schemas.body) {
         const result = await parseAndValidateBody(req, schemas.body);
-        if (!result.success) {
+        if (result.success === false) {
           return result.error;
         }
         validatedReq.validatedBody = result.data;
@@ -223,7 +223,7 @@ export function validate<TBody = any, TQuery = any, TParams = any>(
       // Validate query if schema provided
       if (schemas.query) {
         const result = parseAndValidateQuery(req, schemas.query);
-        if (!result.success) {
+        if (result.success === false) {
           return result.error;
         }
         validatedReq.validatedQuery = result.data;
@@ -232,7 +232,7 @@ export function validate<TBody = any, TQuery = any, TParams = any>(
       // Validate params if schema provided and context.params exists
       if (schemas.params && context?.params) {
         const result = parseAndValidateParams(context.params, schemas.params);
-        if (!result.success) {
+        if (result.success === false) {
           return result.error;
         }
         validatedReq.validatedParams = result.data;
@@ -250,39 +250,39 @@ export function validate<TBody = any, TQuery = any, TParams = any>(
 /**
  * Validate body only (shorthand)
  */
-export function validateBody<T = any>(
+export function validateBody<T = unknown>(
   schema: ZodSchema<T>,
   handler: (
     req: ValidatedRequest<T>,
-    context?: any
+    context?: { params?: Record<string, unknown> }
   ) => Promise<NextResponse> | NextResponse
-): (req: NextRequest, context?: any) => Promise<NextResponse> {
+): (req: NextRequest, context?: { params?: Record<string, unknown> }) => Promise<NextResponse> {
   return validate({ body: schema }, handler);
 }
 
 /**
  * Validate query only (shorthand)
  */
-export function validateQuery<T = any>(
+export function validateQuery<T = unknown>(
   schema: ZodSchema<T>,
   handler: (
-    req: ValidatedRequest<any, T>,
-    context?: any
+    req: ValidatedRequest<unknown, T>,
+    context?: { params?: Record<string, unknown> }
   ) => Promise<NextResponse> | NextResponse
-): (req: NextRequest, context?: any) => Promise<NextResponse> {
+): (req: NextRequest, context?: { params?: Record<string, unknown> }) => Promise<NextResponse> {
   return validate({ query: schema }, handler);
 }
 
 /**
  * Validate params only (shorthand)
  */
-export function validateParams<T = any>(
+export function validateParams<T = unknown>(
   schema: ZodSchema<T>,
   handler: (
-    req: ValidatedRequest<any, any, T>,
-    context?: any
+    req: ValidatedRequest<unknown, unknown, T>,
+    context?: { params?: Record<string, unknown> }
   ) => Promise<NextResponse> | NextResponse
-): (req: NextRequest, context?: any) => Promise<NextResponse> {
+): (req: NextRequest, context?: { params?: Record<string, unknown> }) => Promise<NextResponse> {
   return validate({ params: schema }, handler);
 }
 
@@ -350,7 +350,7 @@ export const CommonSchemas = {
  * Compose multiple validation middleware
  * Useful when you want to apply auth + validation together
  */
-export function compose<T extends (...args: any[]) => any>(
+export function compose<T extends (...args: never[]) => unknown>(
   ...middlewares: Array<(handler: T) => T>
 ): (handler: T) => T {
   return (handler: T) => {

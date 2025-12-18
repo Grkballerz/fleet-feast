@@ -41,27 +41,43 @@ export const ErrorCodes = {
 } as const;
 
 /**
+ * Recursive type for error details that allows nested objects
+ * while maintaining type safety
+ */
+export type ErrorDetails = {
+  [key: string]: string | number | boolean | null | undefined | string[] | number[] | ErrorDetails | ErrorDetails[];
+};
+
+/**
+ * Metadata for API responses with strict typing
+ */
+export interface ApiMeta {
+  page?: number;
+  limit?: number;
+  total?: number;
+  totalPages?: number;
+  hasNext?: boolean;
+  hasPrev?: boolean;
+  [key: string]: string | number | boolean | null | undefined;
+}
+
+/**
  * Error response structure
  */
 export interface ApiError {
   error: {
     code: string;
     message: string;
-    details?: Record<string, any>;
+    details?: ErrorDetails;
   };
 }
 
 /**
  * Success response structure
  */
-export interface ApiSuccess<T = any> {
+export interface ApiSuccess<T = unknown> {
   data: T;
-  meta?: {
-    page?: number;
-    limit?: number;
-    total?: number;
-    [key: string]: any;
-  };
+  meta?: ApiMeta;
 }
 
 /**
@@ -82,7 +98,7 @@ export function errorResponse(
   code: string,
   message: string,
   status: number = 500,
-  details?: Record<string, any>
+  details?: ErrorDetails
 ): NextResponse<ApiError> {
   return NextResponse.json(
     {
@@ -101,7 +117,7 @@ export function errorResponse(
  */
 export const ApiResponses = {
   // 400 Bad Request
-  badRequest: (message: string, details?: Record<string, any>) =>
+  badRequest: (message: string, details?: ErrorDetails) =>
     errorResponse(ErrorCodes.VALIDATION_ERROR, message, 400, details),
 
   validationError: (errors: Record<string, string[]>) =>
@@ -210,12 +226,14 @@ export const ApiResponses = {
 /**
  * Type guard for API errors
  */
-export function isApiError(value: any): value is ApiError {
+export function isApiError(value: unknown): value is ApiError {
   return (
-    value &&
+    value !== null &&
+    value !== undefined &&
     typeof value === "object" &&
     "error" in value &&
     typeof value.error === "object" &&
+    value.error !== null &&
     "code" in value.error &&
     "message" in value.error
   );
@@ -244,7 +262,7 @@ export function getErrorMessage(error: unknown): string {
  * Sanitize error details for logging
  * Removes sensitive information before logging
  */
-export function sanitizeErrorDetails(details: Record<string, any>): Record<string, any> {
+export function sanitizeErrorDetails(details: ErrorDetails): ErrorDetails {
   const sensitiveKeys = [
     "password",
     "passwordHash",
@@ -257,7 +275,7 @@ export function sanitizeErrorDetails(details: Record<string, any>): Record<strin
     "ssn",
   ];
 
-  const sanitized: Record<string, any> = {};
+  const sanitized: ErrorDetails = {};
 
   for (const [key, value] of Object.entries(details)) {
     const lowerKey = key.toLowerCase();
@@ -267,8 +285,12 @@ export function sanitizeErrorDetails(details: Record<string, any>): Record<strin
 
     if (isSensitive) {
       sanitized[key] = "[REDACTED]";
+    } else if (Array.isArray(value)) {
+      sanitized[key] = value.map((item) =>
+        typeof item === "object" && item !== null ? sanitizeErrorDetails(item as ErrorDetails) : item
+      );
     } else if (value && typeof value === "object") {
-      sanitized[key] = sanitizeErrorDetails(value);
+      sanitized[key] = sanitizeErrorDetails(value as ErrorDetails);
     } else {
       sanitized[key] = value;
     }

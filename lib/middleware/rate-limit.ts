@@ -149,7 +149,7 @@ function defaultKeyGenerator(req: NextRequest): string {
  *   keyGenerator: (req) => `endpoint:${req.nextUrl.pathname}:${getClientIp(req)}`,
  * });
  */
-export function rateLimit<T extends (...args: any[]) => any>(
+export function rateLimit<T extends (req: NextRequest, ...args: unknown[]) => Promise<NextResponse> | NextResponse>(
   handler: T,
   config?: Partial<RateLimitConfig>
 ): T {
@@ -162,7 +162,7 @@ export function rateLimit<T extends (...args: any[]) => any>(
     onLimitReached: config?.onLimitReached,
   };
 
-  return (async (req: NextRequest, ...args: any[]) => {
+  return (async (req: NextRequest, ...args: unknown[]) => {
     try {
       // Check if rate limiting should be skipped
       if (options.skip?.(req)) {
@@ -224,7 +224,7 @@ export function rateLimit<T extends (...args: any[]) => any>(
  * Apply adaptive rate limiting based on authentication status
  * Authenticated users get higher limits
  */
-export function adaptiveRateLimit<T extends (...args: any[]) => any>(
+export function adaptiveRateLimit<T extends (req: NextRequest, ...args: unknown[]) => Promise<NextResponse> | NextResponse>(
   handler: T
 ): T {
   return rateLimit(handler, {
@@ -256,7 +256,7 @@ export function adaptiveRateLimit<T extends (...args: any[]) => any>(
  * Rate limit by IP only (ignores authentication)
  * Useful for public endpoints
  */
-export function rateLimitByIp<T extends (...args: any[]) => any>(
+export function rateLimitByIp<T extends (req: NextRequest, ...args: unknown[]) => Promise<NextResponse> | NextResponse>(
   handler: T,
   config?: Partial<Omit<RateLimitConfig, "keyGenerator">>
 ): T {
@@ -270,7 +270,7 @@ export function rateLimitByIp<T extends (...args: any[]) => any>(
  * Rate limit by user ID only
  * Requires authentication
  */
-export function rateLimitByUser<T extends (...args: any[]) => any>(
+export function rateLimitByUser<T extends (req: NextRequest, ...args: unknown[]) => Promise<NextResponse> | NextResponse>(
   handler: T,
   config?: Partial<Omit<RateLimitConfig, "keyGenerator">>
 ): T {
@@ -289,7 +289,7 @@ export function rateLimitByUser<T extends (...args: any[]) => any>(
 /**
  * Rate limit by custom key
  */
-export function rateLimitByKey<T extends (...args: any[]) => any>(
+export function rateLimitByKey<T extends (req: NextRequest, ...args: unknown[]) => Promise<NextResponse> | NextResponse>(
   handler: T,
   keyFn: (req: NextRequest) => string,
   config?: Partial<Omit<RateLimitConfig, "keyGenerator">>

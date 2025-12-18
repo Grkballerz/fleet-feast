@@ -97,9 +97,14 @@ export function calculateVendorPayout(amount: number): number {
 }
 
 /**
+ * Helper type for any function (used by debounce)
+ */
+type AnyFunction = (...args: never[]) => unknown;
+
+/**
  * Debounce function for search inputs
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends AnyFunction>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
