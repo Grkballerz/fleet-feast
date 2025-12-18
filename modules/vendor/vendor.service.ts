@@ -41,7 +41,15 @@ export async function submitVendorApplication(
   // Check if user exists and has VENDOR role
   const user = await prisma.user.findUnique({
     where: { id: userId, deletedAt: null },
-    include: { vendor: true },
+    select: {
+      id: true,
+      role: true,
+      vendor: {
+        select: {
+          id: true,
+        },
+      },
+    },
   });
 
   if (!user) {

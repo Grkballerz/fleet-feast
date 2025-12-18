@@ -164,7 +164,19 @@ export async function createBooking(
   // Verify vendor exists and is approved
   const vendor = await prisma.vendor.findUnique({
     where: { id: data.vendorId, deletedAt: null },
-    include: { user: true },
+    select: {
+      id: true,
+      userId: true,
+      status: true,
+      capacityMin: true,
+      capacityMax: true,
+      user: {
+        select: {
+          id: true,
+          email: true,
+        },
+      },
+    },
   });
 
   if (!vendor) {

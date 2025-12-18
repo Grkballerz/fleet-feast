@@ -321,3 +321,55 @@ export function withMiddleware<T extends (...args: any[]) => Promise<NextRespons
   // Wrap final result with error handler
   return withErrorHandler(wrapped);
 }
+
+/**
+ * Higher-order function for consistent error handling
+ * Simplified version with explicit typing for API route handlers
+ *
+ * @example
+ * export const GET = withErrorHandling(async (req) => {
+ *   const data = await fetchData();
+ *   return ApiResponses.ok(data);
+ * });
+ *
+ * @example
+ * export const POST = withErrorHandling(async (req, context) => {
+ *   const { id } = context?.params || {};
+ *   // Your code here
+ * });
+ */
+type Handler = (req: NextRequest, context?: { params?: Record<string, unknown> }) => Promise<NextResponse>;
+
+export function withErrorHandling(handler: Handler): Handler {
+  return async (req: NextRequest, context?: { params?: Record<string, unknown> }) => {
+    try {
+      return await handler(req, context);
+    } catch (error: unknown) {
+      console.error("[API Error]:", error);
+
+      // Handle Prisma errors
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === "P2025") {
+          return ApiResponses.notFound("Resource");
+        }
+        if (error.code === "P2002") {
+          return ApiResponses.conflict("Duplicate entry");
+        }
+      }
+
+      // Handle Zod validation errors
+      if (error instanceof ZodError) {
+        const formatted: Record<string, string[]> = {};
+        for (const issue of error.issues) {
+          const path = issue.path.join(".") || "root";
+          if (!formatted[path]) formatted[path] = [];
+          formatted[path].push(issue.message);
+        }
+        return ApiResponses.validationError(formatted);
+      }
+
+      // Generic error
+      return ApiResponses.internalError(getErrorMessage(error));
+    }
+  };
+}

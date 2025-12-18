@@ -8,6 +8,7 @@ import { auth } from "@/lib/auth";
 import { getUserViolationSummary } from "@/modules/violation/violation.service";
 import { getUserViolationsSchema } from "@/modules/violation/violation.validation";
 import { UserRole } from "@prisma/client";
+import { getErrorMessage } from "@/lib/api-response";
 
 export async function GET(
   req: NextRequest,
@@ -47,28 +48,28 @@ export async function GET(
       success: true,
       data: summary,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(`[GET /api/violations/user/${params.userId}] Error:`, error);
 
-    if (error.name === "ZodError") {
+    if (error && typeof error === "object" && "name" in error && error.name === "ZodError") {
       return NextResponse.json(
         {
           error: "Invalid user ID",
-          details: error.errors,
+          details: "errors" in error ? error.errors : undefined,
         },
         { status: 400 }
       );
     }
 
-    if (error.code === "USER_NOT_FOUND") {
+    if (error && typeof error === "object" && "code" in error && error.code === "USER_NOT_FOUND") {
       return NextResponse.json(
-        { error: error.message },
+        { error: getErrorMessage(error) },
         { status: 404 }
       );
     }
 
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: getErrorMessage(error) },
       { status: 500 }
     );
   }

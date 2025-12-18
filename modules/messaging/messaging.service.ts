@@ -56,7 +56,11 @@ export async function sendMessage(
   // Fetch booking with related data
   const booking = await prisma.booking.findUnique({
     where: { id: data.bookingId },
-    include: {
+    select: {
+      id: true,
+      customerId: true,
+      vendorId: true,
+      status: true,
       customer: {
         select: { id: true, email: true },
       },
@@ -215,7 +219,10 @@ export async function getConversation(
   // Fetch booking to verify access
   const booking = await prisma.booking.findUnique({
     where: { id: bookingId },
-    include: {
+    select: {
+      id: true,
+      customerId: true,
+      vendorId: true,
       customer: {
         select: { id: true, email: true },
       },
@@ -323,10 +330,23 @@ export async function getInbox(
     where: {
       OR: [{ customerId: userId }, { vendorId: userId }],
     },
-    include: {
+    select: {
+      id: true,
+      customerId: true,
+      vendorId: true,
+      eventDate: true,
+      eventType: true,
+      status: true,
       messages: {
         where: {
           deletedAt: null,
+        },
+        select: {
+          id: true,
+          content: true,
+          senderId: true,
+          createdAt: true,
+          flagged: true,
         },
         orderBy: {
           createdAt: "desc",

@@ -69,6 +69,7 @@ export {
 // Error handling
 export {
   withErrorHandler,
+  withErrorHandling,
   withMiddleware,
   tryCatch,
   throwValidationError,

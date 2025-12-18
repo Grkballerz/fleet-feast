@@ -58,7 +58,7 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
     <header className={`neo-glass-header sticky top-0 z-30 border-b-3 border-black ${className}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Left: Logo + Desktop Nav */}
+          {/* Left: Logo + Desktop Nav (for non-authenticated users) */}
           <div className="flex items-center gap-8">
             {/* Logo - WCAG 2.4.4, 4.1.2 */}
             <Link href="/" aria-label="Fleet Feast home" className="flex items-center gap-2 shrink-0 group">
@@ -78,10 +78,12 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
               </span>
             </Link>
 
-            {/* Desktop Navigation - WCAG 1.3.1, 2.4.1 */}
-            <nav className="hidden lg:flex" aria-label="Main navigation">
-              <NavMenu items={navItems} userRole={session?.user.role} />
-            </nav>
+            {/* Desktop Navigation for non-authenticated users - WCAG 1.3.1, 2.4.1 */}
+            {!session && (
+              <nav className="hidden lg:flex" aria-label="Main navigation">
+                <NavMenu items={navItems} userRole={session?.user.role} />
+              </nav>
+            )}
           </div>
 
           {/* Center: Search Bar (Desktop) */}
@@ -111,7 +113,7 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
 
           {/* Right: User Menu - WCAG 4.1.2 */}
           <nav className="hidden lg:flex items-center gap-4" aria-label="User menu">
-            <UserMenu />
+            <UserMenu navItems={navItems} />
           </nav>
 
           {/* Mobile: Hamburger Button - WCAG 4.1.2 */}

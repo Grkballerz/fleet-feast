@@ -122,7 +122,16 @@ export async function createConnectedAccount(
   // Verify vendor exists
   const vendor = await prisma.vendor.findUnique({
     where: { id: data.vendorId },
-    include: { user: true },
+    select: {
+      id: true,
+      stripeAccountId: true,
+      user: {
+        select: {
+          id: true,
+          email: true,
+        },
+      },
+    },
   });
 
   if (!vendor) {
@@ -211,10 +220,30 @@ export async function createPaymentIntent(
   // Fetch booking with vendor details
   const booking = await prisma.booking.findUnique({
     where: { id: data.bookingId },
-    include: {
-      vendor: true,
-      vendorProfile: true,
-      payment: true,
+    select: {
+      id: true,
+      status: true,
+      totalAmount: true,
+      vendorId: true,
+      eventDate: true,
+      vendor: {
+        select: {
+          id: true,
+          email: true,
+        },
+      },
+      vendorProfile: {
+        select: {
+          id: true,
+          stripeAccountId: true,
+          stripeConnected: true,
+        },
+      },
+      payment: {
+        select: {
+          id: true,
+        },
+      },
     },
   });
 
@@ -305,7 +334,15 @@ export async function handlePaymentAuthorized(
 ): Promise<void> {
   const payment = await prisma.payment.findUnique({
     where: { stripePaymentIntentId: paymentIntentId },
-    include: { booking: true },
+    select: {
+      id: true,
+      bookingId: true,
+      booking: {
+        select: {
+          id: true,
+        },
+      },
+    },
   });
 
   if (!payment) {
@@ -368,7 +405,18 @@ export async function processRefund(
 ): Promise<PaymentDetails> {
   const payment = await prisma.payment.findUnique({
     where: { id: paymentId },
-    include: { booking: true },
+    select: {
+      id: true,
+      status: true,
+      stripePaymentIntentId: true,
+      amount: true,
+      bookingId: true,
+      booking: {
+        select: {
+          eventDate: true,
+        },
+      },
+    },
   });
 
   if (!payment) {
@@ -551,9 +599,20 @@ export async function getPayoutDetails(
 ): Promise<PayoutDetails> {
   const payment = await prisma.payment.findUnique({
     where: { id: paymentId },
-    include: {
+    select: {
+      id: true,
+      bookingId: true,
+      amount: true,
+      status: true,
+      releasedAt: true,
+      stripeTransferId: true,
+      createdAt: true,
       booking: {
-        include: {
+        select: {
+          vendorId: true,
+          eventDate: true,
+          status: true,
+          eventType: true,
           customer: {
             select: {
               email: true,
@@ -616,10 +675,19 @@ export async function releaseEscrowPayments(): Promise<EscrowReleaseResult> {
         },
       },
     },
-    include: {
+    select: {
+      id: true,
+      bookingId: true,
+      stripePaymentIntentId: true,
       booking: {
-        include: {
-          vendorProfile: true,
+        select: {
+          id: true,
+          vendorProfile: {
+            select: {
+              id: true,
+              stripeAccountId: true,
+            },
+          },
         },
       },
     },
@@ -670,7 +738,15 @@ export async function releaseEscrowPayments(): Promise<EscrowReleaseResult> {
 export async function capturePaymentAfterEvent(bookingId: string): Promise<void> {
   const payment = await prisma.payment.findUnique({
     where: { bookingId },
-    include: { booking: true },
+    select: {
+      id: true,
+      status: true,
+      booking: {
+        select: {
+          id: true,
+        },
+      },
+    },
   });
 
   if (!payment) {

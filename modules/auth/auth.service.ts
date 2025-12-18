@@ -147,7 +147,10 @@ export async function verifyEmail(token: string): Promise<{ success: boolean; em
       token,
       type: "EMAIL_VERIFICATION",
     },
-    include: {
+    select: {
+      id: true,
+      userId: true,
+      expiresAt: true,
       user: {
         select: {
           id: true,

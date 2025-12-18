@@ -12,6 +12,7 @@ import { getViolationById } from "@/modules/violation/violation.service";
 import { getViolationByIdSchema } from "@/modules/violation/violation.validation";
 import { UserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { getErrorMessage } from "@/lib/api-response";
 
 export async function GET(
   req: NextRequest,
@@ -54,21 +55,21 @@ export async function GET(
       success: true,
       data: violation,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(`[GET /api/admin/violations/${params.id}] Error:`, error);
 
-    if (error.name === "ZodError") {
+    if (error && typeof error === "object" && "name" in error && error.name === "ZodError") {
       return NextResponse.json(
         {
           error: "Invalid violation ID",
-          details: error.errors,
+          details: "errors" in error ? error.errors : undefined,
         },
         { status: 400 }
       );
     }
 
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: getErrorMessage(error) },
       { status: 500 }
     );
   }
@@ -117,20 +118,20 @@ export async function PUT(
       success: true,
       data: updatedViolation,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(`[PUT /api/admin/violations/${params.id}] Error:`, error);
 
-    if (error.name === "ZodError") {
+    if (error && typeof error === "object" && "name" in error && error.name === "ZodError") {
       return NextResponse.json(
         {
           error: "Invalid violation ID",
-          details: error.errors,
+          details: "errors" in error ? error.errors : undefined,
         },
         { status: 400 }
       );
     }
 
-    if (error.code === "P2025") {
+    if (error && typeof error === "object" && "code" in error && error.code === "P2025") {
       return NextResponse.json(
         { error: "Violation not found" },
         { status: 404 }
@@ -138,7 +139,7 @@ export async function PUT(
     }
 
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: getErrorMessage(error) },
       { status: 500 }
     );
   }

@@ -84,8 +84,15 @@ export function useBooking(): UseBookingReturn {
       // Clear draft
       bookingStore.clearDraft();
 
-      // Invalidate bookings query
-      queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      // Invalidate all booking queries using hierarchical keys
+      queryClient.invalidateQueries({ queryKey: queryKeys.bookings.all });
+
+      // Also invalidate vendor availability since a booking was created
+      if (booking.vendorId) {
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.vendors.availability(booking.vendorId)
+        });
+      }
 
       // Show success message
       showSuccess("Booking created successfully!", "Your booking has been submitted.");

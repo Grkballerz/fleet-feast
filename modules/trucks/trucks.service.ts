@@ -280,13 +280,35 @@ export async function getTruckProfile(
   // Fetch truck with related data
   const truck = await prisma.vendor.findUnique({
     where: { id: truckId, deletedAt: null },
-    include: {
-      menu: true,
+    select: {
+      id: true,
+      businessName: true,
+      cuisineType: true,
+      description: true,
+      priceRange: true,
+      capacityMin: true,
+      capacityMax: true,
+      serviceArea: true,
+      status: true,
+      approvedAt: true,
+      createdAt: true,
+      coverImageUrl: true,
+      menu: {
+        select: {
+          items: true,
+          pricingModel: true,
+        },
+      },
       availability: {
         where: {
           date: {
             gte: new Date(), // Only future dates
           },
+        },
+        select: {
+          date: true,
+          isAvailable: true,
+          notes: true,
         },
         orderBy: {
           date: "asc",
@@ -294,23 +316,27 @@ export async function getTruckProfile(
         take: 90, // Next 3 months
       },
       user: {
-        include: {
+        select: {
           reviewsReceived: {
             where: {
               hidden: false,
               deletedAt: null,
             },
-            orderBy: {
-              createdAt: "desc",
-            },
-            take: 10, // Recent 10 reviews
-            include: {
+            select: {
+              id: true,
+              rating: true,
+              content: true,
+              createdAt: true,
               reviewer: {
                 select: {
                   email: true, // We'll mask this
                 },
               },
             },
+            orderBy: {
+              createdAt: "desc",
+            },
+            take: 10, // Recent 10 reviews
           },
         },
       },
@@ -383,7 +409,15 @@ export async function getTruckProfile(
 export async function getVendorMenu(userId: string): Promise<Menu | null> {
   const vendor = await prisma.vendor.findUnique({
     where: { userId, deletedAt: null },
-    include: { menu: true },
+    select: {
+      id: true,
+      menu: {
+        select: {
+          items: true,
+          pricingModel: true,
+        },
+      },
+    },
   });
 
   if (!vendor) {

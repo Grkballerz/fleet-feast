@@ -8,6 +8,13 @@ import { Dropdown, DropdownItem } from "@/components/ui/Dropdown";
 import { Button } from "@/components/ui/Button";
 import { UserRole } from "@/types";
 
+export interface NavMenuItem {
+  label: string;
+  href: string;
+  icon?: React.ReactNode;
+  roles?: UserRole[];
+}
+
 export interface UserMenuProps {
   /**
    * Additional CSS classes
@@ -18,6 +25,10 @@ export interface UserMenuProps {
    * Use in mobile drawer where navigation links are already visible
    */
   compact?: boolean;
+  /**
+   * Navigation items to display in the dropdown (desktop mode)
+   */
+  navItems?: NavMenuItem[];
 }
 
 /**
@@ -31,7 +42,7 @@ export interface UserMenuProps {
  * <UserMenu />
  * ```
  */
-export const UserMenu: React.FC<UserMenuProps> = ({ className, compact = false }) => {
+export const UserMenu: React.FC<UserMenuProps> = ({ className, compact = false, navItems = [] }) => {
   const { data: session, status } = useSession();
 
   // Loading state
@@ -68,36 +79,20 @@ export const UserMenu: React.FC<UserMenuProps> = ({ className, compact = false }
   const getDropdownItems = (): DropdownItem[] => {
     const items: DropdownItem[] = [];
 
-    // Role-specific dashboard links (skip in compact mode - already in nav)
-    if (!compact) {
-      if (user.role === UserRole.CUSTOMER) {
-        items.push(
-          { label: "My Dashboard", href: "/dashboard" },
-          { label: "My Bookings", href: "/dashboard/bookings" },
-          { label: "Messages", href: "/dashboard/messages" },
-          { label: "Favorites", href: "/dashboard/favorites" }
-        );
-      } else if (user.role === UserRole.VENDOR) {
-        items.push(
-          { label: "Vendor Dashboard", href: "/vendor/dashboard" },
-          { label: "Bookings", href: "/vendor/bookings" },
-          { label: "Calendar", href: "/vendor/calendar" },
-          { label: "Profile", href: "/vendor/profile" }
-        );
-      } else if (user.role === UserRole.ADMIN) {
-        items.push(
-          { label: "Admin Dashboard", href: "/admin" },
-          { label: "Pending Vendors", href: "/admin/vendors/pending" },
-          { label: "Disputes", href: "/admin/disputes" },
-          { label: "Users", href: "/admin/users" }
-        );
-      }
+    // Navigation links from header (skip in compact mode - already in mobile nav)
+    if (!compact && navItems.length > 0) {
+      navItems.forEach((navItem) => {
+        items.push({
+          label: navItem.label,
+          href: navItem.href,
+          icon: navItem.icon,
+        });
+      });
       items.push({ divider: true });
     }
 
     // Common items (always shown)
     items.push(
-      { label: "Settings", href: "/settings" },
       { label: "Help & Support", href: "/support" },
       { divider: true },
       {

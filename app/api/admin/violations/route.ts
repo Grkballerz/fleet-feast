@@ -8,6 +8,7 @@ import { auth } from "@/lib/auth";
 import { listViolations } from "@/modules/violation/violation.service";
 import { violationListFiltersSchema } from "@/modules/violation/violation.validation";
 import { UserRole } from "@prisma/client";
+import { getErrorMessage } from "@/lib/api-response";
 
 export async function GET(req: NextRequest) {
   try {
@@ -78,21 +79,21 @@ export async function GET(req: NextRequest) {
         totalPages: Math.ceil(result.total / validatedFilters.limit),
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[GET /api/admin/violations] Error:", error);
 
-    if (error.name === "ZodError") {
+    if (error && typeof error === "object" && "name" in error && error.name === "ZodError") {
       return NextResponse.json(
         {
           error: "Validation failed",
-          details: error.errors,
+          details: "errors" in error ? error.errors : undefined,
         },
         { status: 400 }
       );
     }
 
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: getErrorMessage(error) },
       { status: 500 }
     );
   }

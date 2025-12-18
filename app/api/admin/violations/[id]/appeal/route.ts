@@ -8,6 +8,7 @@ import { auth } from "@/lib/auth";
 import { handleAppeal } from "@/modules/violation/violation.service";
 import { handleAppealSchema } from "@/modules/violation/violation.validation";
 import { UserRole } from "@prisma/client";
+import { getErrorMessage } from "@/lib/api-response";
 
 export async function POST(
   req: NextRequest,
@@ -49,28 +50,28 @@ export async function POST(
       data: violation,
       message: `Appeal ${validatedData.decision.toLowerCase()} successfully`,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(`[POST /api/admin/violations/${params.id}/appeal] Error:`, error);
 
-    if (error.name === "ZodError") {
+    if (error && typeof error === "object" && "name" in error && error.name === "ZodError") {
       return NextResponse.json(
         {
           error: "Validation failed",
-          details: error.errors,
+          details: "errors" in error ? error.errors : undefined,
         },
         { status: 400 }
       );
     }
 
-    if (error.code === "VIOLATION_NOT_FOUND") {
+    if (error && typeof error === "object" && "code" in error && error.code === "VIOLATION_NOT_FOUND") {
       return NextResponse.json(
-        { error: error.message },
+        { error: getErrorMessage(error) },
         { status: 404 }
       );
     }
 
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: getErrorMessage(error) },
       { status: 500 }
     );
   }

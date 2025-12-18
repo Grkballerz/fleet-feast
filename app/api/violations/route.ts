@@ -8,6 +8,7 @@ import { auth } from "@/lib/auth";
 import { createViolation } from "@/modules/violation/violation.service";
 import { createViolationSchema } from "@/modules/violation/violation.validation";
 import { UserRole } from "@prisma/client";
+import { getErrorMessage } from "@/lib/api-response";
 
 export async function POST(req: NextRequest) {
   try {
@@ -45,28 +46,28 @@ export async function POST(req: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[POST /api/violations] Error:", error);
 
-    if (error.name === "ZodError") {
+    if (error && typeof error === "object" && "name" in error && error.name === "ZodError") {
       return NextResponse.json(
         {
           error: "Validation failed",
-          details: error.errors,
+          details: "errors" in error ? error.errors : undefined,
         },
         { status: 400 }
       );
     }
 
-    if (error.code === "USER_NOT_FOUND") {
+    if (error && typeof error === "object" && "code" in error && error.code === "USER_NOT_FOUND") {
       return NextResponse.json(
-        { error: error.message },
+        { error: getErrorMessage(error) },
         { status: 404 }
       );
     }
 
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: getErrorMessage(error) },
       { status: 500 }
     );
   }
