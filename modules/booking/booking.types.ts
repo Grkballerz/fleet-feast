@@ -21,6 +21,54 @@ export interface BookingRequestData {
 }
 
 /**
+ * Inquiry request data (customer requests proposal)
+ */
+export interface InquiryRequestData {
+  vendorId: string;
+  eventDate: string; // YYYY-MM-DD format
+  eventTime: string; // HH:MM format
+  eventType: EventType;
+  location: string;
+  guestCount: number;
+  specialRequests?: string;
+}
+
+/**
+ * Line item in a proposal
+ */
+export interface LineItem {
+  name: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+}
+
+/**
+ * Proposal details stored as JSON
+ */
+export interface ProposalDetails {
+  lineItems: LineItem[];
+  inclusions: string[];
+  terms?: string;
+}
+
+/**
+ * Proposal data (vendor sends proposal)
+ */
+export interface ProposalData {
+  proposalAmount: number;
+  proposalDetails: ProposalDetails;
+  expiresInDays?: number; // default: 7
+}
+
+/**
+ * Proposal acceptance data (customer accepts)
+ */
+export interface ProposalAcceptData {
+  acceptTerms: boolean;
+}
+
+/**
  * Booking update data (limited fields)
  */
 export interface BookingUpdateData {
@@ -68,6 +116,14 @@ export interface BookingDetails {
   discountAmount?: number;
   loyaltyApplied?: boolean;
 
+  // Proposal fields
+  proposalAmount: number | null;
+  proposalDetails: ProposalDetails | null;
+  proposalSentAt: Date | null;
+  proposalExpiresAt: Date | null;
+  platformFeeCustomer: number | null;
+  platformFeeVendor: number | null;
+
   // Status
   status: BookingStatus;
 
@@ -110,6 +166,10 @@ export interface BookingListItem {
   totalAmount: number;
   status: BookingStatus;
   createdAt: Date;
+
+  // Proposal fields
+  proposalAmount?: number;
+  proposalExpiresAt?: Date;
 
   // Other party info
   vendorBusinessName?: string; // For customer

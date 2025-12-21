@@ -15,11 +15,10 @@ import {
 } from "@/lib/middleware/auth.middleware";
 import { ApiResponses } from "@/lib/api-response";
 import {
-  listVendorPayouts,
-  PaymentError,
-} from "@/modules/payment/payment.service";
+  getVendorPayouts,
+} from "@/modules/payout/payout.service";
+import { PayoutError } from "@/modules/payout/payout.types";
 import { UserRole } from "@prisma/client";
-import { prisma } from "@/lib/prisma";
 
 /**
  * Handle GET request - List vendor payouts
@@ -34,7 +33,7 @@ async function handleGET(req: AuthenticatedRequest) {
       return ApiResponses.forbidden("Only vendors can view payouts");
     }
 
-    const payouts = await listVendorPayouts(userId);
+    const payouts = await getVendorPayouts(userId);
 
     return ApiResponses.ok({
       payouts,
@@ -43,7 +42,7 @@ async function handleGET(req: AuthenticatedRequest) {
   } catch (error) {
     console.error("[Vendor Payouts List] Error:", error);
 
-    if (error instanceof PaymentError) {
+    if (error instanceof PayoutError) {
       if (error.statusCode === 404) {
         return ApiResponses.notFound(error.message);
       }

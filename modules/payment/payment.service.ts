@@ -170,10 +170,10 @@ export async function handlePaymentFailed(
     data: { status: PaymentStatus.FAILED },
   });
 
-  // Update booking status
+  // Update booking status to CANCELLED (payment failure results in cancellation)
   await prisma.booking.update({
     where: { id: payment.bookingId },
-    data: { status: BookingStatus.PAYMENT_FAILED },
+    data: { status: BookingStatus.CANCELLED },
   });
 }
 

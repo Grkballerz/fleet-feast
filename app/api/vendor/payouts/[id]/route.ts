@@ -13,11 +13,10 @@ import {
   type AuthenticatedRequest,
 } from "@/lib/middleware/auth.middleware";
 import { ApiResponses } from "@/lib/api-response";
-import { paymentIdSchema } from "@/modules/payment/payment.validation";
 import {
   getPayoutDetails,
-  PaymentError,
-} from "@/modules/payment/payment.service";
+} from "@/modules/payout/payout.service";
+import { PayoutError } from "@/modules/payout/payout.types";
 import { UserRole } from "@prisma/client";
 
 /**
@@ -30,21 +29,27 @@ async function handleGET(
   try {
     const userId = getUserId(req);
     const user = getUser(req);
+    const payoutId = params.id;
 
     // Only vendors can view payout details
     if (user.role !== UserRole.VENDOR) {
       return ApiResponses.forbidden("Only vendors can view payout details");
     }
 
-    const { id } = paymentIdSchema.parse(params);
+    const payout = await getPayoutDetails(payoutId);
 
-    const payout = await getPayoutDetails(id, userId);
+    // Verify vendor ownership
+    if (payout.vendorId !== userId) {
+      return ApiResponses.forbidden(
+        "You don't have permission to view this payout"
+      );
+    }
 
     return ApiResponses.ok(payout);
   } catch (error) {
     console.error("[Vendor Payout Details] Error:", error);
 
-    if (error instanceof PaymentError) {
+    if (error instanceof PayoutError) {
       if (error.statusCode === 404) {
         return ApiResponses.notFound(error.message);
       }

@@ -6,12 +6,16 @@
 import { z } from "zod";
 
 /**
- * Payment intent creation schema
+ * Payment creation schema (Helcim)
  */
 export const createPaymentIntentSchema = z.object({
   bookingId: z
     .string()
     .uuid("Invalid booking ID format"),
+
+  cardToken: z
+    .string()
+    .min(1, "Card token is required"),
 
   amount: z
     .number()
@@ -20,17 +24,20 @@ export const createPaymentIntentSchema = z.object({
     .optional(), // If not provided, use booking.totalAmount
 
   currency: z
-    .string()
-    .length(3, "Currency must be 3 characters (ISO 4217)")
-    .toLowerCase()
-    .default("usd")
+    .enum(["USD", "CAD"], { errorMap: () => ({ message: "Currency must be USD or CAD" }) })
+    .default("USD")
     .optional(),
+});
 
-  description: z
-    .string()
-    .max(500, "Description must be less than 500 characters")
-    .trim()
-    .optional(),
+/**
+ * Payment capture schema
+ */
+export const capturePaymentSchema = z.object({
+  amount: z
+    .number()
+    .positive("Capture amount must be positive")
+    .max(1000000, "Amount cannot exceed $1,000,000")
+    .optional(), // If not provided, capture full amount
 });
 
 /**
