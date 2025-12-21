@@ -5,6 +5,7 @@
 
 import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth/next";
+import { auth } from "@/lib/auth";
 import type { Session } from "next-auth";
 import { UserRole } from "@prisma/client";
 
@@ -21,7 +22,9 @@ export function createMockRequest(
 
   // Mock session if provided
   if (session !== undefined) {
+    // Mock both old and new NextAuth APIs
     jest.mocked(getServerSession).mockResolvedValue(session);
+    jest.mocked(auth).mockResolvedValue(session);
   }
 
   return request;
@@ -133,6 +136,7 @@ export async function expectResponse(
  */
 export function mockAuthSession(session: Session | null) {
   jest.mocked(getServerSession).mockResolvedValue(session);
+  jest.mocked(auth).mockResolvedValue(session);
 }
 
 /**
@@ -140,4 +144,5 @@ export function mockAuthSession(session: Session | null) {
  */
 export function clearAuthMocks() {
   jest.mocked(getServerSession).mockClear();
+  jest.mocked(auth).mockClear();
 }

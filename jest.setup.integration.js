@@ -27,9 +27,18 @@ jest.mock('@auth/prisma-adapter', () => ({
 }));
 
 // Mock next-auth for server-side testing
+const mockAuth = jest.fn(() => Promise.resolve(null));
 jest.mock('next-auth', () => ({
   __esModule: true,
-  default: jest.fn(),
+  default: jest.fn(() => ({
+    auth: mockAuth,
+    handlers: {
+      GET: jest.fn(),
+      POST: jest.fn(),
+    },
+    signIn: jest.fn(),
+    signOut: jest.fn(),
+  })),
 }));
 
 jest.mock('next-auth/next', () => ({

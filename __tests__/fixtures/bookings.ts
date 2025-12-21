@@ -162,6 +162,135 @@ export const testBookingDisputed: Partial<Booking> = {
 };
 
 /**
+ * Inquiry-Proposal Flow Fixtures (New Flow)
+ */
+export const testBookingInquiry: Partial<Booking> = {
+  id: "test-booking-inquiry-001",
+  customerId: "test-customer-001",
+  vendorId: "test-vendor-001",
+  eventDate: new Date("2025-03-15T00:00:00Z"),
+  eventTime: "18:00",
+  eventType: "WEDDING",
+  location: "123 Wedding Venue Lane, City, ST 12345",
+  guestCount: 100,
+  specialRequests: "Vegetarian options needed",
+  status: BookingStatus.INQUIRY,
+  totalAmount: 0,
+  platformFee: 0,
+  vendorPayout: 0,
+  createdAt: new Date("2025-01-20T00:00:00Z"),
+  updatedAt: new Date("2025-01-20T00:00:00Z"),
+};
+
+export const testBookingProposalSent: Partial<Booking> = {
+  id: "test-booking-proposal-001",
+  customerId: "test-customer-001",
+  vendorId: "test-vendor-001",
+  eventDate: new Date("2025-03-20T00:00:00Z"),
+  eventTime: "12:00",
+  eventType: "CORPORATE",
+  location: "456 Corporate Center, City, ST 12345",
+  guestCount: 75,
+  specialRequests: null,
+  status: BookingStatus.PROPOSAL_SENT,
+  proposalAmount: 200000, // $2000.00
+  proposalDetails: {
+    lineItems: [
+      { name: "Tacos", quantity: 75, unitPrice: 1500, total: 112500 },
+      { name: "Burritos", quantity: 75, unitPrice: 1500, total: 112500 },
+    ],
+    inclusions: ["Plates", "Napkins", "Utensils", "Setup/Cleanup"],
+    terms: "Payment due 48 hours before event",
+  },
+  proposalSentAt: new Date("2025-01-21T00:00:00Z"),
+  proposalExpiresAt: new Date("2025-01-28T00:00:00Z"), // 7 days later
+  platformFeeCustomer: 10000, // 5% of 200000
+  platformFeeVendor: 10000, // 5% of 200000
+  platformFee: 20000, // Total 10%
+  totalAmount: 210000, // proposalAmount + platformFeeCustomer
+  vendorPayout: 190000, // proposalAmount - platformFeeVendor
+  createdAt: new Date("2025-01-20T00:00:00Z"),
+  updatedAt: new Date("2025-01-21T00:00:00Z"),
+};
+
+export const testBookingProposalAccepted: Partial<Booking> = {
+  id: "test-booking-accepted-001",
+  customerId: "test-customer-001",
+  vendorId: "test-vendor-001",
+  eventDate: new Date("2025-03-25T00:00:00Z"),
+  eventTime: "19:00",
+  eventType: "BIRTHDAY",
+  location: "789 Party Place, City, ST 12345",
+  guestCount: 50,
+  status: BookingStatus.ACCEPTED,
+  proposalAmount: 150000, // $1500.00
+  proposalDetails: {
+    lineItems: [
+      { name: "Burgers", quantity: 50, unitPrice: 2000, total: 100000 },
+      { name: "Fries", quantity: 50, unitPrice: 1000, total: 50000 },
+    ],
+    inclusions: ["Plates", "Napkins"],
+    terms: "Payment due upon acceptance",
+  },
+  proposalSentAt: new Date("2025-01-22T00:00:00Z"),
+  proposalExpiresAt: new Date("2025-01-29T00:00:00Z"),
+  platformFeeCustomer: 7500,
+  platformFeeVendor: 7500,
+  platformFee: 15000,
+  totalAmount: 157500,
+  vendorPayout: 142500,
+  createdAt: new Date("2025-01-21T00:00:00Z"),
+  updatedAt: new Date("2025-01-22T10:00:00Z"),
+};
+
+export const testBookingVendorDeclined: Partial<Booking> = {
+  id: "test-booking-vendor-declined-001",
+  customerId: "test-customer-001",
+  vendorId: "test-vendor-001",
+  eventDate: new Date("2025-03-30T00:00:00Z"),
+  eventTime: "14:00",
+  eventType: "OTHER",
+  location: "321 Event Space, City, ST 12345",
+  guestCount: 60,
+  status: BookingStatus.VENDOR_DECLINED,
+  totalAmount: 0,
+  platformFee: 0,
+  vendorPayout: 0,
+  declineReason: "Not available on this date",
+  createdAt: new Date("2025-01-23T00:00:00Z"),
+  updatedAt: new Date("2025-01-24T00:00:00Z"),
+};
+
+export const testBookingCustomerDeclined: Partial<Booking> = {
+  id: "test-booking-customer-declined-001",
+  customerId: "test-customer-001",
+  vendorId: "test-vendor-001",
+  eventDate: new Date("2025-04-05T00:00:00Z"),
+  eventTime: "11:00",
+  eventType: "FESTIVAL",
+  location: "555 Park Street, City, ST 12345",
+  guestCount: 200,
+  status: BookingStatus.CUSTOMER_DECLINED,
+  proposalAmount: 500000, // $5000.00
+  proposalDetails: {
+    lineItems: [
+      { name: "Tacos", quantity: 200, unitPrice: 2500, total: 500000 },
+    ],
+    inclusions: ["Everything"],
+  },
+  proposalSentAt: new Date("2025-01-24T00:00:00Z"),
+  proposalExpiresAt: new Date("2025-01-31T00:00:00Z"),
+  platformFeeCustomer: 25000,
+  platformFeeVendor: 25000,
+  platformFee: 50000,
+  totalAmount: 525000,
+  vendorPayout: 475000,
+  declineReason: "Found a better price",
+  createdAt: new Date("2025-01-23T00:00:00Z"),
+  updatedAt: new Date("2025-01-25T00:00:00Z"),
+};
+
+/**
  * Helper to create a test booking with custom properties
  */
 export function createTestBooking(

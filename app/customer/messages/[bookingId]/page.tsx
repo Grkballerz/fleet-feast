@@ -110,7 +110,7 @@ export default function MessageThreadPage() {
       }
 
       // Navigate to payment page
-      router.push(`/customer/bookings/${bookingId}/payment`);
+      router.push(`/customer/booking/${bookingId}/payment`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to accept proposal");
       setIsProcessing(false);
@@ -291,6 +291,7 @@ export default function MessageThreadPage() {
               isCustomer={true}
               onAccept={handleAccept}
               onDecline={handleDecline}
+              onProceedToPayment={() => router.push(`/customer/booking/${bookingId}/payment`)}
               isLoading={isProcessing}
             />
           )}

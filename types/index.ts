@@ -63,7 +63,7 @@ export interface Payment {
   platformFee: number;
   vendorPayout: number;
   status: PaymentStatus;
-  stripePaymentIntentId?: string;
+  externalPaymentId?: string; // Helcim transaction ID
   createdAt: Date;
   updatedAt: Date;
 }

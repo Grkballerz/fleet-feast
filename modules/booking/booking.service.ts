@@ -1078,7 +1078,7 @@ export async function acceptProposal(
         cuisineType: updatedBooking.vendorProfile.cuisineType,
       },
     },
-    paymentUrl: `/customer/bookings/${bookingId}/payment`,
+    paymentUrl: `/customer/booking/${bookingId}/payment`,
   };
 }
 

@@ -20,27 +20,33 @@ const testPrisma = new PrismaClient({
  */
 export async function clearDatabase() {
   await testPrisma.$transaction([
-    // Messages and notifications
-    testPrisma.message.deleteMany(),
-    testPrisma.notification.deleteMany(),
-
-    // Payments and disputes
-    testPrisma.dispute.deleteMany(),
-    testPrisma.payment.deleteMany(),
+    // Quotes and requests
+    testPrisma.quote.deleteMany(),
+    testPrisma.quoteRequest.deleteMany(),
 
     // Bookings and related
     testPrisma.booking.deleteMany(),
     testPrisma.review.deleteMany(),
     testPrisma.availability.deleteMany(),
 
-    // Violations and appeals
-    testPrisma.violationAppeal.deleteMany(),
+    // Disputes and violations
+    testPrisma.dispute.deleteMany(),
     testPrisma.violation.deleteMany(),
 
+    // Payments
+    testPrisma.vendorPayoutBooking.deleteMany(),
+    testPrisma.vendorPayout.deleteMany(),
+    testPrisma.escrowTransaction.deleteMany(),
+    testPrisma.payment.deleteMany(),
+
+    // Messages and notifications
+    testPrisma.message.deleteMany(),
+    testPrisma.notificationPreferences.deleteMany(),
+    testPrisma.notification.deleteMany(),
+
     // Vendor data
-    testPrisma.menuItem.deleteMany(),
-    testPrisma.document.deleteMany(),
-    testPrisma.truck.deleteMany(),
+    testPrisma.vendorMenu.deleteMany(),
+    testPrisma.vendorDocument.deleteMany(),
     testPrisma.vendor.deleteMany(),
 
     // User data

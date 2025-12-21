@@ -176,11 +176,12 @@ export const VendorBankAccountForm: React.FC<VendorBankAccountFormProps> = ({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          holderName: formData.holderName.trim(),
-          accountNumber: formData.accountNumber.replace(/\D/g, ""),
-          routingNumber: formData.routingNumber.replace(/\D/g, ""),
-          accountType: formData.accountType,
+          bankAccountHolder: formData.holderName.trim(),
+          bankAccountNumber: formData.accountNumber.replace(/\D/g, ""),
+          bankRoutingNumber: formData.routingNumber.replace(/\D/g, ""),
+          bankAccountType: formData.accountType,
           bankName: formData.bankName.trim() || undefined,
+          payoutMethod: "ACH", // Default payout method
         }),
       });
 

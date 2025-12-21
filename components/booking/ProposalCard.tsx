@@ -68,6 +68,10 @@ export interface ProposalCardProps {
    */
   onDecline?: () => void;
   /**
+   * Callback when customer proceeds to payment (for ACCEPTED status)
+   */
+  onProceedToPayment?: () => void;
+  /**
    * Whether an action is currently loading
    */
   isLoading?: boolean;
@@ -117,6 +121,7 @@ export const ProposalCard: React.FC<ProposalCardProps> = ({
   isCustomer,
   onAccept,
   onDecline,
+  onProceedToPayment,
   isLoading = false,
   className,
 }) => {
@@ -405,11 +410,12 @@ export const ProposalCard: React.FC<ProposalCardProps> = ({
       )}
 
       {/* Link to Payment for Accepted Proposals */}
-      {status === "ACCEPTED" && isCustomer && (
+      {status === "ACCEPTED" && isCustomer && onProceedToPayment && (
         <CardFooter className="mt-6 pt-6 border-t border-border">
           <Button
             variant="primary"
             size="md"
+            onClick={onProceedToPayment}
             className="w-full"
             iconLeft={<DollarSign className="h-4 w-4" />}
           >
