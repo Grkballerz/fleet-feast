@@ -24,11 +24,11 @@ This registry tracks all API endpoints in the Fleet Feast platform. It serves as
 
 ## Statistics
 
-- **Total Endpoints:** 93
+- **Total Endpoints:** 94
 - **Public Endpoints:** 14
-- **Protected Endpoints:** 72
+- **Protected Endpoints:** 73
 - **Admin-Only Endpoints:** 15
-- **HTTP Methods:** GET (45), POST (38), PUT (16), PATCH (5), DELETE (2)
+- **HTTP Methods:** GET (45), POST (39), PUT (16), PATCH (5), DELETE (2)
 
 ---
 
@@ -110,7 +110,7 @@ This registry tracks all API endpoints in the Fleet Feast platform. It serves as
 
 ---
 
-### 5. Bookings & Inquiries (8 endpoints)
+### 5. Bookings & Inquiries (9 endpoints)
 **Base Path:** `/api/bookings` and `/api/inquiries`
 
 | Method | Endpoint | Auth | Role | Description | Status |
@@ -120,7 +120,8 @@ This registry tracks all API endpoints in the Fleet Feast platform. It serves as
 | POST | `/api/bookings` | Required | Customer | Create booking | ✅ Implemented |
 | GET | `/api/bookings/{id}` | Required | Customer/Vendor | Get booking details | ✅ Implemented |
 | PUT | `/api/bookings/{id}` | Required | Customer | Update booking (PENDING only) | ✅ Implemented |
-| PUT | `/api/bookings/{id}/accept` | Required | Vendor | Accept booking | ✅ Implemented |
+| POST | `/api/bookings/{id}/accept` | Required | Customer | Accept vendor proposal | ✅ Implemented |
+| PUT | `/api/bookings/{id}/accept` | Required | Vendor | Accept booking (legacy) | ✅ Implemented |
 | PUT | `/api/bookings/{id}/decline` | Required | Vendor | Decline booking | ✅ Implemented |
 | DELETE | `/api/bookings/{id}` | Required | Customer/Vendor | Cancel booking | ✅ Implemented |
 
@@ -149,6 +150,18 @@ INQUIRY → PROPOSAL_SENT → ACCEPTED → PAID → CONFIRMED → COMPLETED
 - Customer reviews proposal and can accept or decline
 - On acceptance: booking status → ACCEPTED, payment flow begins
 - On decline: booking status → DECLINED
+
+**Proposal Acceptance (POST /api/bookings/:id/accept):**
+- Customer accepts vendor proposal to proceed with booking
+- Validates booking status is PROPOSAL_SENT
+- Checks proposal hasn't expired (proposalExpiresAt > now)
+- If expired, updates booking status to EXPIRED and returns 400 error
+- Updates booking status to ACCEPTED and sets acceptedAt timestamp
+- Creates PROPOSAL_ACCEPTED notification for vendor
+- Returns payment URL for customer to complete payment
+- Response includes booking ID, status, totalAmount, and paymentUrl
+- Only the booking customer can accept (403 if not owner)
+- Optional request body with acceptTerms field for frontend confirmation
 
 **General Booking Rules:**
 - **Availability Check:** Vendor must be available on event date
@@ -800,6 +813,44 @@ vendor:availability:{vendorId}:{date}
 ---
 
 ## Change Log
+
+### Version 2.4 - 2025-12-20 (Ellis_Endpoints)
+- **Implemented Proposal Acceptance API** (Task Fleet-Feast-9ji)
+  - POST `/api/bookings/:id/accept` - Customer accepts vendor proposal
+  - Validates booking status is PROPOSAL_SENT
+  - Checks proposal expiration (proposalExpiresAt > now)
+  - If expired, updates booking to EXPIRED status and returns 400 error
+  - Updates booking status to ACCEPTED and sets acceptedAt timestamp
+  - Creates PROPOSAL_ACCEPTED notification for vendor
+  - Returns payment URL for customer to proceed with payment
+  - Only the booking customer can accept (403 if not owner)
+  - Optional request body with acceptTerms field for frontend confirmation
+- Service layer function: `acceptProposal(bookingId, customerId)`
+  - Transaction-safe proposal acceptance
+  - Automatic expiry detection and handling
+  - Notification creation for vendor
+  - Returns booking details and payment URL
+- Response format:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "id": "uuid",
+      "status": "ACCEPTED",
+      "totalAmount": 1575.00,
+      "paymentUrl": "/customer/bookings/{id}/payment"
+    }
+  }
+  ```
+- Error handling:
+  - 400 Bad Request if status is not PROPOSAL_SENT
+  - 400 Bad Request if proposal has expired
+  - 403 Forbidden if not the booking customer
+  - 404 Not Found if booking doesn't exist
+- Updated API Registry:
+  - Added POST `/api/bookings/:id/accept` to Bookings & Inquiries section
+  - Updated endpoint statistics (94 total endpoints)
+  - Documented proposal acceptance workflow and business rules
 
 ### Version 2.3 - 2025-12-20 (Ellis_Endpoints)
 - **Implemented Inquiry Submission API** (Task Fleet-Feast-dpx)

@@ -930,6 +930,159 @@ export async function declineBookingInquiryOrProposal(
 }
 
 /**
+ * Accept proposal (customer accepts vendor proposal)
+ * Transitions: PROPOSAL_SENT → ACCEPTED
+ */
+export async function acceptProposal(
+  bookingId: string,
+  customerId: string
+): Promise<{ booking: BookingDetails; paymentUrl: string }> {
+  const booking = await prisma.booking.findUnique({
+    where: { id: bookingId },
+    include: {
+      vendor: {
+        select: {
+          id: true,
+          email: true,
+        },
+      },
+      vendorProfile: {
+        select: {
+          id: true,
+          businessName: true,
+          cuisineType: true,
+        },
+      },
+    },
+  });
+
+  if (!booking) {
+    throw new BookingError("Booking not found", "BOOKING_NOT_FOUND", 404);
+  }
+
+  // Verify customer owns this booking
+  if (booking.customerId !== customerId) {
+    throw new BookingError(
+      "You don't have permission to accept this proposal",
+      "UNAUTHORIZED",
+      403
+    );
+  }
+
+  // Check status
+  if (booking.status !== BookingStatus.PROPOSAL_SENT) {
+    throw new BookingError(
+      "Only proposals with PROPOSAL_SENT status can be accepted",
+      "INVALID_STATUS",
+      400
+    );
+  }
+
+  // Check if proposal has expired
+  if (!booking.proposalExpiresAt) {
+    throw new BookingError(
+      "Proposal expiration date not set",
+      "INVALID_PROPOSAL",
+      400
+    );
+  }
+
+  const now = new Date();
+  if (now > booking.proposalExpiresAt) {
+    // Update booking status to EXPIRED
+    await prisma.booking.update({
+      where: { id: bookingId },
+      data: {
+        status: BookingStatus.EXPIRED,
+      },
+    });
+
+    throw new BookingError(
+      "This proposal has expired",
+      "PROPOSAL_EXPIRED",
+      400
+    );
+  }
+
+  // Update booking status to ACCEPTED
+  const updatedBooking = await prisma.booking.update({
+    where: { id: bookingId },
+    data: {
+      status: BookingStatus.ACCEPTED,
+      acceptedAt: now,
+    },
+    include: {
+      vendorProfile: {
+        select: {
+          id: true,
+          businessName: true,
+          cuisineType: true,
+        },
+      },
+    },
+  });
+
+  // Create notification for vendor
+  await prisma.notification.create({
+    data: {
+      userId: booking.vendorId,
+      type: "PROPOSAL_ACCEPTED",
+      title: "Proposal Accepted",
+      message: `Customer accepted your proposal for ${updatedBooking.eventDate.toISOString().split("T")[0]}`,
+      link: `/vendor/bookings/${bookingId}`,
+      metadata: {
+        bookingId,
+        eventDate: updatedBooking.eventDate.toISOString().split("T")[0],
+        eventTime: updatedBooking.eventTime,
+        totalAmount: Number(updatedBooking.totalAmount),
+      },
+    },
+  });
+
+  return {
+    booking: {
+      id: updatedBooking.id,
+      customerId: updatedBooking.customerId,
+      vendorId: updatedBooking.vendorId,
+      eventDate: updatedBooking.eventDate.toISOString().split("T")[0],
+      eventTime: updatedBooking.eventTime,
+      eventType: updatedBooking.eventType,
+      location: updatedBooking.location,
+      guestCount: updatedBooking.guestCount,
+      specialRequests: updatedBooking.specialRequests,
+      totalAmount: Number(updatedBooking.totalAmount),
+      platformFee: Number(updatedBooking.platformFee),
+      vendorPayout: Number(updatedBooking.vendorPayout),
+      discountAmount: updatedBooking.discountAmount ? Number(updatedBooking.discountAmount) : 0,
+      loyaltyApplied: updatedBooking.loyaltyApplied,
+      proposalAmount: updatedBooking.proposalAmount ? Number(updatedBooking.proposalAmount) : null,
+      proposalDetails: updatedBooking.proposalDetails as any,
+      proposalSentAt: updatedBooking.proposalSentAt,
+      proposalExpiresAt: updatedBooking.proposalExpiresAt,
+      platformFeeCustomer: updatedBooking.platformFeeCustomer ? Number(updatedBooking.platformFeeCustomer) : null,
+      platformFeeVendor: updatedBooking.platformFeeVendor ? Number(updatedBooking.platformFeeVendor) : null,
+      status: updatedBooking.status,
+      createdAt: updatedBooking.createdAt,
+      updatedAt: updatedBooking.updatedAt,
+      acceptedAt: updatedBooking.acceptedAt,
+      respondedAt: updatedBooking.respondedAt,
+      cancelledAt: updatedBooking.cancelledAt,
+      cancelledBy: updatedBooking.cancelledBy,
+      cancellationReason: updatedBooking.cancellationReason,
+      refundAmount: updatedBooking.refundAmount
+        ? Number(updatedBooking.refundAmount)
+        : null,
+      vendor: {
+        id: updatedBooking.vendorProfile.id,
+        businessName: updatedBooking.vendorProfile.businessName,
+        cuisineType: updatedBooking.vendorProfile.cuisineType,
+      },
+    },
+    paymentUrl: `/customer/bookings/${bookingId}/payment`,
+  };
+}
+
+/**
  * Cancel booking (customer or vendor)
  */
 export async function cancelBooking(

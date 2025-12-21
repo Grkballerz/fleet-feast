@@ -1227,4 +1227,158 @@ Track all UI components, design tokens, and styling utilities for Fleet Feast.
 
 ---
 
+## Booking Components (Task Fleet-Feast-skd)
+**Status**: Complete
+**Agent**: Casey_Components
+**Date**: 2025-12-20
+
+### ProposalBuilder Component
+**Path**: `components/booking/ProposalBuilder.tsx`
+**Description**: Complete proposal creation form for vendors to send detailed proposals to customers with line items, fee preview, inclusions, and terms.
+
+**Props**:
+- `inquiry` (InquiryData): Customer inquiry details (eventDate, eventTime, guestCount, eventType, location, specialRequests)
+- `onSubmit` (function): Async callback when proposal is submitted, receives ProposalData
+- `isLoading` (boolean, optional): Loading state during submission
+
+**Type Definitions**:
+- `InquiryData` - Customer inquiry with event details
+- `ProposalData` - Complete proposal submission data
+- `LineItem` - Individual line item with id, name, quantity, unitPrice
+- `ProposalBuilderProps` - Component props interface
+
+**Features**:
+- **Line Item Builder**:
+  - Dynamic add/remove rows
+  - Fields: Name, Quantity, Unit Price
+  - Auto-calculated total per line
+  - Running subtotal display
+  - Minimum 1 line item required
+  - Validation per line item
+- **Fee Preview Card**:
+  - Subtotal calculation
+  - Platform Fee (5%) - vendor portion
+  - Customer Pays (subtotal + 5% service fee)
+  - **You Receive** (subtotal - platform fee)
+  - Color-coded breakdown
+  - Real-time updates
+- **Inclusions Checklist**:
+  - 8 predefined options (Delivery, Setup, Cleanup, Staff, Equipment, Serving Utensils, Plates & Napkins, Tables & Chairs)
+  - Custom additions with add/remove
+  - Multi-select functionality
+  - Visual selection states
+- **Terms & Conditions**:
+  - Optional textarea for terms
+  - 500+ character support
+  - Helper text display
+- **Expiration Picker**:
+  - Default: 7 days
+  - Options: 3, 5, 7, 14, 30 days
+  - Button-based selection
+  - Display expiry date
+- **Submission Flow**:
+  - Validation before submit
+  - Confirmation modal with summary
+  - Loading states
+  - Error handling
+
+**Validation Rules**:
+- At least one line item required
+- All line items need non-empty name
+- All line items need price > 0
+- Total must be > $0
+- Clear errors on field correction
+
+**Fee Structure**:
+- Platform Fee: 5% (deducted from vendor)
+- Service Fee: 5% (added to customer)
+- Example: $1000 subtotal → Vendor receives $950, Customer pays $1050
+
+**Event Type Display**:
+- Formats EventType enum for display
+- Converts PRIVATE_PARTY → "Private Party"
+- Uses Prisma EventType enum
+
+**Components Used**:
+- Button (primary, outline, ghost variants)
+- Card (CardHeader, CardBody)
+- Input (with validation errors)
+- Modal (confirmation dialog)
+- lucide-react icons (Trash2, Plus, DollarSign, Calendar, AlertCircle)
+
+**Dependencies**:
+- @prisma/client (EventType enum)
+- React hooks (useState, useMemo)
+- crypto.randomUUID for line item IDs
+- @/lib/utils (cn helper)
+
+**Accessibility Features**:
+- Proper ARIA labels for remove buttons
+- Keyboard navigation support
+- Enter key to add custom inclusions
+- Required field indicators
+- Error announcements
+- Focus management
+- Screen reader compatible
+
+**Test Coverage**: `components/booking/ProposalBuilder.test.tsx`
+- Rendering tests (inquiry details, default state)
+- Line item management (add, remove, update, calculations)
+- Fee calculations (5% platform fee, subtotals, real-time updates)
+- Inclusions (toggle, custom add/remove, duplicates)
+- Terms textarea
+- Expiration picker
+- Validation (name required, price > 0, total > 0, error clearing)
+- Submission flow (modal, onSubmit callback, data structure)
+- Accessibility (ARIA labels, keyboard nav)
+- 50+ test cases
+
+**Examples**: `components/booking/ProposalBuilder.example.tsx`
+- Basic usage with minimal configuration
+- API integration with inquiry fetch
+- Custom validation (minimum amounts, required inclusions)
+- Draft saving with localStorage
+- Modal presentation
+
+**Export**: `components/booking/index.ts`
+- Named export: ProposalBuilder
+- Type export: ProposalBuilderProps
+
+**Design Patterns**:
+- Mobile-first responsive design
+- Card-based sections
+- Dynamic form rows
+- Real-time calculations with useMemo
+- Validation with error state tracking
+- Confirmation before destructive actions
+- Loading states for async operations
+- Empty states and placeholders
+
+**Used In**: Vendor proposal creation workflow, inquiry responses
+
+**Integration Example**:
+```tsx
+<ProposalBuilder
+  inquiry={{
+    eventDate: "2025-01-15",
+    eventTime: "18:00",
+    guestCount: 100,
+    eventType: "CORPORATE",
+    location: "123 Main St, City, State"
+  }}
+  onSubmit={async (proposalData) => {
+    const response = await fetch('/api/proposals', {
+      method: 'POST',
+      body: JSON.stringify(proposalData)
+    });
+    // Handle response
+  }}
+  isLoading={submitting}
+/>
+```
+
+**Maintained By**: Casey_Components
+
+---
+
 *Last Updated: 2025-12-20*

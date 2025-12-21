@@ -1,31 +1,32 @@
 /**
- * Vendor Accept Booking API
- * PUT /api/bookings/:id/accept - Vendor accepts booking
+ * Customer Accept Proposal API
+ * POST /api/bookings/:id/accept - Customer accepts vendor proposal
  *
- * Requires vendor authentication
+ * Requires customer authentication
  */
 
 import { NextResponse } from "next/server";
 import {
-  requireVendor,
+  requireCustomer,
   getUserId,
   type AuthenticatedRequest,
 } from "@/lib/middleware/auth.middleware";
 import { ApiResponses } from "@/lib/api-response";
 import {
-  acceptBooking,
+  acceptProposal,
   BookingError,
 } from "@/modules/booking/booking.service";
+import { proposalAcceptSchema } from "@/modules/booking/booking.validation";
 
 /**
- * Handle PUT request - Vendor accepts booking
+ * Handle POST request - Customer accepts proposal
  */
-async function handlePUT(
+async function handlePOST(
   req: AuthenticatedRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const vendorId = getUserId(req);
+    const customerId = getUserId(req);
     const { id } = params;
 
     // Validate UUID format
@@ -34,15 +35,39 @@ async function handlePUT(
       return ApiResponses.badRequest("Invalid booking ID format");
     }
 
-    // Accept booking
-    const booking = await acceptBooking(id, vendorId);
+    // Parse and validate request body (optional acceptTerms field)
+    let body: any = {};
+    try {
+      const text = await req.text();
+      if (text) {
+        body = JSON.parse(text);
+      }
+    } catch (e) {
+      // Empty body is acceptable
+    }
+
+    // Validate request body if provided
+    if (Object.keys(body).length > 0) {
+      const validation = proposalAcceptSchema.safeParse(body);
+      if (!validation.success) {
+        return ApiResponses.validationError(validation.error);
+      }
+    }
+
+    // Accept proposal
+    const result = await acceptProposal(id, customerId);
 
     return ApiResponses.ok({
-      booking,
-      message: "Booking accepted successfully. Customer will be notified to complete payment.",
+      success: true,
+      data: {
+        id: result.booking.id,
+        status: result.booking.status,
+        totalAmount: result.booking.totalAmount,
+        paymentUrl: result.paymentUrl,
+      },
     });
   } catch (error) {
-    console.error("[Booking Accept] Error:", error);
+    console.error("[Proposal Accept] Error:", error);
 
     // Handle custom booking errors
     if (error instanceof BookingError) {
@@ -58,9 +83,9 @@ async function handlePUT(
     }
 
     // Handle unexpected errors
-    return ApiResponses.internalError("Failed to accept booking");
+    return ApiResponses.internalError("Failed to accept proposal");
   }
 }
 
-// Export with vendor authentication middleware
-export const PUT = requireVendor(handlePUT);
+// Export with customer authentication middleware
+export const POST = requireCustomer(handlePOST);
