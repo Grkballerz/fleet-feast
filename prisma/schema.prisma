@@ -149,6 +149,17 @@ enum EventType {
   OTHER
 }
 
+enum BankAccountType {
+  CHECKING
+  SAVINGS
+}
+
+enum PayoutMethod {
+  ACH
+  EFT
+  WIRE
+}
+
 // ============================================================================
 // CORE ENTITIES
 // ============================================================================
@@ -214,6 +225,16 @@ model Vendor {
   approvedAt      DateTime?    @map("approved_at")
   approvedBy      String?      @map("approved_by") // Admin user ID
   rejectionReason String?      @map("rejection_reason") @db.Text
+
+  // Bank Account Information
+  bankAccountHolder String?           @map("bank_account_holder")
+  bankAccountNumber String?           @map("bank_account_number") // Encrypted at rest
+  bankRoutingNumber String?           @map("bank_routing_number")
+  bankAccountType   BankAccountType?  @map("bank_account_type")
+  bankName          String?           @map("bank_name")
+  bankVerified      Boolean           @default(false) @map("bank_verified")
+  bankVerifiedAt    DateTime?         @map("bank_verified_at")
+  payoutMethod      PayoutMethod?     @map("payout_method")
 
   // Timestamps
   createdAt DateTime  @default(now()) @map("created_at")

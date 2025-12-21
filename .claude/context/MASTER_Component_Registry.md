@@ -1104,4 +1104,127 @@ Track all UI components, design tokens, and styling utilities for Fleet Feast.
 
 ---
 
-*Last Updated: 2025-12-05*
+## Payment Components (Task Fleet-Feast-67o)
+**Status**: Complete
+**Agent**: Casey_Components
+**Date**: 2025-12-20
+
+### HelcimPaymentForm Component
+**Path**: `components/payment/HelcimPaymentForm.tsx`
+**Description**: Secure payment form component using Helcim.js for card tokenization
+
+**Props**:
+- `amount` (number): Total amount to charge in cents (e.g., 10000 = $100.00)
+- `onSuccess` (function): Callback fired when tokenization succeeds, receives card token
+- `onError` (function): Callback fired when tokenization fails, receives Error object
+- `disabled` (boolean, optional): Whether form is disabled during submission
+- `buttonText` (string, optional): Custom button text (default: "Process Payment")
+- `className` (string, optional): Optional CSS class for container
+
+**Features**:
+- Dynamic Helcim.js script loading with error handling
+- Secure card tokenization without exposing card data
+- Environment variable validation (NEXT_PUBLIC_HELCIM_JS_CONFIG_TOKEN)
+- Loading states during script load and initialization
+- Error states with user-friendly messages
+- Amount formatting and display
+- Security badge with Lock icon
+- Accessible form with ARIA attributes
+- Script cleanup on component unmount
+- Progress states (loading → ready → processing)
+
+**Security**:
+- Client-side tokenization (no card data touches server)
+- Secure Helcim.js iframe for card input
+- Environment variable validation
+- HTTPS-only in production
+- PCI DSS compliance via Helcim
+
+**Environment Variables Required**:
+- `NEXT_PUBLIC_HELCIM_JS_CONFIG_TOKEN` - Helcim.js configuration token
+
+**TypeScript Types**:
+- `HelcimPaymentFormProps` - Component props interface
+- `HelcimConfig` - Helcim.js initialization config
+- `HelcimSuccessResponse` - Success callback response
+- `HelcimErrorResponse` - Error callback response
+
+**Type Definitions**: `types/helcim-js.d.ts`
+- Global `window.helcim` interface
+- Complete type coverage for Helcim.js API
+- Success/error response types
+- Configuration options
+
+**Tests**: `components/payment/HelcimPaymentForm.test.tsx`
+- Script loading behavior
+- Environment variable validation
+- Component rendering states
+- Helcim initialization
+- Payment flow callbacks
+- Accessibility features
+- Amount formatting
+- Error handling
+
+**Test Coverage**:
+- 9 test suites
+- 20+ individual test cases
+- Loading states
+- Error states
+- Success/error callbacks
+- Keyboard accessibility
+- ARIA attributes
+
+**Components Used**: Button, Spinner, Alert, lucide-react icons (CreditCard, Lock)
+
+**Dependencies**:
+- Helcim.js (loaded dynamically from https://myhelcim.com/js/version2.js)
+- @/lib/utils (cn helper)
+- @/components/ui/* (Button, Spinner, Alert)
+- lucide-react (icons)
+
+**Used In**: Payment checkout flows, booking payments
+
+**Integration Example**:
+```tsx
+<HelcimPaymentForm
+  amount={booking.totalAmount}
+  onSuccess={(token) => {
+    // Send token to backend for payment processing
+    await fetch('/api/payments', {
+      method: 'POST',
+      body: JSON.stringify({ cardToken: token, bookingId })
+    });
+  }}
+  onError={(error) => {
+    console.error('Tokenization failed:', error.message);
+  }}
+  buttonText={`Pay ${formatCurrency(booking.totalAmount)}`}
+/>
+```
+
+**Accessibility Features**:
+- Proper ARIA labels and roles
+- Keyboard navigation support
+- Screen reader compatible
+- Focus management
+- Loading state announcements (aria-live)
+- Error alerts with role="alert"
+
+**Design Tokens Used**:
+- neo-card class for consistent card styling
+- Button component variants
+- Color tokens for error/success states
+- Typography utilities for text
+- Spacing tokens for layout
+
+**Related Documentation**:
+- Helcim API: https://devdocs.helcim.com/
+- Integration guide: `lib/HELCIM_INTEGRATION.md`
+- Helcim client: `lib/helcim.ts`
+- Type definitions: `lib/helcim.types.ts`
+
+**Maintained By**: Casey_Components
+
+---
+
+*Last Updated: 2025-12-20*
