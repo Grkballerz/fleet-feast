@@ -320,6 +320,16 @@ model Booking {
   platformFee  Decimal @map("platform_fee") @db.Decimal(10, 2) // 15% default, 10% for loyalty
   vendorPayout Decimal @map("vendor_payout") @db.Decimal(10, 2) // totalAmount - platformFee
 
+  // Proposal fields
+  proposalAmount      Decimal?  @map("proposal_amount") @db.Decimal(10, 2)
+  proposalDetails     Json?     @map("proposal_details") // Line items, inclusions, terms
+  proposalSentAt      DateTime? @map("proposal_sent_at")
+  proposalExpiresAt   DateTime? @map("proposal_expires_at")
+
+  // Platform fee split (50/50 model)
+  platformFeeCustomer Decimal? @map("platform_fee_customer") @db.Decimal(10, 2)
+  platformFeeVendor   Decimal? @map("platform_fee_vendor") @db.Decimal(10, 2)
+
   // Status
   status BookingStatus @default(INQUIRY)
 
@@ -351,6 +361,7 @@ model Booking {
   @@index([vendorId, eventDate(sort: Desc)])
   @@index([status])
   @@index([eventDate])
+  @@index([status, proposalExpiresAt]) // For finding expiring proposals
   @@map("bookings")
 }
 
