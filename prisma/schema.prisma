@@ -48,15 +48,15 @@ enum DocumentType {
 }
 
 enum BookingStatus {
-  INQUIRY        // Customer submitted inquiry, awaiting vendor proposal
-  PROPOSAL_SENT  // Vendor sent proposal, awaiting customer acceptance
-  ACCEPTED       // Customer accepted proposal, awaiting payment
-  PAID           // Payment completed, pending confirmation
-  CONFIRMED      // Payment confirmed, booking active
-  COMPLETED      // Event occurred successfully
-  DECLINED       // Customer or vendor declined
-  EXPIRED        // Proposal or inquiry expired without action
-  CANCELLED      // Cancelled after confirmation
+  INQUIRY // Customer submitted inquiry, awaiting vendor proposal
+  PROPOSAL_SENT // Vendor sent proposal, awaiting customer acceptance
+  ACCEPTED // Customer accepted proposal, awaiting payment
+  PAID // Payment completed, pending confirmation
+  CONFIRMED // Payment confirmed, booking active
+  COMPLETED // Event occurred successfully
+  DECLINED // Customer or vendor declined
+  EXPIRED // Proposal or inquiry expired without action
+  CANCELLED // Cancelled after confirmation
 }
 
 enum PaymentStatus {
@@ -160,6 +160,26 @@ enum PayoutMethod {
   WIRE
 }
 
+enum EscrowTransactionType {
+  HOLD // Initial payment hold (authorization)
+  CAPTURE // Event completed, capture payment
+  RELEASE // Release to vendor after hold period
+  REFUND // Return to customer
+}
+
+enum EscrowStatus {
+  PENDING // Transaction initiated, not yet completed
+  COMPLETED // Transaction successfully completed
+  FAILED // Transaction failed
+}
+
+enum PayoutStatus {
+  PENDING // Payout scheduled, not yet processed
+  PROCESSING // Payout in progress with payment provider
+  COMPLETED // Payout successfully completed
+  FAILED // Payout failed
+}
+
 // ============================================================================
 // CORE ENTITIES
 // ============================================================================
@@ -227,14 +247,14 @@ model Vendor {
   rejectionReason String?      @map("rejection_reason") @db.Text
 
   // Bank Account Information
-  bankAccountHolder String?           @map("bank_account_holder")
-  bankAccountNumber String?           @map("bank_account_number") // Encrypted at rest
-  bankRoutingNumber String?           @map("bank_routing_number")
-  bankAccountType   BankAccountType?  @map("bank_account_type")
-  bankName          String?           @map("bank_name")
-  bankVerified      Boolean           @default(false) @map("bank_verified")
-  bankVerifiedAt    DateTime?         @map("bank_verified_at")
-  payoutMethod      PayoutMethod?     @map("payout_method")
+  bankAccountHolder String?          @map("bank_account_holder")
+  bankAccountNumber String?          @map("bank_account_number") // Encrypted at rest
+  bankRoutingNumber String?          @map("bank_routing_number")
+  bankAccountType   BankAccountType? @map("bank_account_type")
+  bankName          String?          @map("bank_name")
+  bankVerified      Boolean          @default(false) @map("bank_verified")
+  bankVerifiedAt    DateTime?        @map("bank_verified_at")
+  payoutMethod      PayoutMethod?    @map("payout_method")
 
   // Timestamps
   createdAt DateTime  @default(now()) @map("created_at")
@@ -247,6 +267,7 @@ model Vendor {
   menu         VendorMenu?
   availability Availability[]
   bookings     Booking[]
+  payouts      VendorPayout[]
 
   @@index([userId])
   @@index([cuisineType, status, approvedAt]) // Vendor search optimization
@@ -348,10 +369,10 @@ model Booking {
   vendorPayout Decimal @map("vendor_payout") @db.Decimal(10, 2) // totalAmount - platformFee
 
   // Proposal fields
-  proposalAmount      Decimal?  @map("proposal_amount") @db.Decimal(10, 2)
-  proposalDetails     Json?     @map("proposal_details") // Line items, inclusions, terms
-  proposalSentAt      DateTime? @map("proposal_sent_at")
-  proposalExpiresAt   DateTime? @map("proposal_expires_at")
+  proposalAmount    Decimal?  @map("proposal_amount") @db.Decimal(10, 2)
+  proposalDetails   Json?     @map("proposal_details") // Line items, inclusions, terms
+  proposalSentAt    DateTime? @map("proposal_sent_at")
+  proposalExpiresAt DateTime? @map("proposal_expires_at")
 
   // Platform fee split (50/50 model)
   platformFeeCustomer Decimal? @map("platform_fee_customer") @db.Decimal(10, 2)
@@ -375,14 +396,16 @@ model Booking {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
-  customer      User      @relation("CustomerBookings", fields: [customerId], references: [id], onDelete: Restrict)
-  vendor        User      @relation("VendorBookings", fields: [vendorId], references: [id], onDelete: Restrict)
-  vendorProfile Vendor    @relation(fields: [vendorId], references: [userId], onDelete: Restrict, map: "bookings_vendor_profile_fkey")
-  payment       Payment?
-  messages      Message[]
-  review        Review?
-  dispute       Dispute?
-  quote         Quote?
+  customer            User                  @relation("CustomerBookings", fields: [customerId], references: [id], onDelete: Restrict)
+  vendor              User                  @relation("VendorBookings", fields: [vendorId], references: [id], onDelete: Restrict)
+  vendorProfile       Vendor                @relation(fields: [vendorId], references: [userId], onDelete: Restrict, map: "bookings_vendor_profile_fkey")
+  payment             Payment?
+  messages            Message[]
+  review              Review?
+  dispute             Dispute?
+  quote               Quote?
+  escrowTransactions  EscrowTransaction[]
+  vendorPayoutBooking VendorPayoutBooking[]
 
   @@index([customerId, createdAt(sort: Desc)])
   @@index([vendorId, eventDate(sort: Desc)])
@@ -397,7 +420,7 @@ model Payment {
   bookingId String @unique @map("booking_id")
 
   // External Payment Integration
-  externalPaymentId String? @unique @map("external_payment_id")
+  externalPaymentId  String? @unique @map("external_payment_id")
   externalTransferId String? @unique @map("external_transfer_id")
 
   // Amount
@@ -421,6 +444,92 @@ model Payment {
   @@index([status, capturedAt]) // For escrow release cron job
   @@index([externalPaymentId])
   @@map("payments")
+}
+
+model EscrowTransaction {
+  id        String @id @default(uuid())
+  bookingId String @map("booking_id")
+
+  // Transaction Details
+  type   EscrowTransactionType
+  amount Decimal               @db.Decimal(10, 2)
+  status EscrowStatus          @default(PENDING)
+
+  // External Reference
+  helcimTransactionId String? @unique @map("helcim_transaction_id") // Helcim API transaction reference
+
+  // Metadata
+  notes String? @db.Text // Additional notes or error messages
+
+  // Timestamps
+  createdAt   DateTime  @default(now()) @map("created_at")
+  completedAt DateTime? @map("completed_at") // When transaction finalized
+
+  // Relations
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+
+  @@index([bookingId, type, createdAt(sort: Desc)]) // Transaction history per booking
+  @@index([status, createdAt]) // Find pending transactions
+  @@index([type, completedAt]) // Transaction type reporting
+  @@index([helcimTransactionId])
+  @@map("escrow_transactions")
+}
+
+model VendorPayout {
+  id       String @id @default(uuid())
+  vendorId String @map("vendor_id")
+
+  // Amount
+  amount Decimal @db.Decimal(10, 2)
+
+  // Status & Processing
+  status       PayoutStatus  @default(PENDING)
+  payoutMethod PayoutMethod?
+
+  // Schedule
+  scheduledFor DateTime  @map("scheduled_for") // When payout should be processed
+  processedAt  DateTime? @map("processed_at") // When actually processed
+
+  // External Integration
+  externalReference String? @map("external_reference") // Bank transfer ID or payment provider reference
+
+  // Failure Handling
+  failureReason String? @map("failure_reason") @db.Text
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  vendor   Vendor                @relation(fields: [vendorId], references: [id], onDelete: Restrict)
+  bookings VendorPayoutBooking[]
+
+  @@index([vendorId, status, scheduledFor]) // Find vendor payouts by status
+  @@index([status, scheduledFor]) // Find pending payouts to process
+  @@index([processedAt]) // Reporting
+  @@map("vendor_payouts")
+}
+
+// Join table for many-to-many relationship between VendorPayout and Booking
+model VendorPayoutBooking {
+  id        String @id @default(uuid())
+  payoutId  String @map("payout_id")
+  bookingId String @map("booking_id")
+
+  // Amount from this booking included in the payout
+  amount Decimal @db.Decimal(10, 2)
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  payout  VendorPayout @relation(fields: [payoutId], references: [id], onDelete: Cascade)
+  booking Booking      @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+
+  @@unique([payoutId, bookingId]) // Each booking can only be in a payout once
+  @@index([payoutId])
+  @@index([bookingId])
+  @@map("vendor_payout_bookings")
 }
 
 model Message {
