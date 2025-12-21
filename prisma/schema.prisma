@@ -111,6 +111,12 @@ enum NotificationType {
   DISPUTE_RESOLVED // Both: Dispute was resolved
   VIOLATION_WARNING // User: Received a violation warning
   ACCOUNT_STATUS_CHANGED // User: Account status changed
+  // Proposal workflow notifications
+  INQUIRY_RECEIVED // Vendor: New inquiry received (booking request)
+  PROPOSAL_SENT // Customer: Vendor sent a proposal
+  PROPOSAL_ACCEPTED // Vendor: Customer accepted the proposal
+  PROPOSAL_EXPIRING // Customer: Proposal expiring soon (24-48h warning)
+  PROPOSAL_EXPIRED // Both: Proposal expired without acceptance
 }
 
 enum CuisineType {
@@ -688,6 +694,13 @@ model NotificationPreferences {
   emailDisputeResolved      Boolean @default(true) @map("email_dispute_resolved")
   emailViolationWarning     Boolean @default(true) @map("email_violation_warning")
   emailAccountStatusChanged Boolean @default(true) @map("email_account_status_changed")
+
+  // Proposal notification preferences
+  emailInquiryReceived  Boolean @default(true) @map("email_inquiry_received")
+  emailProposalSent     Boolean @default(true) @map("email_proposal_sent")
+  emailProposalAccepted Boolean @default(true) @map("email_proposal_accepted")
+  emailProposalExpiring Boolean @default(true) @map("email_proposal_expiring")
+  emailProposalExpired  Boolean @default(true) @map("email_proposal_expired")
 
   // Digest option
   emailDigest Boolean @default(false) @map("email_digest") // Daily summary instead of immediate

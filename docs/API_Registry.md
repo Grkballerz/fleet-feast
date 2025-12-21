@@ -154,7 +154,7 @@ PENDING → ACCEPTED → CONFIRMED → COMPLETED
 | POST | `/api/payments` | Required | Customer | Create payment intent | ✅ Implemented |
 | GET | `/api/payments/{id}` | Required | Customer/Vendor | Get payment details | ✅ Implemented |
 | POST | `/api/payments/{id}/refund` | Required | Customer/Admin | Process refund | ✅ Implemented |
-| POST | `/api/payments/webhook` | Webhook | Stripe | Stripe webhook handler | ✅ Implemented |
+| POST | `/api/payments/webhook` | Webhook | Helcim | Helcim webhook handler | ✅ Implemented |
 | POST | `/api/payments/connect/onboard` | Required | Vendor | Create Stripe Connect onboarding link | ✅ Implemented |
 | GET | `/api/vendor/payouts` | Required | Vendor | List vendor payouts | ✅ Implemented |
 | GET | `/api/vendor/payouts/{id}` | Required | Vendor | Get payout details | ✅ Implemented |
@@ -167,11 +167,13 @@ PENDING → AUTHORIZED → CAPTURED → RELEASED
       FAILED     REFUNDED    REFUNDED
 ```
 
-**Stripe Connect Integration:**
-- Marketplace model with Express connected accounts
-- Vendor onboarding with account_onboarding flow
+**Helcim Payment Integration:**
+- Card payment processing with pre-authorization
+- Webhook signature verification via HMAC SHA-256
+- Idempotency handling for duplicate webhooks
+- Support for payment authorization, capture, refund, and void operations
 - Application fee for platform commission (15%)
-- Manual payout schedule (escrow control)
+- Manual capture for escrow control
 
 **Escrow System:**
 - Payment authorized when booking is ACCEPTED
@@ -187,13 +189,17 @@ PENDING → AUTHORIZED → CAPTURED → RELEASED
 - Partial refunds supported for disputes
 
 **Webhook Events Handled:**
-- `payment_intent.succeeded` - Update payment status to AUTHORIZED
-- `payment_intent.payment_failed` - Update payment status to FAILED
-- `payment_intent.canceled` - Log cancellation
-- `charge.refunded` - Log refund completion
-- `transfer.created` - Log successful vendor payout
-- `transfer.failed` - Alert on failed payout
-- `account.updated` - Update vendor Stripe connection status
+- `APPROVED` - Payment approved/authorized, update status to AUTHORIZED
+- `DECLINED` - Payment declined/failed, update status to FAILED
+- `REFUNDED` - Payment refunded, update status to REFUNDED
+- Unknown events logged and acknowledged (returns 200 to prevent retries)
+
+**Webhook Security:**
+- HMAC signature verification using webhook secret
+- 401 Unauthorized for invalid signatures
+- 200 OK response for all valid webhooks (prevents unnecessary retries)
+- Idempotency checks prevent duplicate processing
+- Raw body parsing required for signature verification
 
 ---
 
@@ -714,19 +720,23 @@ vendor:availability:{vendorId}:{date}
 
 ## External Integrations
 
-### Stripe Connect
-### Version 2.1 - 2025-12-05 (Blake_Backend)- Implemented Loyalty Discount System (1 endpoint + booking integration)  - GET `/api/loyalty/check?vendorId={vendorId}` - Check loyalty discount eligibility- Features:  - **5% automatic discount** on 2nd+ booking with same vendor  - Platform absorbs cost by reducing commission from **15% → 10%**  - **Vendor payout increases** despite customer paying less  - Eligibility based on COMPLETED booking count (≥1 previous booking)  - Automatic application during booking creation (no customer action required)  - Discount details included in all booking responses- Database Changes:  - Added `discountAmount` (Decimal, nullable) to Booking model  - Added `loyaltyApplied` (Boolean) to Booking model  - Created Prisma migration: `20251205091550_add_loyalty_discount_fields`- Created loyalty module with comprehensive service layer- Updated booking service to integrate loyalty pricing- Updated API Registry with loyalty section (section 11)
+### Helcim Payments
 **Endpoints Affected:**
-- `POST /api/payments/authorize` - Create PaymentIntent
-- `POST /api/payments/webhook` - Handle Stripe events
-- `POST /api/admin/vendors/{vendorId}/approve` - Trigger Stripe onboarding
+- `POST /api/payments` - Create payment pre-authorization
+- `POST /api/payments/webhook` - Handle Helcim webhook events
+- `POST /api/payments/{id}/refund` - Process refunds via Helcim API
 
-**Events Handled:**
-- `payment_intent.succeeded`
-- `payment_intent.payment_failed`
-- `transfer.created`
-- `charge.dispute.created`
-- `account.updated`
+**Webhook Events Handled:**
+- `APPROVED` - Payment successfully authorized
+- `DECLINED` - Payment authorization failed
+- `REFUNDED` - Payment refunded to customer
+
+**Integration Details:**
+- REST API integration (no official SDK)
+- HMAC SHA-256 webhook signature verification
+- Pre-authorization for escrow control
+- Card tokenization via HelcimPay.js on frontend
+- Server-side processing with API tokens
 
 ### SendGrid Email
 **Triggered By:**
@@ -771,6 +781,34 @@ vendor:availability:{vendorId}:{date}
 ---
 
 ## Change Log
+
+### Version 2.2 - 2025-12-20 (Ellis_Endpoints)
+- **Rebuilt Helcim Webhook Handler** (Task Fleet-Feast-zt6)
+  - Rebuilt `/api/payments/webhook` for Helcim integration
+  - Implemented HMAC SHA-256 signature verification using `verifyWebhook` from `lib/helcim.ts`
+  - Event handlers for all payment events:
+    - `APPROVED` - Updates Payment to AUTHORIZED with timestamp
+    - `DECLINED` - Updates Payment to FAILED
+    - `REFUNDED` - Updates Payment to REFUNDED with timestamp
+  - Idempotency handling using `externalPaymentId` to prevent duplicate processing
+  - Security features:
+    - Raw body parsing for signature verification
+    - 401 Unauthorized for invalid signatures
+    - 200 OK for all processed events (prevents unnecessary retries)
+    - Comprehensive error logging
+  - Database integration:
+    - Queries Payment by `externalPaymentId` (Helcim transaction ID)
+    - Updates status and timestamps atomically
+    - Includes booking context for logging
+  - Graceful error handling:
+    - Returns 200 even on processing errors to prevent webhook retries
+    - Logs warnings for missing payments
+    - Handles unknown event types
+  - Added GET endpoint for webhook debugging/info
+- Updated API Registry:
+  - Changed webhook integration from Stripe to Helcim
+  - Updated webhook event documentation
+  - Updated external integrations section
 
 ### Version 1.9 - 2025-12-05 (Ellis_Endpoints)
 - Implemented Quote Request System API (6 endpoints)
