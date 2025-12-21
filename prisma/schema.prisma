@@ -48,19 +48,20 @@ enum DocumentType {
 }
 
 enum BookingStatus {
-  PENDING // Customer submitted, awaiting vendor response
-  ACCEPTED // Vendor accepted, awaiting payment
-  PAYMENT_FAILED // Payment authorization failed
-  CONFIRMED // Payment authorized, booking confirmed
-  COMPLETED // Event occurred, in 7-day dispute window
-  CANCELLED // Cancelled by customer or vendor
-  DISPUTED // Dispute raised
-  REFUNDED // Payment refunded
+  INQUIRY        // Customer submitted inquiry, awaiting vendor proposal
+  PROPOSAL_SENT  // Vendor sent proposal, awaiting customer acceptance
+  ACCEPTED       // Customer accepted proposal, awaiting payment
+  PAID           // Payment completed, pending confirmation
+  CONFIRMED      // Payment confirmed, booking active
+  COMPLETED      // Event occurred successfully
+  DECLINED       // Customer or vendor declined
+  EXPIRED        // Proposal or inquiry expired without action
+  CANCELLED      // Cancelled after confirmation
 }
 
 enum PaymentStatus {
   PENDING // Initial state
-  AUTHORIZED // Stripe PaymentIntent created, funds held
+  AUTHORIZED // Payment authorized, funds held
   CAPTURED // Payment captured (event occurred)
   RELEASED // Funds transferred to vendor (after 7 days)
   REFUNDED // Payment refunded to customer
@@ -320,7 +321,7 @@ model Booking {
   vendorPayout Decimal @map("vendor_payout") @db.Decimal(10, 2) // totalAmount - platformFee
 
   // Status
-  status BookingStatus @default(PENDING)
+  status BookingStatus @default(INQUIRY)
 
   // Cancellation
   cancelledAt        DateTime? @map("cancelled_at")
