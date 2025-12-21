@@ -71,6 +71,14 @@ export interface EmailTemplateData {
   totalAmount?: string;
   vendorName?: string;
   customerName?: string;
+  businessName?: string;
+
+  // Proposal-related
+  proposalId?: string;
+  proposalAmount?: string;
+  expiresAt?: string;
+  timeLeft?: string;
+  proposalLink?: string;
 
   // Message-related
   senderName?: string;
@@ -112,6 +120,11 @@ export interface NotificationPreferencesResponse {
   emailDisputeResolved: boolean;
   emailViolationWarning: boolean;
   emailAccountStatusChanged: boolean;
+  emailInquiryReceived: boolean;
+  emailProposalSent: boolean;
+  emailProposalAccepted: boolean;
+  emailProposalExpiring: boolean;
+  emailProposalExpired: boolean;
   emailDigest: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -130,6 +143,11 @@ export interface UpdateNotificationPreferencesParams {
   emailDisputeResolved?: boolean;
   emailViolationWarning?: boolean;
   emailAccountStatusChanged?: boolean;
+  emailInquiryReceived?: boolean;
+  emailProposalSent?: boolean;
+  emailProposalAccepted?: boolean;
+  emailProposalExpiring?: boolean;
+  emailProposalExpired?: boolean;
   emailDigest?: boolean;
 }
 
@@ -165,4 +183,9 @@ export const EMAIL_PREFERENCE_MAP: Record<NotificationType, keyof NotificationPr
   DISPUTE_RESOLVED: 'emailDisputeResolved',
   VIOLATION_WARNING: 'emailViolationWarning',
   ACCOUNT_STATUS_CHANGED: 'emailAccountStatusChanged',
+  INQUIRY_RECEIVED: 'emailInquiryReceived',
+  PROPOSAL_SENT: 'emailProposalSent',
+  PROPOSAL_ACCEPTED: 'emailProposalAccepted',
+  PROPOSAL_EXPIRING: 'emailProposalExpiring',
+  PROPOSAL_EXPIRED: 'emailProposalExpired',
 };

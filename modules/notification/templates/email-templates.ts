@@ -537,3 +537,219 @@ export const renderAccountStatusChangedTemplate = (data: EmailTemplateData): Ema
     html: baseTemplate('Account Status Update', content, data.platformUrl),
   };
 };
+
+// ============================================================================
+// INQUIRY RECEIVED (to vendor)
+// ============================================================================
+
+export const renderInquiryReceivedTemplate = (data: EmailTemplateData): EmailTemplate => {
+  const content = `
+    <h1>New Inquiry from Customer</h1>
+    <div class="content">
+      <p>Hi ${data.userName},</p>
+      <p><strong>${data.customerName}</strong> is interested in your services!</p>
+
+      <div class="details">
+        <div class="details-row">
+          <span class="details-label">Event Type:</span>
+          <span>${data.eventType}</span>
+        </div>
+        <div class="details-row">
+          <span class="details-label">Event Date:</span>
+          <span>${data.eventDate}</span>
+        </div>
+        ${data.guestCount ? `
+        <div class="details-row">
+          <span class="details-label">Guest Count:</span>
+          <span>${data.guestCount}</span>
+        </div>
+        ` : ''}
+        ${data.location ? `
+        <div class="details-row">
+          <span class="details-label">Location:</span>
+          <span>${data.location}</span>
+        </div>
+        ` : ''}
+      </div>
+
+      <p><strong>Please respond with a proposal</strong> to secure this booking opportunity.</p>
+
+      <a href="${data.platformUrl}/vendor/bookings/${data.bookingId}" class="button">Send Proposal</a>
+    </div>
+  `;
+
+  return {
+    subject: `New Inquiry: ${data.customerName} - ${data.eventType}`,
+    html: baseTemplate('New Inquiry', content, data.platformUrl),
+  };
+};
+
+// ============================================================================
+// PROPOSAL SENT (to customer)
+// ============================================================================
+
+export const renderProposalSentTemplate = (data: EmailTemplateData): EmailTemplate => {
+  const content = `
+    <h1>New Proposal from ${data.businessName}</h1>
+    <div class="content">
+      <p>Hi ${data.userName},</p>
+      <p><strong>${data.businessName}</strong> has sent you a proposal for your ${data.eventType || 'event'}!</p>
+
+      <div class="details">
+        <div class="details-row">
+          <span class="details-label">Event Date:</span>
+          <span>${data.eventDate}</span>
+        </div>
+        <div class="details-row">
+          <span class="details-label">Proposal Amount:</span>
+          <span><strong>$${data.proposalAmount}</strong></span>
+        </div>
+        ${data.expiresAt ? `
+        <div class="details-row">
+          <span class="details-label">Valid Until:</span>
+          <span>${data.expiresAt}</span>
+        </div>
+        ` : ''}
+      </div>
+
+      <p>Review the proposal details and accept to confirm your booking.</p>
+
+      <a href="${data.proposalLink || `${data.platformUrl}/customer/bookings/${data.bookingId}`}" class="button">View Proposal</a>
+    </div>
+  `;
+
+  return {
+    subject: `New Proposal from ${data.businessName} - $${data.proposalAmount}`,
+    html: baseTemplate('New Proposal', content, data.platformUrl),
+  };
+};
+
+// ============================================================================
+// PROPOSAL ACCEPTED (to vendor)
+// ============================================================================
+
+export const renderProposalAcceptedTemplate = (data: EmailTemplateData): EmailTemplate => {
+  const content = `
+    <h1>Proposal Accepted! 🎉</h1>
+    <div class="content">
+      <p>Hi ${data.userName},</p>
+      <p>Great news! <strong>${data.customerName}</strong> accepted your proposal!</p>
+
+      <div class="details">
+        <div class="details-row">
+          <span class="details-label">Event Type:</span>
+          <span>${data.eventType}</span>
+        </div>
+        <div class="details-row">
+          <span class="details-label">Event Date:</span>
+          <span>${data.eventDate}</span>
+        </div>
+        <div class="details-row">
+          <span class="details-label">Proposal Amount:</span>
+          <span><strong>$${data.proposalAmount}</strong></span>
+        </div>
+      </div>
+
+      <p>Payment will be processed and you'll receive a confirmation once complete.</p>
+
+      <a href="${data.platformUrl}/vendor/bookings/${data.bookingId}" class="button">View Booking</a>
+    </div>
+  `;
+
+  return {
+    subject: `Proposal Accepted - ${data.customerName}`,
+    html: baseTemplate('Proposal Accepted', content, data.platformUrl),
+  };
+};
+
+// ============================================================================
+// PROPOSAL EXPIRING (to customer)
+// ============================================================================
+
+export const renderProposalExpiringTemplate = (data: EmailTemplateData): EmailTemplate => {
+  const content = `
+    <h1>Proposal Expiring Soon ⏰</h1>
+    <div class="content">
+      <p>Hi ${data.userName},</p>
+      <p>The proposal from <strong>${data.businessName}</strong> is expiring soon!</p>
+
+      <div class="details">
+        <div class="details-row">
+          <span class="details-label">Event Type:</span>
+          <span>${data.eventType}</span>
+        </div>
+        <div class="details-row">
+          <span class="details-label">Event Date:</span>
+          <span>${data.eventDate}</span>
+        </div>
+        <div class="details-row">
+          <span class="details-label">Proposal Amount:</span>
+          <span>$${data.proposalAmount}</span>
+        </div>
+        <div class="details-row">
+          <span class="details-label">Time Remaining:</span>
+          <span><strong>${data.timeLeft}</strong></span>
+        </div>
+      </div>
+
+      <p>Don't miss out! Review and accept the proposal to secure your booking.</p>
+
+      <a href="${data.proposalLink || `${data.platformUrl}/customer/bookings/${data.bookingId}`}" class="button">Review Proposal</a>
+    </div>
+  `;
+
+  return {
+    subject: `Urgent: Proposal Expires in ${data.timeLeft} - ${data.businessName}`,
+    html: baseTemplate('Proposal Expiring Soon', content, data.platformUrl),
+  };
+};
+
+// ============================================================================
+// PROPOSAL EXPIRED (to both)
+// ============================================================================
+
+export const renderProposalExpiredTemplate = (data: EmailTemplateData): EmailTemplate => {
+  const isVendor = !!data.customerName; // If customerName exists, recipient is vendor
+
+  const content = `
+    <h1>Proposal Expired</h1>
+    <div class="content">
+      <p>Hi ${data.userName},</p>
+      <p>The proposal for ${data.eventType || 'your event'} on ${data.eventDate} has expired.</p>
+
+      <div class="details">
+        <div class="details-row">
+          <span class="details-label">Event Type:</span>
+          <span>${data.eventType}</span>
+        </div>
+        <div class="details-row">
+          <span class="details-label">Event Date:</span>
+          <span>${data.eventDate}</span>
+        </div>
+        ${isVendor ? `
+        <div class="details-row">
+          <span class="details-label">Customer:</span>
+          <span>${data.customerName}</span>
+        </div>
+        ` : `
+        <div class="details-row">
+          <span class="details-label">Vendor:</span>
+          <span>${data.businessName}</span>
+        </div>
+        `}
+      </div>
+
+      ${isVendor
+        ? '<p>You can send a new proposal if the customer is still interested.</p>'
+        : '<p>You can request a new proposal or browse other vendors for your event.</p>'
+      }
+
+      <a href="${data.platformUrl}/${isVendor ? 'vendor' : 'customer'}/bookings/${data.bookingId}" class="button">View Details</a>
+    </div>
+  `;
+
+  return {
+    subject: `Proposal Expired - ${data.eventType}`,
+    html: baseTemplate('Proposal Expired', content, data.platformUrl),
+  };
+};

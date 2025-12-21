@@ -487,3 +487,122 @@ export async function notifyReviewPrompt(params: {
     },
   });
 }
+
+// ============================================================================
+// PROPOSAL WORKFLOW NOTIFICATIONS
+// ============================================================================
+
+/**
+ * Send inquiry received notification to vendor
+ */
+export async function notifyInquiryReceived(params: {
+  vendorId: string;
+  bookingId: string;
+  customerName: string;
+  eventType: string;
+  eventDate: string;
+  guestCount?: number;
+  location?: string;
+}): Promise<void> {
+  await notificationService.createNotification({
+    userId: params.vendorId,
+    type: 'INQUIRY_RECEIVED',
+    title: 'New Inquiry from Customer',
+    message: `${params.customerName} is interested in your services for ${params.eventType} on ${params.eventDate}`,
+    link: `/vendor/bookings/${params.bookingId}`,
+    metadata: params,
+  });
+}
+
+/**
+ * Send proposal sent notification to customer
+ */
+export async function notifyProposalSent(params: {
+  customerId: string;
+  bookingId: string;
+  businessName: string;
+  proposalAmount: string;
+  eventType?: string;
+  eventDate: string;
+  expiresAt?: string;
+}): Promise<void> {
+  await notificationService.createNotification({
+    userId: params.customerId,
+    type: 'PROPOSAL_SENT',
+    title: `New Proposal from ${params.businessName}`,
+    message: `${params.businessName} has sent you a proposal for $${params.proposalAmount}`,
+    link: `/customer/bookings/${params.bookingId}`,
+    metadata: {
+      ...params,
+      proposalLink: `${process.env.NEXT_PUBLIC_APP_URL}/customer/bookings/${params.bookingId}`,
+    },
+  });
+}
+
+/**
+ * Send proposal accepted notification to vendor
+ */
+export async function notifyProposalAccepted(params: {
+  vendorId: string;
+  bookingId: string;
+  customerName: string;
+  eventType: string;
+  eventDate: string;
+  proposalAmount: string;
+}): Promise<void> {
+  await notificationService.createNotification({
+    userId: params.vendorId,
+    type: 'PROPOSAL_ACCEPTED',
+    title: 'Proposal Accepted!',
+    message: `Your proposal for ${params.eventType} on ${params.eventDate} was accepted`,
+    link: `/vendor/bookings/${params.bookingId}`,
+    metadata: params,
+  });
+}
+
+/**
+ * Send proposal expiring notification to customer
+ */
+export async function notifyProposalExpiring(params: {
+  customerId: string;
+  bookingId: string;
+  businessName: string;
+  eventType: string;
+  eventDate: string;
+  proposalAmount: string;
+  timeLeft: string;
+  expiresAt: string;
+}): Promise<void> {
+  await notificationService.createNotification({
+    userId: params.customerId,
+    type: 'PROPOSAL_EXPIRING',
+    title: 'Proposal Expiring Soon',
+    message: `Your proposal from ${params.businessName} expires in ${params.timeLeft}`,
+    link: `/customer/bookings/${params.bookingId}`,
+    metadata: {
+      ...params,
+      proposalLink: `${process.env.NEXT_PUBLIC_APP_URL}/customer/bookings/${params.bookingId}`,
+    },
+  });
+}
+
+/**
+ * Send proposal expired notification to both parties
+ */
+export async function notifyProposalExpired(params: {
+  userId: string;
+  bookingId: string;
+  eventType: string;
+  eventDate: string;
+  customerName?: string;
+  businessName?: string;
+}): Promise<void> {
+  await notificationService.createNotification({
+    userId: params.userId,
+    type: 'PROPOSAL_EXPIRED',
+    title: 'Proposal Expired',
+    message: `The proposal for ${params.eventType} has expired`,
+    link: `/bookings/${params.bookingId}`,
+    metadata: params,
+  });
+}

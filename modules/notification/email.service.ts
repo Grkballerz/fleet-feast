@@ -26,6 +26,11 @@ import {
   renderDisputeResolvedTemplate,
   renderViolationWarningTemplate,
   renderAccountStatusChangedTemplate,
+  renderInquiryReceivedTemplate,
+  renderProposalSentTemplate,
+  renderProposalAcceptedTemplate,
+  renderProposalExpiringTemplate,
+  renderProposalExpiredTemplate,
 } from './templates/email-templates';
 
 // ============================================================================
@@ -62,6 +67,11 @@ const EMAIL_TEMPLATE_RENDERERS: Record<
   DISPUTE_RESOLVED: renderDisputeResolvedTemplate,
   VIOLATION_WARNING: renderViolationWarningTemplate,
   ACCOUNT_STATUS_CHANGED: renderAccountStatusChangedTemplate,
+  INQUIRY_RECEIVED: renderInquiryReceivedTemplate,
+  PROPOSAL_SENT: renderProposalSentTemplate,
+  PROPOSAL_ACCEPTED: renderProposalAcceptedTemplate,
+  PROPOSAL_EXPIRING: renderProposalExpiringTemplate,
+  PROPOSAL_EXPIRED: renderProposalExpiredTemplate,
 };
 
 // ============================================================================
