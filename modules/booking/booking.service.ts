@@ -653,7 +653,8 @@ export async function acceptBooking(
 }
 
 /**
- * Vendor declines booking
+ * Vendor declines booking (legacy - PENDING status only)
+ * @deprecated Use declineBookingInquiryOrProposal for new proposal workflow
  */
 export async function declineBooking(
   bookingId: string,
@@ -753,6 +754,178 @@ export async function declineBooking(
       id: updatedBooking.customer.id,
       email: updatedBooking.customer.email,
     },
+  };
+}
+
+/**
+ * Decline booking inquiry or proposal
+ * - Vendor declines INQUIRY → DECLINED
+ * - Customer declines PROPOSAL_SENT → DECLINED
+ */
+export async function declineBookingInquiryOrProposal(
+  bookingId: string,
+  userId: string,
+  data: { reason?: string }
+): Promise<{ booking: BookingDetails; message: string }> {
+  const booking = await prisma.booking.findUnique({
+    where: { id: bookingId },
+    include: {
+      customer: {
+        select: {
+          id: true,
+          email: true,
+        },
+      },
+      vendor: {
+        select: {
+          id: true,
+          email: true,
+        },
+      },
+      vendorProfile: {
+        select: {
+          id: true,
+          businessName: true,
+          cuisineType: true,
+        },
+      },
+    },
+  });
+
+  if (!booking) {
+    throw new BookingError("Booking not found", "BOOKING_NOT_FOUND", 404);
+  }
+
+  let notificationRecipientId: string;
+  let notificationMessage: string;
+  let responseMessage: string;
+
+  // Handle INQUIRY decline (vendor action)
+  if (booking.status === BookingStatus.INQUIRY) {
+    // Only vendor can decline inquiry
+    if (booking.vendorId !== userId) {
+      throw new BookingError(
+        "Only the vendor can decline an inquiry",
+        "UNAUTHORIZED",
+        403
+      );
+    }
+
+    notificationRecipientId = booking.customerId;
+    notificationMessage = "Inquiry Declined";
+    responseMessage = "Inquiry declined. Customer will be notified.";
+  }
+  // Handle PROPOSAL_SENT decline (customer action)
+  else if (booking.status === BookingStatus.PROPOSAL_SENT) {
+    // Only customer can decline proposal
+    if (booking.customerId !== userId) {
+      throw new BookingError(
+        "Only the customer can decline a proposal",
+        "UNAUTHORIZED",
+        403
+      );
+    }
+
+    notificationRecipientId = booking.vendorId;
+    notificationMessage = "Proposal Declined";
+    responseMessage = "Proposal declined. Vendor will be notified.";
+  }
+  // Invalid status
+  else {
+    throw new BookingError(
+      `Booking cannot be declined in ${booking.status} status. Only INQUIRY or PROPOSAL_SENT bookings can be declined.`,
+      "INVALID_STATUS",
+      400
+    );
+  }
+
+  // Update booking status
+  const now = new Date();
+  const updatedBooking = await prisma.booking.update({
+    where: { id: bookingId },
+    data: {
+      status: BookingStatus.DECLINED,
+      respondedAt: now,
+    },
+    include: {
+      customer: {
+        select: {
+          id: true,
+          email: true,
+        },
+      },
+      vendorProfile: {
+        select: {
+          id: true,
+          businessName: true,
+          cuisineType: true,
+        },
+      },
+    },
+  });
+
+  // Create notification for the other party
+  await prisma.notification.create({
+    data: {
+      userId: notificationRecipientId,
+      type: "BOOKING_DECLINED",
+      title: notificationMessage,
+      message: `Booking for ${updatedBooking.eventDate.toISOString().split("T")[0]} has been declined`,
+      link: `/bookings/${bookingId}`,
+      metadata: {
+        bookingId,
+        eventDate: updatedBooking.eventDate.toISOString().split("T")[0],
+        eventTime: updatedBooking.eventTime,
+        reason: data.reason,
+      },
+    },
+  });
+
+  // Create message if reason provided
+  if (data.reason) {
+    await prisma.message.create({
+      data: {
+        bookingId,
+        senderId: userId,
+        content: `Declined: ${data.reason}`,
+      },
+    });
+  }
+
+  return {
+    booking: {
+      id: updatedBooking.id,
+      customerId: updatedBooking.customerId,
+      vendorId: updatedBooking.vendorId,
+      eventDate: updatedBooking.eventDate.toISOString().split("T")[0],
+      eventTime: updatedBooking.eventTime,
+      eventType: updatedBooking.eventType,
+      location: updatedBooking.location,
+      guestCount: updatedBooking.guestCount,
+      specialRequests: updatedBooking.specialRequests,
+      totalAmount: Number(updatedBooking.totalAmount),
+      platformFee: Number(updatedBooking.platformFee),
+      vendorPayout: Number(updatedBooking.vendorPayout),
+      discountAmount: updatedBooking.discountAmount ? Number(updatedBooking.discountAmount) : 0,
+      loyaltyApplied: updatedBooking.loyaltyApplied,
+      status: updatedBooking.status,
+      createdAt: updatedBooking.createdAt,
+      updatedAt: updatedBooking.updatedAt,
+      acceptedAt: updatedBooking.acceptedAt,
+      respondedAt: updatedBooking.respondedAt,
+      cancelledAt: updatedBooking.cancelledAt,
+      cancelledBy: updatedBooking.cancelledBy,
+      cancellationReason: updatedBooking.cancellationReason,
+      refundAmount: updatedBooking.refundAmount
+        ? Number(updatedBooking.refundAmount)
+        : null,
+      vendor: {
+        id: updatedBooking.vendorProfile.id,
+        businessName: updatedBooking.vendorProfile.businessName,
+        cuisineType: updatedBooking.vendorProfile.cuisineType,
+      },
+    },
+    message: responseMessage,
   };
 }
 

@@ -1,32 +1,36 @@
 /**
- * Vendor Decline Booking API
- * PUT /api/bookings/:id/decline - Vendor declines booking
+ * Decline Booking API
+ * POST /api/bookings/:id/decline - Vendor/Customer declines booking
  *
- * Requires vendor authentication
+ * Scenarios:
+ * - Vendor declines INQUIRY → DECLINED
+ * - Customer declines PROPOSAL_SENT → DECLINED
+ *
+ * Requires authentication
  */
 
 import { NextResponse } from "next/server";
 import {
-  requireVendor,
+  requireAuth,
   getUserId,
   type AuthenticatedRequest,
 } from "@/lib/middleware/auth.middleware";
 import { ApiResponses } from "@/lib/api-response";
 import { vendorDeclineSchema } from "@/modules/booking/booking.validation";
 import {
-  declineBooking,
+  declineBookingInquiryOrProposal,
   BookingError,
 } from "@/modules/booking/booking.service";
 
 /**
- * Handle PUT request - Vendor declines booking
+ * Handle POST request - Decline booking (inquiry or proposal)
  */
-async function handlePUT(
+async function handlePOST(
   req: AuthenticatedRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const vendorId = getUserId(req);
+    const userId = getUserId(req);
     const { id } = params;
 
     // Validate UUID format
@@ -48,11 +52,12 @@ async function handlePUT(
     }
 
     // Decline booking
-    const booking = await declineBooking(id, vendorId, { reason });
+    const result = await declineBookingInquiryOrProposal(id, userId, { reason });
 
     return ApiResponses.ok({
-      booking,
-      message: "Booking declined. Customer will be notified.",
+      success: true,
+      data: result.booking,
+      message: result.message,
     });
   } catch (error) {
     console.error("[Booking Decline] Error:", error);
@@ -75,5 +80,5 @@ async function handlePUT(
   }
 }
 
-// Export with vendor authentication middleware
-export const PUT = requireVendor(handlePUT);
+// Export with authentication middleware (both vendor and customer can decline)
+export const POST = requireAuth(handlePOST);

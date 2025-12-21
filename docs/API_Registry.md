@@ -24,11 +24,11 @@ This registry tracks all API endpoints in the Fleet Feast platform. It serves as
 
 ## Statistics
 
-- **Total Endpoints:** 92
+- **Total Endpoints:** 93
 - **Public Endpoints:** 14
-- **Protected Endpoints:** 71
+- **Protected Endpoints:** 72
 - **Admin-Only Endpoints:** 15
-- **HTTP Methods:** GET (45), POST (37), PUT (16), PATCH (5), DELETE (2)
+- **HTTP Methods:** GET (45), POST (38), PUT (16), PATCH (5), DELETE (2)
 
 ---
 
@@ -110,11 +110,12 @@ This registry tracks all API endpoints in the Fleet Feast platform. It serves as
 
 ---
 
-### 5. Bookings (7 endpoints)
-**Base Path:** `/api/bookings`
+### 5. Bookings & Inquiries (8 endpoints)
+**Base Path:** `/api/bookings` and `/api/inquiries`
 
 | Method | Endpoint | Auth | Role | Description | Status |
 |--------|----------|------|------|-------------|--------|
+| POST | `/api/inquiries` | Required | Customer | Submit inquiry for proposal | ✅ Implemented |
 | GET | `/api/bookings` | Required | Customer/Vendor | List user bookings | ✅ Implemented |
 | POST | `/api/bookings` | Required | Customer | Create booking | ✅ Implemented |
 | GET | `/api/bookings/{id}` | Required | Customer/Vendor | Get booking details | ✅ Implemented |
@@ -125,17 +126,34 @@ This registry tracks all API endpoints in the Fleet Feast platform. It serves as
 
 **Booking State Transitions:**
 ```
-PENDING → ACCEPTED → CONFIRMED → COMPLETED
-         ↓           ↓           ↓
-      CANCELLED  CANCELLED  CANCELLED → REFUNDED
-                              ↓
-                          DISPUTED → REFUNDED
+INQUIRY → PROPOSAL_SENT → ACCEPTED → PAID → CONFIRMED → COMPLETED
+         ↓                ↓          ↓      ↓           ↓
+      DECLINED/EXPIRED DECLINED  CANCELLED CANCELLED CANCELLED → REFUNDED
+                                                       ↓
+                                                   DISPUTED → REFUNDED
 ```
 
 **Business Rules:**
+
+**Inquiry Submission (POST /api/inquiries):**
+- Customer submits inquiry with event details (date, time, type, location, guest count)
+- Booking created with status INQUIRY and amounts set to 0
+- Vendor must be APPROVED to receive inquiries
+- Optional availability check warns if vendor is unavailable on requested date
+- Notification sent to vendor (type: INQUIRY_RECEIVED)
+- Only customers can submit inquiries
+
+**Proposal Workflow:**
+- Vendor reviews inquiry and sends proposal with pricing
+- Booking status updated to PROPOSAL_SENT
+- Customer reviews proposal and can accept or decline
+- On acceptance: booking status → ACCEPTED, payment flow begins
+- On decline: booking status → DECLINED
+
+**General Booking Rules:**
 - **Availability Check:** Vendor must be available on event date
 - **Capacity Validation:** Guest count must be within vendor capacity range
-- **48-Hour Response Window:** Vendor must accept/decline within 48 hours
+- **48-Hour Response Window:** Vendor must respond to inquiry/proposal within 48 hours
 - **Status Validation:** Only valid status transitions allowed
 - **Cancellation Policy:**
   - 7+ days before event: 100% refund
@@ -568,6 +586,7 @@ Vendor Payout: $855 (vendor receives)
 | Food Trucks | 3/3 | ✅ Complete | Ellis_Endpoints (Task Fleet-Feast-w6w) |
 | Search | 1 (deprecated) | Replaced by Food Trucks API | Ellis_Endpoints |
 | Bookings | 7/7 | ✅ Complete | Blake_Backend (Task Fleet-Feast-wu8, Fleet-Feast-4tc) |
+| Inquiries | 1/1 | ✅ Complete | Ellis_Endpoints (Task Fleet-Feast-dpx) |
 | Quotes | 6/6 | ✅ Complete | Ellis_Endpoints (Task Fleet-Feast-4h6) |
 | Payments | 7/8 | ✅ Complete | Blake_Backend (Task Fleet-Feast-5cl) |
 | Loyalty | 1/1 | ✅ Complete | Blake_Backend (Task Fleet-Feast-4tc) |
@@ -781,6 +800,31 @@ vendor:availability:{vendorId}:{date}
 ---
 
 ## Change Log
+
+### Version 2.3 - 2025-12-20 (Ellis_Endpoints)
+- **Implemented Inquiry Submission API** (Task Fleet-Feast-dpx)
+  - POST `/api/inquiries` - Customer submits inquiry for vendor proposal
+  - Creates booking with INQUIRY status and amounts set to 0
+  - Validates vendor exists and is APPROVED
+  - Optional availability check warns if vendor is unavailable
+  - Creates INQUIRY_RECEIVED notification for vendor
+  - Only customers can submit inquiries
+  - Response includes booking ID, status, and creation timestamp
+- Business logic:
+  - Booking created with totalAmount/platformFee/vendorPayout all set to 0
+  - Vendor userId looked up from vendor profile
+  - Event date validated as future date
+  - Notification includes booking context (eventType, eventDate, guestCount)
+- Error handling:
+  - 403 Forbidden if non-customer attempts to submit
+  - 404 Not Found if vendor doesn't exist
+  - 400 Bad Request if vendor is not APPROVED
+  - Prisma error handling for foreign key and unique constraints
+- Updated API Registry:
+  - Added Inquiries domain with 1 endpoint
+  - Updated booking state transitions to include INQUIRY flow
+  - Documented inquiry-to-proposal workflow
+  - Updated endpoint statistics (93 total endpoints)
 
 ### Version 2.2 - 2025-12-20 (Ellis_Endpoints)
 - **Rebuilt Helcim Webhook Handler** (Task Fleet-Feast-zt6)
