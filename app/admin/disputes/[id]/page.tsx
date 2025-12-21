@@ -390,7 +390,7 @@ export default function DisputeDetailPage() {
 
       {/* Resolve Modal */}
       <Modal
-        isOpen={showResolveModal}
+        open={showResolveModal}
         onClose={() => setShowResolveModal(false)}
         title="Resolve Dispute"
       >

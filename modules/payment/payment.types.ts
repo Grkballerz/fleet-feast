@@ -1,6 +1,8 @@
 /**
  * Payment Module TypeScript Types
  * Shared types for payment and escrow operations
+ *
+ * NOTE: Stripe-specific types removed. Payment processing will be handled by Helcim.
  */
 
 import { PaymentStatus, BookingStatus } from "@prisma/client";
@@ -13,45 +15,6 @@ export interface PaymentSplit {
   totalAmount: number;
   platformFee: number;
   vendorPayout: number;
-}
-
-/**
- * Payment intent creation data
- */
-export interface CreatePaymentIntentData {
-  bookingId: string;
-  amount: number;
-  currency?: string; // Default: 'usd'
-  description?: string;
-}
-
-/**
- * Stripe payment intent response
- */
-export interface PaymentIntentResponse {
-  clientSecret: string;
-  paymentIntentId: string;
-  amount: number;
-  currency: string;
-  status: string;
-}
-
-/**
- * Payment details
- */
-export interface PaymentDetails {
-  id: string;
-  bookingId: string;
-  stripePaymentIntentId: string | null;
-  stripeTransferId: string | null;
-  amount: number;
-  status: PaymentStatus;
-  authorizedAt: Date | null;
-  capturedAt: Date | null;
-  releasedAt: Date | null;
-  refundedAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 /**
@@ -84,7 +47,7 @@ export interface PayoutDetails {
   netPayout: number;
   status: PaymentStatus;
   releasedAt: Date | null;
-  stripeTransferId: string | null;
+  externalTransferId: string | null;
   eventDate: Date;
   bookingStatus: BookingStatus;
   customerEmail: string;
@@ -114,49 +77,6 @@ export interface PayoutListItem {
 export interface EarlyPayoutRequestData {
   paymentId: string;
   reason?: string;
-}
-
-/**
- * Connected account onboarding data
- */
-export interface ConnectedAccountData {
-  vendorId: string;
-  email: string;
-  businessName: string;
-  country?: string; // Default: 'US'
-}
-
-/**
- * Connected account onboarding response
- */
-export interface OnboardingLinkResponse {
-  accountId: string;
-  onboardingUrl: string;
-  expiresAt: number; // Unix timestamp
-}
-
-/**
- * Stripe webhook event types we handle
- */
-export enum StripeWebhookEvent {
-  PAYMENT_INTENT_SUCCEEDED = 'payment_intent.succeeded',
-  PAYMENT_INTENT_PAYMENT_FAILED = 'payment_intent.payment_failed',
-  PAYMENT_INTENT_CANCELED = 'payment_intent.canceled',
-  CHARGE_REFUNDED = 'charge.refunded',
-  TRANSFER_CREATED = 'transfer.created',
-  TRANSFER_FAILED = 'transfer.failed',
-  ACCOUNT_UPDATED = 'account.updated',
-  ACCOUNT_EXTERNAL_ACCOUNT_CREATED = 'account.external_account.created',
-}
-
-/**
- * Webhook handler metadata
- */
-export interface WebhookMetadata {
-  bookingId?: string;
-  vendorId?: string;
-  releaseDate?: string;
-  paymentId?: string;
 }
 
 /**

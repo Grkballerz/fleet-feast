@@ -39,8 +39,6 @@ async function handleGET(req: AuthenticatedRequest) {
         latitude: profile.latitude,
         longitude: profile.longitude,
         status: profile.status,
-        stripeAccountId: profile.stripeAccountId,
-        stripeConnected: profile.stripeConnected,
         approvedAt: profile.approvedAt,
         rejectionReason: profile.rejectionReason,
         createdAt: profile.createdAt,

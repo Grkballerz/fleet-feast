@@ -23,11 +23,6 @@ export function validateProductionEnv(): void {
 
   const requiredEnvVars = [
     {
-      name: "STRIPE_WEBHOOK_SECRET",
-      description: "Stripe webhook signature verification",
-      critical: true,
-    },
-    {
       name: "NEXT_PUBLIC_APP_URL",
       description: "Application URL for redirects and webhooks",
       critical: true,
@@ -42,11 +37,7 @@ export function validateProductionEnv(): void {
       description: "Database connection string",
       critical: true,
     },
-    {
-      name: "STRIPE_SECRET_KEY",
-      description: "Stripe API secret key",
-      critical: true,
-    },
+    // NOTE: Stripe env vars removed - will be replaced with Helcim configuration
   ];
 
   const missingVars: string[] = [];
@@ -108,9 +99,7 @@ export function validateDevelopmentEnv(): void {
     warnings.push("NEXTAUTH_SECRET - Using insecure default secret");
   }
 
-  if (!process.env.STRIPE_SECRET_KEY) {
-    warnings.push("STRIPE_SECRET_KEY - Payment features will not work");
-  }
+  // NOTE: Stripe validation removed - will be replaced with Helcim validation
 
   if (warnings.length > 0) {
     console.warn("\n⚠️  Development Environment Warnings:");

@@ -336,7 +336,7 @@ export default function VendorBookingsPage() {
       {/* Booking Details Modal */}
       {selectedBooking && (
         <Modal
-          isOpen={showDetailsModal}
+          open={showDetailsModal}
           onClose={() => {
             setShowDetailsModal(false);
             setSelectedBooking(null);

@@ -380,7 +380,7 @@ export async function resolveDispute(
     if (
       refundAmount > 0 &&
       dispute.booking.payment &&
-      dispute.booking.payment.stripePaymentIntentId
+      dispute.booking.payment.externalPaymentId
     ) {
       await processRefund(dispute.booking.payment.id, {
         amount: refundAmount,

@@ -60,7 +60,7 @@ interface VendorInfo {
 export function BookingClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const vendorId = searchParams.get("vendor");
+  const vendorId = searchParams.get("vendorId") || searchParams.get("vendor");
 
   const [vendor, setVendor] = useState<VendorInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -101,10 +101,21 @@ export function BookingClient() {
 
     async function fetchVendor() {
       try {
-        const res = await fetch(`/api/vendors/${vendorId}`);
+        const res = await fetch(`/api/trucks/${vendorId}`);
         if (!res.ok) throw new Error("Failed to fetch vendor");
         const data = await res.json();
-        setVendor(data);
+        const truck = data.data?.truck;
+        if (!truck) throw new Error("Vendor not found");
+
+        // Map truck data to vendor info format
+        setVendor({
+          id: truck.id,
+          businessName: truck.businessName,
+          minimumGuests: truck.capacityMin || 10,
+          maximumGuests: truck.capacityMax || 200,
+          pricePerPerson: 15, // Default, could be from menu pricing
+          baseRate: 500, // Default base rate
+        });
         setFormData((prev) => ({ ...prev, vendorId }));
       } catch (err) {
         setError("Failed to load vendor information");

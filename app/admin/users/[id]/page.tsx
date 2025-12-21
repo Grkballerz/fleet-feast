@@ -380,7 +380,7 @@ export default function UserDetailPage() {
 
       {/* Suspend Modal */}
       <Modal
-        isOpen={showSuspendModal}
+        open={showSuspendModal}
         onClose={() => setShowSuspendModal(false)}
         title="Suspend User Account"
       >
@@ -427,7 +427,7 @@ export default function UserDetailPage() {
 
       {/* Activate Modal */}
       <Modal
-        isOpen={showActivateModal}
+        open={showActivateModal}
         onClose={() => setShowActivateModal(false)}
         title="Activate User Account"
       >

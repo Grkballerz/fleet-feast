@@ -394,7 +394,7 @@ export default function VendorApplicationDetailPage() {
 
       {/* Approve Modal */}
       <Modal
-        isOpen={showApproveModal}
+        open={showApproveModal}
         onClose={() => setShowApproveModal(false)}
         title="Approve Application"
       >
@@ -435,7 +435,7 @@ export default function VendorApplicationDetailPage() {
 
       {/* Reject Modal */}
       <Modal
-        isOpen={showRejectModal}
+        open={showRejectModal}
         onClose={() => setShowRejectModal(false)}
         title="Reject Application"
       >

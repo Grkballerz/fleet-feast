@@ -23,7 +23,8 @@ async function getTruckProfile(id: string) {
     });
 
     if (!res.ok) {
-      if (res.status === 404) return null;
+      // 404 = truck not found, 400 = invalid ID format - both should show 404 page
+      if (res.status === 404 || res.status === 400) return null;
       throw new Error("Failed to fetch truck profile");
     }
 

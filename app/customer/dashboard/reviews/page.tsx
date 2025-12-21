@@ -297,7 +297,7 @@ export default function ReviewsPage() {
 
       {/* Review Submission Modal */}
       <Modal
-        isOpen={showReviewModal}
+        open={showReviewModal}
         onClose={handleCloseReviewModal}
         title={`Review ${selectedBooking?.vendorName}`}
       >

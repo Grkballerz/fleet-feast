@@ -302,7 +302,7 @@ export default function VendorReviewsPage() {
       {/* Response Modal */}
       {selectedReview && (
         <Modal
-          isOpen={showResponseModal}
+          open={showResponseModal}
           onClose={() => {
             setShowResponseModal(false);
             setSelectedReview(null);

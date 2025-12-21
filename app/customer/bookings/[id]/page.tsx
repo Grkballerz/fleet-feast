@@ -520,7 +520,7 @@ export default function BookingDetailsPage() {
 
         {/* Cancel Booking Modal */}
         <Modal
-          isOpen={showCancelModal}
+          open={showCancelModal}
           onClose={() => setShowCancelModal(false)}
           title="Cancel Booking"
         >

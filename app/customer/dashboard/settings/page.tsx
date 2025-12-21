@@ -518,7 +518,7 @@ export default function SettingsPage() {
 
       {/* Delete Account Confirmation Modal */}
       <Modal
-        isOpen={showDeleteModal}
+        open={showDeleteModal}
         onClose={() => {
           setShowDeleteModal(false);
           setDeleteConfirmText("");

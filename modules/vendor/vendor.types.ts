@@ -84,8 +84,6 @@ export interface VendorProfile extends PublicVendorProfile {
   serviceRadius: number | null;
   latitude: number | null;
   longitude: number | null;
-  stripeAccountId: string | null;
-  stripeConnected: boolean;
   rejectionReason: string | null;
   updatedAt: Date;
 }

@@ -66,13 +66,11 @@ export const suspendedVendor: Partial<Vendor> = {
   updatedAt: new Date("2025-01-03T00:00:00Z"),
 };
 
-export const testVendorWithStripe: Partial<Vendor> = {
+// NOTE: Stripe vendor test fixture removed - will be replaced with Helcim fixtures
+export const testVendorWithPayment: Partial<Vendor> = {
   ...testVendor,
-  id: "test-vendor-stripe-001",
-  stripeAccountId: "acct_test_vendor_123",
-  stripeOnboarded: true,
-  stripeChargesEnabled: true,
-  stripePayoutsEnabled: true,
+  id: "test-vendor-payment-001",
+  // Bank account fields will be added when Helcim integration is implemented
 };
 
 /**

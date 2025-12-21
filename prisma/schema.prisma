@@ -202,10 +202,6 @@ model Vendor {
   latitude      Float?
   longitude     Float?
 
-  // Stripe Connect
-  stripeAccountId String? @unique @map("stripe_account_id")
-  stripeConnected Boolean @default(false) @map("stripe_connected")
-
   // Status & Approval
   status          VendorStatus @default(PENDING)
   approvedAt      DateTime?    @map("approved_at")
@@ -227,7 +223,6 @@ model Vendor {
   @@index([userId])
   @@index([cuisineType, status, approvedAt]) // Vendor search optimization
   @@index([status])
-  @@index([stripeAccountId])
   @@map("vendors")
 }
 
@@ -362,9 +357,9 @@ model Payment {
   id        String @id @default(uuid())
   bookingId String @unique @map("booking_id")
 
-  // Stripe Integration
-  stripePaymentIntentId String? @unique @map("stripe_payment_intent_id")
-  stripeTransferId      String? @unique @map("stripe_transfer_id")
+  // External Payment Integration
+  externalPaymentId String? @unique @map("external_payment_id")
+  externalTransferId String? @unique @map("external_transfer_id")
 
   // Amount
   amount Decimal @db.Decimal(10, 2)
@@ -385,7 +380,7 @@ model Payment {
 
   @@index([bookingId])
   @@index([status, capturedAt]) // For escrow release cron job
-  @@index([stripePaymentIntentId])
+  @@index([externalPaymentId])
   @@map("payments")
 }
 

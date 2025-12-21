@@ -209,7 +209,7 @@ export const Step3Menu: React.FC<Step3MenuProps> = ({
 
       {/* Add/Edit Modal */}
       <Modal
-        isOpen={isModalOpen}
+        open={isModalOpen}
         onClose={handleCancel}
         title={editingIndex !== null ? "Edit Menu Item" : "Add Menu Item"}
       >

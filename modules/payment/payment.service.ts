@@ -1,27 +1,18 @@
 /**
  * Payment Service Layer
  * Handles business logic for payments, escrow, refunds, and vendor payouts
+ *
+ * NOTE: Stripe dependencies removed. Payment processing will be handled by Helcim.
+ * This file contains core payment logic that is payment-processor agnostic.
  */
 
 import { prisma } from "@/lib/prisma";
 import { PaymentStatus, BookingStatus } from "@prisma/client";
-import {
-  stripeConnect,
-  stripePayments,
-  stripeTransfers,
-  stripeUtils
-} from "./stripe.client";
 import type {
   PaymentSplit,
-  CreatePaymentIntentData,
-  PaymentIntentResponse,
-  PaymentDetails,
-  RefundRequestData,
   RefundCalculation,
   PayoutDetails,
   PayoutListItem,
-  ConnectedAccountData,
-  OnboardingLinkResponse,
   EscrowReleaseResult,
 } from "./payment.types";
 
@@ -113,227 +104,17 @@ export function calculateReleaseDate(eventDate: Date): Date {
   return releaseDate;
 }
 
-/**
- * Create Stripe Connected Account for vendor
- */
-export async function createConnectedAccount(
-  data: ConnectedAccountData
-): Promise<OnboardingLinkResponse> {
-  // Verify vendor exists
-  const vendor = await prisma.vendor.findUnique({
-    where: { id: data.vendorId },
-    select: {
-      id: true,
-      stripeAccountId: true,
-      user: {
-        select: {
-          id: true,
-          email: true,
-        },
-      },
-    },
-  });
-
-  if (!vendor) {
-    throw new PaymentError("Vendor not found", "VENDOR_NOT_FOUND", 404);
-  }
-
-  // Check if vendor already has a connected account
-  if (vendor.stripeAccountId) {
-    // Check if account is already fully onboarded
-    const isOnboarded = await stripeConnect.isAccountOnboarded(
-      vendor.stripeAccountId
-    );
-
-    if (isOnboarded) {
-      throw new PaymentError(
-        "Vendor already has a connected account",
-        "ACCOUNT_EXISTS",
-        400
-      );
-    }
-
-    // If not onboarded, create a new onboarding link
-    const accountLink = await stripeConnect.createAccountLink({
-      accountId: vendor.stripeAccountId,
-      refreshUrl: `${APP_URL}/vendor/stripe-onboarding/refresh`,
-      returnUrl: `${APP_URL}/vendor/stripe-onboarding/complete`,
-    });
-
-    return {
-      accountId: vendor.stripeAccountId,
-      onboardingUrl: accountLink.url,
-      expiresAt: accountLink.expires_at,
-    };
-  }
-
-  // Create new connected account
-  const account = await stripeConnect.createAccount({
-    email: data.email,
-    businessName: data.businessName,
-    country: data.country || "US",
-  });
-
-  // Save account ID to vendor
-  await prisma.vendor.update({
-    where: { id: data.vendorId },
-    data: {
-      stripeAccountId: account.id,
-      stripeConnected: false, // Will be true after onboarding
-    },
-  });
-
-  // Generate onboarding link
-  const accountLink = await stripeConnect.createAccountLink({
-    accountId: account.id,
-    refreshUrl: `${APP_URL}/vendor/stripe-onboarding/refresh`,
-    returnUrl: `${APP_URL}/vendor/stripe-onboarding/complete`,
-  });
-
-  return {
-    accountId: account.id,
-    onboardingUrl: accountLink.url,
-    expiresAt: accountLink.expires_at,
-  };
-}
-
-/**
- * Update vendor Stripe connection status
- */
-export async function updateVendorStripeStatus(
-  stripeAccountId: string
-): Promise<void> {
-  const isOnboarded = await stripeConnect.isAccountOnboarded(stripeAccountId);
-
-  await prisma.vendor.update({
-    where: { stripeAccountId },
-    data: { stripeConnected: isOnboarded },
-  });
-}
-
-/**
- * Create payment intent for a booking
- */
-export async function createPaymentIntent(
-  data: CreatePaymentIntentData
-): Promise<PaymentIntentResponse> {
-  // Fetch booking with vendor details
-  const booking = await prisma.booking.findUnique({
-    where: { id: data.bookingId },
-    select: {
-      id: true,
-      status: true,
-      totalAmount: true,
-      vendorId: true,
-      eventDate: true,
-      vendor: {
-        select: {
-          id: true,
-          email: true,
-        },
-      },
-      vendorProfile: {
-        select: {
-          id: true,
-          stripeAccountId: true,
-          stripeConnected: true,
-        },
-      },
-      payment: {
-        select: {
-          id: true,
-        },
-      },
-    },
-  });
-
-  if (!booking) {
-    throw new PaymentError("Booking not found", "BOOKING_NOT_FOUND", 404);
-  }
-
-  // Check booking status
-  if (booking.status !== BookingStatus.ACCEPTED) {
-    throw new PaymentError(
-      "Payment can only be created for ACCEPTED bookings",
-      "INVALID_BOOKING_STATUS",
-      400
-    );
-  }
-
-  // Check if payment already exists
-  if (booking.payment) {
-    throw new PaymentError(
-      "Payment already exists for this booking",
-      "PAYMENT_EXISTS",
-      400
-    );
-  }
-
-  // Verify vendor has connected account
-  if (!booking.vendorProfile.stripeAccountId) {
-    throw new PaymentError(
-      "Vendor has not set up payment account",
-      "VENDOR_NO_STRIPE_ACCOUNT",
-      400
-    );
-  }
-
-  if (!booking.vendorProfile.stripeConnected) {
-    throw new PaymentError(
-      "Vendor has not completed payment onboarding",
-      "VENDOR_NOT_ONBOARDED",
-      400
-    );
-  }
-
-  // Calculate payment split
-  const amount = data.amount || Number(booking.totalAmount);
-  const split = calculatePaymentSplit(amount);
-
-  // Calculate release date
-  const releaseDate = calculateReleaseDate(booking.eventDate);
-
-  // Create Stripe payment intent
-  const paymentIntent = await stripePayments.createPaymentIntent({
-    amount,
-    currency: data.currency || "usd",
-    description: data.description || `Booking ${booking.id}`,
-    metadata: {
-      bookingId: booking.id,
-      vendorId: booking.vendorId,
-      releaseDate: releaseDate.toISOString(),
-    },
-    connectedAccountId: booking.vendorProfile.stripeAccountId,
-    applicationFeeAmount: split.platformFee,
-  });
-
-  // Create payment record
-  await prisma.payment.create({
-    data: {
-      bookingId: booking.id,
-      stripePaymentIntentId: paymentIntent.id,
-      amount,
-      status: PaymentStatus.PENDING,
-    },
-  });
-
-  return {
-    clientSecret: paymentIntent.client_secret!,
-    paymentIntentId: paymentIntent.id,
-    amount,
-    currency: paymentIntent.currency,
-    status: paymentIntent.status,
-  };
-}
+// NOTE: createConnectedAccount, updateVendorStripeStatus, and createPaymentIntent
+// have been removed. These will be replaced with Helcim-specific implementations.
 
 /**
  * Handle successful payment authorization
  */
 export async function handlePaymentAuthorized(
-  paymentIntentId: string
+  externalPaymentId: string
 ): Promise<void> {
   const payment = await prisma.payment.findUnique({
-    where: { stripePaymentIntentId: paymentIntentId },
+    where: { externalPaymentId },
     select: {
       id: true,
       bookingId: true,
@@ -347,7 +128,7 @@ export async function handlePaymentAuthorized(
 
   if (!payment) {
     throw new PaymentError(
-      "Payment not found for intent",
+      "Payment not found for external payment ID",
       "PAYMENT_NOT_FOUND",
       404
     );
@@ -373,10 +154,10 @@ export async function handlePaymentAuthorized(
  * Handle payment failure
  */
 export async function handlePaymentFailed(
-  paymentIntentId: string
+  externalPaymentId: string
 ): Promise<void> {
   const payment = await prisma.payment.findUnique({
-    where: { stripePaymentIntentId: paymentIntentId },
+    where: { externalPaymentId },
   });
 
   if (!payment) {
@@ -397,18 +178,18 @@ export async function handlePaymentFailed(
 }
 
 /**
- * Process refund for a payment
+ * Calculate refund for a payment (business logic only)
+ * NOTE: Actual refund processing via payment gateway removed - will be handled by Helcim
  */
-export async function processRefund(
+export async function calculateRefundForPayment(
   paymentId: string,
-  data: RefundRequestData
-): Promise<PaymentDetails> {
+  reason?: string
+): Promise<RefundCalculation> {
   const payment = await prisma.payment.findUnique({
     where: { id: paymentId },
     select: {
       id: true,
       status: true,
-      stripePaymentIntentId: true,
       amount: true,
       bookingId: true,
       booking: {
@@ -435,86 +216,18 @@ export async function processRefund(
     );
   }
 
-  if (!payment.stripePaymentIntentId) {
-    throw new PaymentError(
-      "Payment has no Stripe payment intent",
-      "NO_PAYMENT_INTENT",
-      400
-    );
-  }
-
-  // Calculate refund amount
-  let refundAmount = data.amount;
-
-  if (!refundAmount) {
-    // Use cancellation policy
-    const refundCalc = calculateRefund(
-      payment.booking.eventDate,
-      Number(payment.amount),
-      data.reason
-    );
-    refundAmount = refundCalc.refundAmount;
-  }
-
-  // Validate refund amount
-  if (refundAmount > Number(payment.amount)) {
-    throw new PaymentError(
-      "Refund amount cannot exceed payment amount",
-      "INVALID_REFUND_AMOUNT",
-      400
-    );
-  }
-
-  // Create refund in Stripe
-  const refund = await stripePayments.createRefund({
-    paymentIntentId: payment.stripePaymentIntentId,
-    amount: refundAmount,
-    reason: "requested_by_customer",
-    metadata: {
-      paymentId: payment.id,
-      bookingId: payment.bookingId,
-      reason: data.reason || "Cancellation",
-    },
-  });
-
-  // Update payment status
-  const updatedPayment = await prisma.payment.update({
-    where: { id: payment.id },
-    data: {
-      status: PaymentStatus.REFUNDED,
-      refundedAt: new Date(),
-    },
-  });
-
-  // Update booking status and refund amount
-  await prisma.booking.update({
-    where: { id: payment.bookingId },
-    data: {
-      status: BookingStatus.REFUNDED,
-      refundAmount: refundAmount,
-    },
-  });
-
-  return {
-    id: updatedPayment.id,
-    bookingId: updatedPayment.bookingId,
-    stripePaymentIntentId: updatedPayment.stripePaymentIntentId,
-    stripeTransferId: updatedPayment.stripeTransferId,
-    amount: Number(updatedPayment.amount),
-    status: updatedPayment.status,
-    authorizedAt: updatedPayment.authorizedAt,
-    capturedAt: updatedPayment.capturedAt,
-    releasedAt: updatedPayment.releasedAt,
-    refundedAt: updatedPayment.refundedAt,
-    createdAt: updatedPayment.createdAt,
-    updatedAt: updatedPayment.updatedAt,
-  };
+  // Calculate refund amount using cancellation policy
+  return calculateRefund(
+    payment.booking.eventDate,
+    Number(payment.amount),
+    reason
+  );
 }
 
 /**
  * Get payment details
  */
-export async function getPaymentDetails(paymentId: string): Promise<PaymentDetails> {
+export async function getPaymentDetails(paymentId: string) {
   const payment = await prisma.payment.findUnique({
     where: { id: paymentId },
   });
@@ -526,8 +239,8 @@ export async function getPaymentDetails(paymentId: string): Promise<PaymentDetai
   return {
     id: payment.id,
     bookingId: payment.bookingId,
-    stripePaymentIntentId: payment.stripePaymentIntentId,
-    stripeTransferId: payment.stripeTransferId,
+    externalPaymentId: payment.externalPaymentId,
+    externalTransferId: payment.externalTransferId,
     amount: Number(payment.amount),
     status: payment.status,
     authorizedAt: payment.authorizedAt,
@@ -605,7 +318,7 @@ export async function getPayoutDetails(
       amount: true,
       status: true,
       releasedAt: true,
-      stripeTransferId: true,
+      externalTransferId: true,
       createdAt: true,
       booking: {
         select: {
@@ -647,7 +360,7 @@ export async function getPayoutDetails(
     netPayout: split.vendorPayout,
     status: payment.status,
     releasedAt: payment.releasedAt,
-    stripeTransferId: payment.stripeTransferId,
+    externalTransferId: payment.externalTransferId,
     eventDate: payment.booking.eventDate,
     bookingStatus: payment.booking.status,
     customerEmail: payment.booking.customer.email,
@@ -657,10 +370,20 @@ export async function getPayoutDetails(
 }
 
 /**
- * Release escrow payments (scheduled job)
- * Run daily to release payments 7 days after event completion
+ * Get payments eligible for escrow release
+ * NOTE: Actual release will be handled by Helcim integration
+ * Run daily to identify payments 7 days after event completion
  */
-export async function releaseEscrowPayments(): Promise<EscrowReleaseResult> {
+export async function getEligibleEscrowReleases(): Promise<{
+  payments: Array<{
+    id: string;
+    bookingId: string;
+    externalPaymentId: string | null;
+    amount: number;
+    vendorId: string;
+  }>;
+  count: number;
+}> {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -678,58 +401,27 @@ export async function releaseEscrowPayments(): Promise<EscrowReleaseResult> {
     select: {
       id: true,
       bookingId: true,
-      stripePaymentIntentId: true,
+      externalPaymentId: true,
+      amount: true,
       booking: {
         select: {
           id: true,
-          vendorProfile: {
-            select: {
-              id: true,
-              stripeAccountId: true,
-            },
-          },
+          vendorId: true,
         },
       },
     },
   });
 
-  const result: EscrowReleaseResult = {
-    processedCount: paymentsToRelease.length,
-    successCount: 0,
-    failedCount: 0,
-    errors: [],
+  return {
+    payments: paymentsToRelease.map(p => ({
+      id: p.id,
+      bookingId: p.bookingId,
+      externalPaymentId: p.externalPaymentId,
+      amount: Number(p.amount),
+      vendorId: p.booking.vendorId,
+    })),
+    count: paymentsToRelease.length,
   };
-
-  for (const payment of paymentsToRelease) {
-    try {
-      if (!payment.stripePaymentIntentId) {
-        throw new Error("No Stripe payment intent ID");
-      }
-
-      // Capture the payment (release from escrow)
-      await stripePayments.capturePaymentIntent(payment.stripePaymentIntentId);
-
-      // Update payment status
-      await prisma.payment.update({
-        where: { id: payment.id },
-        data: {
-          status: PaymentStatus.RELEASED,
-          releasedAt: new Date(),
-        },
-      });
-
-      result.successCount++;
-    } catch (error) {
-      result.failedCount++;
-      result.errors.push({
-        paymentId: payment.id,
-        bookingId: payment.bookingId,
-        error: error instanceof Error ? error.message : "Unknown error",
-      });
-    }
-  }
-
-  return result;
 }
 
 /**

@@ -283,7 +283,7 @@ export default function ViolationsPage() {
 
       {/* Resolve Appeal Modal */}
       <Modal
-        isOpen={showResolveModal}
+        open={showResolveModal}
         onClose={() => {
           setShowResolveModal(false);
           setSelectedViolation(null);

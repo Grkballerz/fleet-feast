@@ -14,21 +14,26 @@ import {
   expectResponse,
 } from "../setup/server";
 import { testCustomer, testVendorUser } from "../fixtures/users";
-import { testVendorWithStripe } from "../fixtures/vendors";
+import { testVendorWithPayment } from "../fixtures/vendors";
 import {
   testBookingAccepted,
   testBookingConfirmed,
 } from "../fixtures/bookings";
 import { mockStripeWebhookEvent } from "../fixtures/payments";
-import {
-  mockStripePayments,
-  mockStripeUtils,
-} from "../mocks/stripe";
 
 // Import mocks
-import "../mocks/stripe";
 import "../mocks/sendgrid";
 import "../mocks/nextauth";
+
+// Mock Stripe functions (since stripe.client was deleted)
+const mockStripePayments = {
+  createPaymentIntent: jest.fn(),
+  createRefund: jest.fn(),
+};
+
+const mockStripeUtils = {
+  constructWebhookEvent: jest.fn(),
+};
 
 const prisma = getTestPrisma();
 const baseUrl = "http://localhost:3000";
@@ -60,7 +65,7 @@ describe("Payment API Integration Tests", () => {
 
     vendor = await prisma.vendor.create({
       data: {
-        ...testVendorWithStripe,
+        ...testVendorWithPayment,
         userId: vendorUser.id,
       } as any,
     });
@@ -113,7 +118,7 @@ describe("Payment API Integration Tests", () => {
       });
       expect(payment).toBeTruthy();
       expect(payment?.status).toBe(PaymentStatus.PENDING);
-      expect(payment?.stripePaymentIntentId).toBe("pi_test_123");
+      expect(payment?.externalPaymentId).toBe("pi_test_123");
 
       // Verify Stripe was called correctly
       expect(mockStripePayments.createPaymentIntent).toHaveBeenCalledWith(
@@ -202,7 +207,7 @@ describe("Payment API Integration Tests", () => {
           vendorId: vendor.id,
           amount: acceptedBooking.totalAmount,
           status: PaymentStatus.PENDING,
-          stripePaymentIntentId: "pi_existing_123",
+          externalPaymentId: "pi_existing_123",
         },
       });
 
@@ -234,12 +239,12 @@ describe("Payment API Integration Tests", () => {
           vendorId: vendor.id,
           amount: acceptedBooking.totalAmount,
           status: PaymentStatus.PENDING,
-          stripePaymentIntentId: "pi_test_webhook_123",
+          externalPaymentId: "pi_test_webhook_123",
         },
       });
 
       const webhookEvent = mockStripeWebhookEvent.paymentIntentSucceeded;
-      webhookEvent.data.object.id = payment.stripePaymentIntentId;
+      webhookEvent.data.object.id = payment.externalPaymentId;
       webhookEvent.data.object.metadata = { bookingId: acceptedBooking.id };
 
       mockStripeUtils.constructWebhookEvent.mockReturnValue(webhookEvent);
@@ -278,12 +283,12 @@ describe("Payment API Integration Tests", () => {
           vendorId: vendor.id,
           amount: acceptedBooking.totalAmount,
           status: PaymentStatus.PENDING,
-          stripePaymentIntentId: "pi_test_webhook_failed_123",
+          externalPaymentId: "pi_test_webhook_failed_123",
         },
       });
 
       const webhookEvent = mockStripeWebhookEvent.paymentIntentPaymentFailed;
-      webhookEvent.data.object.id = payment.stripePaymentIntentId;
+      webhookEvent.data.object.id = payment.externalPaymentId;
       webhookEvent.data.object.metadata = { bookingId: acceptedBooking.id };
 
       mockStripeUtils.constructWebhookEvent.mockReturnValue(webhookEvent);
@@ -331,13 +336,13 @@ describe("Payment API Integration Tests", () => {
           vendorId: vendor.id,
           amount: confirmedBooking.totalAmount,
           status: PaymentStatus.AUTHORIZED,
-          stripePaymentIntentId: "pi_test_refunded_123",
+          externalPaymentId: "pi_test_refunded_123",
           authorizedAt: new Date(),
         },
       });
 
       const webhookEvent = mockStripeWebhookEvent.chargeRefunded;
-      webhookEvent.data.object.payment_intent = payment.stripePaymentIntentId;
+      webhookEvent.data.object.payment_intent = payment.externalPaymentId;
       webhookEvent.data.object.metadata = { bookingId: confirmedBooking.id };
 
       mockStripeUtils.constructWebhookEvent.mockReturnValue(webhookEvent);
@@ -414,7 +419,7 @@ describe("Payment API Integration Tests", () => {
           vendorId: vendor.id,
           amount: confirmedBooking.totalAmount,
           status: PaymentStatus.AUTHORIZED,
-          stripePaymentIntentId: "pi_refund_request_123",
+          externalPaymentId: "pi_refund_request_123",
           authorizedAt: new Date(),
         },
       });
@@ -445,7 +450,7 @@ describe("Payment API Integration Tests", () => {
       // Verify Stripe was called
       expect(mockStripePayments.createRefund).toHaveBeenCalledWith(
         expect.objectContaining({
-          payment_intent: payment.stripePaymentIntentId,
+          payment_intent: payment.externalPaymentId,
         })
       );
     });
@@ -459,7 +464,7 @@ describe("Payment API Integration Tests", () => {
           vendorId: vendor.id,
           amount: acceptedBooking.totalAmount,
           status: PaymentStatus.REFUNDED,
-          stripePaymentIntentId: "pi_already_refunded",
+          externalPaymentId: "pi_already_refunded",
           refundedAt: new Date(),
         },
       });
@@ -529,7 +534,7 @@ describe("Payment API Integration Tests", () => {
 
       // 3. Verify final state
       const payment = await prisma.payment.findFirst({
-        where: { stripePaymentIntentId: createData.paymentIntentId },
+        where: { externalPaymentId: createData.paymentIntentId },
       });
       expect(payment?.status).toBe(PaymentStatus.AUTHORIZED);
 

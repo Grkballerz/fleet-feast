@@ -288,8 +288,6 @@ async function main() {
         status: vendor.status as any,
         approvedAt: vendor.approvedAt,
         approvedBy: vendor.approvedAt ? admins[0].id : null,
-        stripeAccountId: vendor.stripeConnected ? `acct_${user.id.substring(0, 16)}` : null,
-        stripeConnected: vendor.stripeConnected,
         coverImageUrl: (vendor as any).coverImageUrl || null,
       },
     });
@@ -444,8 +442,8 @@ async function main() {
       payment: {
         amount: totalAmount,
         status: 'RELEASED',
-        stripePaymentIntentId: `pi_${Math.random().toString(36).substring(7)}`,
-        stripeTransferId: `tr_${Math.random().toString(36).substring(7)}`,
+        externalPaymentId: `pi_${Math.random().toString(36).substring(7)}`,
+        externalTransferId: `tr_${Math.random().toString(36).substring(7)}`,
         authorizedAt: new Date(eventDate.getTime() - 6 * 24 * 60 * 60 * 1000),
         capturedAt: eventDate,
         releasedAt: new Date(eventDate.getTime() + 8 * 24 * 60 * 60 * 1000),
@@ -499,7 +497,7 @@ async function main() {
       payment: {
         amount: totalAmount,
         status: 'AUTHORIZED',
-        stripePaymentIntentId: `pi_${Math.random().toString(36).substring(7)}`,
+        externalPaymentId: `pi_${Math.random().toString(36).substring(7)}`,
         authorizedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
       },
     });
@@ -573,7 +571,7 @@ async function main() {
       payment: {
         amount: totalAmount,
         status: 'REFUNDED',
-        stripePaymentIntentId: `pi_${Math.random().toString(36).substring(7)}`,
+        externalPaymentId: `pi_${Math.random().toString(36).substring(7)}`,
         authorizedAt: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000),
         refundedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
       },
@@ -610,7 +608,7 @@ async function main() {
     payment: {
       amount: totalAmount,
       status: 'CAPTURED',
-      stripePaymentIntentId: `pi_${Math.random().toString(36).substring(7)}`,
+      externalPaymentId: `pi_${Math.random().toString(36).substring(7)}`,
       authorizedAt: new Date(eventDate.getTime() - 13 * 24 * 60 * 60 * 1000),
       capturedAt: eventDate,
     },
