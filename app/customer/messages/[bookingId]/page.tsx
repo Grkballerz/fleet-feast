@@ -8,12 +8,30 @@ import { Spinner } from "@/components/ui/Spinner";
 import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
 import { MessageThread } from "@/components/messages/MessageThread";
+import {
+  ProposalCard,
+  type Proposal,
+  type BookingStatus,
+} from "@/components/booking/ProposalCard";
 
 interface ConversationData {
   booking: {
     id: string;
     eventDate: string;
-    status: string;
+    status: BookingStatus;
+    proposalAmount?: number;
+    proposalDetails?: {
+      lineItems: Array<{
+        name: string;
+        quantity: number;
+        unitPrice: number;
+        total: number;
+      }>;
+      inclusions: string[];
+      terms?: string;
+    };
+    proposalSentAt?: string;
+    proposalExpiresAt?: string;
     vendor: {
       id: string;
       businessName: string;
@@ -53,6 +71,7 @@ export default function MessageThreadPage() {
   const [currentUserId, setCurrentUserId] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Fetch conversation
   const fetchConversation = async () => {
@@ -77,6 +96,101 @@ export default function MessageThreadPage() {
       setIsLoading(false);
     }
   };
+
+  // Handle accept proposal
+  const handleAccept = async () => {
+    try {
+      setIsProcessing(true);
+      const response = await fetch(`/api/bookings/${bookingId}/accept`, {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to accept proposal");
+      }
+
+      // Navigate to payment page
+      router.push(`/customer/bookings/${bookingId}/payment`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to accept proposal");
+      setIsProcessing(false);
+    }
+  };
+
+  // Handle decline proposal
+  const handleDecline = async () => {
+    if (!confirm("Are you sure you want to decline this proposal?")) {
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+      const response = await fetch(`/api/bookings/${bookingId}/decline`, {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to decline proposal");
+      }
+
+      // Refresh conversation to show updated status
+      await fetchConversation();
+      setIsProcessing(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to decline proposal");
+      setIsProcessing(false);
+    }
+  };
+
+  // Check if booking has a proposal
+  const hasProposal =
+    conversation?.booking &&
+    conversation.booking.proposalAmount !== undefined &&
+    conversation.booking.proposalAmount !== null &&
+    conversation.booking.proposalDetails !== undefined &&
+    conversation.booking.proposalDetails !== null &&
+    conversation.booking.proposalSentAt !== undefined &&
+    conversation.booking.proposalSentAt !== null &&
+    conversation.booking.proposalExpiresAt !== undefined &&
+    conversation.booking.proposalExpiresAt !== null;
+
+  // Get status banner message
+  const getStatusBanner = () => {
+    const status = conversation?.booking?.status;
+
+    switch (status) {
+      case "INQUIRY":
+        return {
+          variant: "info" as const,
+          message: "Waiting for vendor proposal...",
+        };
+      case "PROPOSAL_SENT":
+        return null; // ProposalCard will be shown
+      case "ACCEPTED":
+        return {
+          variant: "success" as const,
+          message: "Proposal accepted! Proceed to payment to confirm your booking.",
+        };
+      case "DECLINED":
+        return {
+          variant: "warning" as const,
+          message: "You declined this proposal. The vendor may send a revised proposal.",
+        };
+      default:
+        if (hasProposal) {
+          const expiresAt = new Date(conversation!.booking.proposalExpiresAt!);
+          if (expiresAt < new Date()) {
+            return {
+              variant: "warning" as const,
+              message: "This proposal has expired. Contact the vendor for a new proposal.",
+            };
+          }
+        }
+        return null;
+    }
+  };
+
+  const statusBanner = getStatusBanner();
 
   useEffect(() => {
     fetchConversation();
@@ -155,14 +269,41 @@ export default function MessageThreadPage() {
       </div>
 
       {/* Message thread */}
-      <div className="flex-1 overflow-hidden">
-        <MessageThread
-          bookingId={bookingId}
-          messages={conversation.messages || []}
-          currentUserId={currentUserId}
-          bookingStatus={conversation.booking?.status || "PENDING"}
-          onRefresh={fetchConversation}
-        />
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-4xl mx-auto p-4 space-y-4">
+          {/* Status Banner */}
+          {statusBanner && (
+            <Alert variant={statusBanner.variant}>
+              {statusBanner.message}
+            </Alert>
+          )}
+
+          {/* Proposal Card */}
+          {hasProposal && (
+            <ProposalCard
+              proposal={{
+                amount: conversation!.booking.proposalAmount!,
+                details: conversation!.booking.proposalDetails!,
+                sentAt: conversation!.booking.proposalSentAt!,
+                expiresAt: conversation!.booking.proposalExpiresAt!,
+              }}
+              status={conversation!.booking.status}
+              isCustomer={true}
+              onAccept={handleAccept}
+              onDecline={handleDecline}
+              isLoading={isProcessing}
+            />
+          )}
+
+          {/* Messages */}
+          <MessageThread
+            bookingId={bookingId}
+            messages={conversation.messages || []}
+            currentUserId={currentUserId}
+            bookingStatus={conversation.booking?.status || "PENDING"}
+            onRefresh={fetchConversation}
+          />
+        </div>
       </div>
     </div>
   );

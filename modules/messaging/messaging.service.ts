@@ -216,18 +216,39 @@ export async function getConversation(
   page: number = 1,
   limit: number = 50
 ): Promise<Conversation> {
-  // Fetch booking to verify access
+  // Fetch booking to verify access and get proposal data
   const booking = await prisma.booking.findUnique({
     where: { id: bookingId },
     select: {
       id: true,
       customerId: true,
       vendorId: true,
+      eventDate: true,
+      eventTime: true,
+      eventType: true,
+      location: true,
+      guestCount: true,
+      specialRequests: true,
+      status: true,
+      proposalAmount: true,
+      proposalDetails: true,
+      proposalSentAt: true,
+      proposalExpiresAt: true,
       customer: {
-        select: { id: true, email: true },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+        },
       },
       vendor: {
-        select: { id: true, email: true },
+        select: {
+          id: true,
+          email: true,
+          businessName: true,
+          avatarUrl: true,
+        },
       },
     },
   });
@@ -305,6 +326,42 @@ export async function getConversation(
       vendor: {
         id: booking.vendor.id,
         email: booking.vendor.email,
+      },
+    },
+    booking: {
+      id: booking.id,
+      eventDate: booking.eventDate.toISOString(),
+      eventTime: booking.eventTime,
+      eventType: booking.eventType,
+      location: booking.location,
+      guestCount: booking.guestCount,
+      specialRequests: booking.specialRequests || undefined,
+      status: booking.status,
+      proposalAmount: booking.proposalAmount
+        ? Number(booking.proposalAmount)
+        : undefined,
+      proposalDetails: booking.proposalDetails
+        ? (booking.proposalDetails as {
+            lineItems: Array<{
+              name: string;
+              quantity: number;
+              unitPrice: number;
+              total: number;
+            }>;
+            inclusions: string[];
+            terms?: string;
+          })
+        : undefined,
+      proposalSentAt: booking.proposalSentAt?.toISOString(),
+      proposalExpiresAt: booking.proposalExpiresAt?.toISOString(),
+      vendor: {
+        id: booking.vendor.id,
+        businessName: booking.vendor.businessName,
+        avatarUrl: booking.vendor.avatarUrl || undefined,
+      },
+      customer: {
+        id: booking.customer.id,
+        name: `${booking.customer.firstName} ${booking.customer.lastName}`,
       },
     },
   };

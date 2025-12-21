@@ -21,11 +21,15 @@ export interface User {
 
 // Booking types
 export enum BookingStatus {
-  PENDING = "PENDING",
+  INQUIRY = "INQUIRY",
+  PROPOSAL_SENT = "PROPOSAL_SENT",
   ACCEPTED = "ACCEPTED",
-  CANCELLED = "CANCELLED",
+  PAID = "PAID",
+  CONFIRMED = "CONFIRMED",
   COMPLETED = "COMPLETED",
-  DISPUTED = "DISPUTED",
+  DECLINED = "DECLINED",
+  EXPIRED = "EXPIRED",
+  CANCELLED = "CANCELLED",
 }
 
 export interface Booking {

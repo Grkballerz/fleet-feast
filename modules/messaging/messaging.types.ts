@@ -51,6 +51,38 @@ export interface Conversation {
       email: string;
     };
   };
+  booking: {
+    id: string;
+    eventDate: string;
+    eventTime: string;
+    eventType: string;
+    location: string;
+    guestCount: number;
+    specialRequests?: string;
+    status: string;
+    proposalAmount?: number;
+    proposalDetails?: {
+      lineItems: Array<{
+        name: string;
+        quantity: number;
+        unitPrice: number;
+        total: number;
+      }>;
+      inclusions: string[];
+      terms?: string;
+    };
+    proposalSentAt?: string;
+    proposalExpiresAt?: string;
+    vendor: {
+      id: string;
+      businessName: string;
+      avatarUrl?: string;
+    };
+    customer: {
+      id: string;
+      name: string;
+    };
+  };
 }
 
 /**

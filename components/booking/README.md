@@ -4,6 +4,158 @@ This directory contains reusable components for the booking and proposal workflo
 
 ## Components
 
+### InquiryForm
+
+A customer-facing form component for submitting booking inquiries without price calculation or payment.
+
+**Location**: `components/booking/InquiryForm.tsx`
+
+**Purpose**: Allows customers to request a custom quote from vendors by providing event details.
+
+#### Features
+
+- **Event Date/Time**: Date picker (minimum tomorrow) and time selection
+- **Event Type**: Dropdown for event categories (Corporate, Wedding, Birthday, Festival, Private Party, Other)
+- **Location**: Single address field for event location
+- **Guest Count**: Number input with vendor capacity validation
+- **Special Requests**: Optional textarea for dietary requirements, setup preferences, etc.
+- **Quote Request Messaging**: Clear explanation that vendor will send a custom proposal
+- **Success State**: Confirmation message after submission
+- **Validation**: Comprehensive client-side validation with inline error messages
+- **Accessibility**: Full WCAG 2.1 AA compliance
+
+#### Usage
+
+```tsx
+import { InquiryForm } from "@/components/booking";
+
+function BookingPage({ vendorId }) {
+  const [vendor, setVendor] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (inquiry) => {
+    setSubmitting(true);
+    try {
+      const response = await fetch("/api/inquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          vendorId: vendor.id,
+          ...inquiry,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to submit inquiry");
+
+      const data = await response.json();
+      router.push(`/inquiries/${data.id}/confirmation`);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <InquiryForm
+      vendor={vendor}
+      onSubmit={handleSubmit}
+      isLoading={submitting}
+    />
+  );
+}
+```
+
+#### Props
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `vendor` | `VendorInfo` | Yes | Vendor details for capacity validation and display |
+| `onSubmit` | `(data: InquiryRequestData) => Promise<void>` | Yes | Callback when inquiry is submitted |
+| `isLoading` | `boolean` | No | Loading state during submission (default: false) |
+
+#### Type Definitions
+
+```typescript
+interface VendorInfo {
+  id: string;
+  businessName: string;
+  cuisineType: CuisineType;
+  capacityMin: number;
+  capacityMax: number;
+}
+
+interface InquiryRequestData {
+  eventDate: string;
+  eventTime: string;
+  eventType: EventType;
+  location: string;
+  guestCount: number;
+  specialRequests?: string;
+}
+
+type EventType = "CORPORATE" | "WEDDING" | "BIRTHDAY" | "FESTIVAL" | "PRIVATE_PARTY" | "OTHER";
+```
+
+#### Validation Rules
+
+- Event date must be at least 1 day in advance
+- Event time is required
+- Location cannot be empty
+- Guest count must be within vendor capacity range
+- Special requests are optional (max 1000 characters)
+- Errors clear automatically when fields are corrected
+
+#### Key Differences from BookingClient
+
+This component replaces the price calculator approach:
+
+- **No price calculation**: Removed live price breakdown
+- **No payment flow**: Inquiry-only, no immediate payment
+- **Simplified location**: Single address field instead of structured address
+- **Quote messaging**: Clear explanation that vendor sends custom proposal
+- **Success state**: In-form success message instead of redirect
+
+#### Accessibility
+
+- Proper ARIA labels on all form controls
+- Required field indicators with `aria-label="required"`
+- Keyboard navigation support (Tab, Enter, Space)
+- Screen reader announcements for errors (`role="alert"`, `aria-live="polite"`)
+- Error messages linked via `aria-describedby`
+- Invalid fields marked with `aria-invalid="true"`
+- Helper text for guest count and character limits
+
+#### Testing
+
+Comprehensive test suite with 45+ test cases covering:
+
+- Component rendering
+- Form validation (all fields)
+- Guest count capacity validation
+- Date validation (must be future)
+- Form submission flow
+- Success/error states
+- Loading states
+- Accessibility features
+- Event type selection
+- Character count for special requests
+
+**Run tests**:
+```bash
+npm test -- InquiryForm.test.tsx
+```
+
+#### Examples
+
+See `InquiryForm.example.tsx` for usage examples including:
+
+1. Basic usage in a booking page
+2. Custom success handling with modal
+3. Error handling with retry logic
+4. Pre-filled form data
+5. Analytics tracking integration
+
+---
+
 ### ProposalBuilder
 
 A comprehensive form component for vendors to create detailed proposals for customer inquiries.

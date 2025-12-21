@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -9,6 +10,11 @@ import { Alert } from "@/components/ui/Alert";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import {
+  BookingStatusBadge,
+  getQuickActions,
+  shouldShowProposalAmount,
+} from "@/components/bookings/BookingStatusBadge";
 import {
   Calendar,
   Users,
@@ -20,8 +26,21 @@ import {
   XCircle,
   Clock,
   ChevronRight,
+  FileText,
+  Send,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
+
+type BookingStatus =
+  | "INQUIRY"
+  | "PROPOSAL_SENT"
+  | "ACCEPTED"
+  | "PAID"
+  | "CONFIRMED"
+  | "COMPLETED"
+  | "DECLINED"
+  | "EXPIRED"
+  | "CANCELLED";
 
 interface Booking {
   id: string;
@@ -30,8 +49,10 @@ interface Booking {
   eventLocation: string;
   eventType: string;
   guestCount: number;
-  status: string;
+  status: BookingStatus;
   totalAmount: number;
+  proposalAmount?: number;
+  proposalExpiresAt?: string;
   specialRequests?: string;
   createdAt: string;
   customer: {
@@ -41,9 +62,18 @@ interface Booking {
   };
 }
 
-type StatusFilter = "ALL" | "PENDING" | "ACCEPTED" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
+type StatusFilter =
+  | "ALL"
+  | "INQUIRY"
+  | "PROPOSAL_SENT"
+  | "ACCEPTED"
+  | "CONFIRMED"
+  | "COMPLETED"
+  | "CANCELLED"
+  | "DECLINED";
 
 export default function VendorBookingsPage() {
+  const router = useRouter();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
@@ -144,28 +174,18 @@ export default function VendorBookingsPage() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    const config: Record<string, { variant: "success" | "warning" | "error" | "neutral", label: string }> = {
-      PENDING: { variant: "warning", label: "Pending" },
-      ACCEPTED: { variant: "success", label: "Accepted" },
-      CONFIRMED: { variant: "success", label: "Confirmed" },
-      COMPLETED: { variant: "neutral", label: "Completed" },
-      CANCELLED: { variant: "error", label: "Cancelled" },
-    };
-    const { variant, label } = config[status] || { variant: "neutral", label: status };
-    return <Badge variant={variant}>{label}</Badge>;
-  };
-
   // Ensure bookings is always an array for filter operations
   const safeBookings = Array.isArray(bookings) ? bookings : [];
 
   const statusCounts = {
     ALL: safeBookings.length,
-    PENDING: safeBookings.filter((b) => b.status === "PENDING").length,
+    INQUIRY: safeBookings.filter((b) => b.status === "INQUIRY").length,
+    PROPOSAL_SENT: safeBookings.filter((b) => b.status === "PROPOSAL_SENT").length,
     ACCEPTED: safeBookings.filter((b) => b.status === "ACCEPTED").length,
     CONFIRMED: safeBookings.filter((b) => b.status === "CONFIRMED").length,
     COMPLETED: safeBookings.filter((b) => b.status === "COMPLETED").length,
     CANCELLED: safeBookings.filter((b) => b.status === "CANCELLED").length,
+    DECLINED: safeBookings.filter((b) => b.status === "DECLINED").length,
   };
 
   if (loading) {
@@ -215,7 +235,7 @@ export default function VendorBookingsPage() {
 
       {/* Status Filter Tabs */}
       <div className="flex overflow-x-auto gap-2 pb-2">
-        {(["ALL", "PENDING", "ACCEPTED", "CONFIRMED", "COMPLETED", "CANCELLED"] as StatusFilter[]).map((status) => (
+        {(["ALL", "INQUIRY", "PROPOSAL_SENT", "ACCEPTED", "CONFIRMED", "COMPLETED", "CANCELLED", "DECLINED"] as StatusFilter[]).map((status) => (
           <Button
             key={status}
             variant={statusFilter === status ? "primary" : "ghost"}
@@ -223,7 +243,7 @@ export default function VendorBookingsPage() {
             onClick={() => setStatusFilter(status)}
             className="whitespace-nowrap"
           >
-            {status} ({statusCounts[status]})
+            {status.replace("_", " ")} ({statusCounts[status]})
           </Button>
         ))}
       </div>
@@ -256,80 +276,104 @@ export default function VendorBookingsPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {filteredBookings.map((booking) => (
-            <div
-              key={booking.id}
-              className="neo-card-glass neo-shadow rounded-neo p-4 cursor-pointer hover:neo-shadow-lg transition-all"
-              onClick={() => {
-                setSelectedBooking(booking);
-                setShowDetailsModal(true);
-              }}
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start gap-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="font-semibold text-text-primary truncate">
-                          {booking.customer.name}
-                        </h3>
-                        {getStatusBadge(booking.status)}
-                      </div>
-                      <div className="space-y-2 text-sm text-text-secondary">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4 flex-shrink-0" />
-                          <span className="truncate">
-                            {format(parseISO(booking.eventDate), "MMM dd, yyyy")} at{" "}
-                            {booking.eventTime}
-                          </span>
+          {filteredBookings.map((booking) => {
+            const quickActions = getQuickActions(booking.status, "vendor");
+
+            return (
+              <div
+                key={booking.id}
+                className="neo-card-glass neo-shadow rounded-neo p-4 cursor-pointer hover:neo-shadow-lg transition-all"
+                onClick={() => {
+                  setSelectedBooking(booking);
+                  setShowDetailsModal(true);
+                }}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="font-semibold text-text-primary truncate">
+                            {booking.customer.name}
+                          </h3>
+                          <BookingStatusBadge
+                            status={booking.status}
+                            viewType="vendor"
+                            proposalExpiresAt={booking.proposalExpiresAt}
+                          />
                         </div>
-                        <div className="flex items-center gap-2">
-                          <MapPin className="w-4 h-4 flex-shrink-0" />
-                          <span className="truncate">{booking.eventLocation}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Users className="w-4 h-4 flex-shrink-0" />
-                          <span>{booking.guestCount} guests</span>
-                          <span className="mx-2">•</span>
-                          <span className="font-medium text-text-primary">
-                            ${(booking.totalAmount / 100).toFixed(2)}
-                          </span>
+                        <div className="space-y-2 text-sm text-text-secondary">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-4 h-4 flex-shrink-0" />
+                            <span className="truncate">
+                              {format(parseISO(booking.eventDate), "MMM dd, yyyy")} at{" "}
+                              {booking.eventTime}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <MapPin className="w-4 h-4 flex-shrink-0" />
+                            <span className="truncate">{booking.eventLocation}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Users className="w-4 h-4 flex-shrink-0" />
+                            <span>{booking.guestCount} guests</span>
+                            <span className="mx-2">•</span>
+                            {shouldShowProposalAmount(booking.status) &&
+                            booking.proposalAmount ? (
+                              <span className="font-medium text-text-primary">
+                                ${(booking.proposalAmount / 100).toFixed(2)}
+                                <span className="text-xs text-text-secondary ml-1">
+                                  (Proposal)
+                                </span>
+                              </span>
+                            ) : (
+                              <span className="font-medium text-text-primary">
+                                ${(booking.totalAmount / 100).toFixed(2)}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
+                  <ChevronRight className="w-5 h-5 text-text-tertiary flex-shrink-0 ml-4" />
                 </div>
-                <ChevronRight className="w-5 h-5 text-text-tertiary flex-shrink-0 ml-4" />
-              </div>
 
-              {/* Quick Actions for Pending */}
-              {booking.status === "PENDING" && (
-                <div
-                  className="mt-4 pt-4 border-t border-border flex gap-2"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Button
-                    size="sm"
-                    variant="primary"
-                    onClick={() => handleAcceptBooking(booking.id)}
-                    disabled={actionLoading}
+                {/* Quick Actions */}
+                {quickActions.length > 0 && (
+                  <div
+                    className="mt-4 pt-4 border-t border-border flex gap-2"
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    <CheckCircle className="w-4 h-4 mr-1" />
-                    Accept
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => handleDeclineBooking(booking.id)}
-                    disabled={actionLoading}
-                  >
-                    <XCircle className="w-4 h-4 mr-1" />
-                    Decline
-                  </Button>
-                </div>
-              )}
-            </div>
-          ))}
+                    {quickActions.includes("send_proposal") && (
+                      <Button
+                        size="sm"
+                        variant="primary"
+                        onClick={() =>
+                          router.push(`/vendor/bookings/${booking.id}?action=proposal`)
+                        }
+                      >
+                        <Send className="w-4 h-4 mr-1" />
+                        Send Proposal
+                      </Button>
+                    )}
+                    {quickActions.includes("view_proposal") && (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() =>
+                          router.push(`/vendor/bookings/${booking.id}?tab=proposal`)
+                        }
+                      >
+                        <FileText className="w-4 h-4 mr-1" />
+                        View Proposal
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -347,7 +391,13 @@ export default function VendorBookingsPage() {
             {/* Status */}
             <div>
               <label className="text-sm font-medium text-text-secondary">Status</label>
-              <div className="mt-1">{getStatusBadge(selectedBooking.status)}</div>
+              <div className="mt-1">
+                <BookingStatusBadge
+                  status={selectedBooking.status}
+                  viewType="vendor"
+                  proposalExpiresAt={selectedBooking.proposalExpiresAt}
+                />
+              </div>
             </div>
 
             {/* Customer Info */}
@@ -404,16 +454,19 @@ export default function VendorBookingsPage() {
             </div>
 
             {/* Actions */}
-            {selectedBooking.status === "PENDING" && (
+            {selectedBooking.status === "INQUIRY" && (
               <div className="flex gap-2 pt-4 border-t">
                 <Button
                   variant="primary"
                   className="flex-1"
-                  onClick={() => handleAcceptBooking(selectedBooking.id)}
+                  onClick={() => {
+                    setShowDetailsModal(false);
+                    router.push(`/vendor/bookings/${selectedBooking.id}?action=proposal`);
+                  }}
                   disabled={actionLoading}
                 >
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  Accept Booking
+                  <Send className="w-4 h-4 mr-2" />
+                  Send Proposal
                 </Button>
                 <Button
                   variant="secondary"
@@ -422,7 +475,22 @@ export default function VendorBookingsPage() {
                   disabled={actionLoading}
                 >
                   <XCircle className="w-4 h-4 mr-2" />
-                  Decline
+                  Decline Inquiry
+                </Button>
+              </div>
+            )}
+            {selectedBooking.status === "PROPOSAL_SENT" && (
+              <div className="flex gap-2 pt-4 border-t">
+                <Button
+                  variant="secondary"
+                  className="flex-1"
+                  onClick={() => {
+                    setShowDetailsModal(false);
+                    router.push(`/vendor/bookings/${selectedBooking.id}?tab=proposal`);
+                  }}
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  View Proposal
                 </Button>
               </div>
             )}

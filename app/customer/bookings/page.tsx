@@ -9,6 +9,11 @@ import { Spinner } from "@/components/ui/Spinner";
 import { Badge } from "@/components/ui/Badge";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import {
+  BookingStatusBadge,
+  getQuickActions,
+  shouldShowProposalAmount,
+} from "@/components/bookings/BookingStatusBadge";
+import {
   Calendar,
   MapPin,
   Users,
@@ -16,17 +21,22 @@ import {
   ChevronRight,
   Search,
   Filter,
+  CreditCard,
+  FileText,
 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
 type BookingStatus =
-  | "PENDING"
+  | "INQUIRY"
+  | "PROPOSAL_SENT"
   | "ACCEPTED"
+  | "PAID"
   | "CONFIRMED"
-  | "CANCELLED"
   | "COMPLETED"
-  | "DISPUTED";
+  | "DECLINED"
+  | "EXPIRED"
+  | "CANCELLED";
 
 interface BookingSummary {
   id: string;
@@ -41,17 +51,21 @@ interface BookingSummary {
   guestCount: number;
   eventType: string;
   totalAmount: number;
+  proposalAmount?: number;
+  proposalExpiresAt?: string;
   status: BookingStatus;
   createdAt: string;
 }
 
 const STATUS_FILTERS = [
   { value: "ALL", label: "All Bookings" },
-  { value: "PENDING", label: "Pending" },
+  { value: "INQUIRY", label: "Inquiries" },
+  { value: "PROPOSAL_SENT", label: "Proposals" },
   { value: "ACCEPTED", label: "Accepted" },
   { value: "CONFIRMED", label: "Confirmed" },
   { value: "COMPLETED", label: "Completed" },
   { value: "CANCELLED", label: "Cancelled" },
+  { value: "DECLINED", label: "Declined" },
 ] as const;
 
 export default function BookingsListPage() {
@@ -113,29 +127,14 @@ export default function BookingsListPage() {
     }
   };
 
-  const getStatusBadgeVariant = (status: BookingStatus) => {
-    switch (status) {
-      case "PENDING":
-        return "warning";
-      case "ACCEPTED":
-      case "CONFIRMED":
-        return "success";
-      case "COMPLETED":
-        return "neutral";
-      case "CANCELLED":
-      case "DISPUTED":
-        return "error";
-      default:
-        return "neutral";
-    }
-  };
-
   const groupBookingsByStatus = () => {
     const upcoming = filteredBookings.filter(
       (b) =>
-        (b.status === "ACCEPTED" ||
-          b.status === "CONFIRMED" ||
-          b.status === "PENDING") &&
+        (b.status === "INQUIRY" ||
+          b.status === "PROPOSAL_SENT" ||
+          b.status === "ACCEPTED" ||
+          b.status === "PAID" ||
+          b.status === "CONFIRMED") &&
         new Date(b.eventDate) >= new Date()
     );
 
@@ -143,6 +142,8 @@ export default function BookingsListPage() {
       (b) =>
         b.status === "COMPLETED" ||
         b.status === "CANCELLED" ||
+        b.status === "DECLINED" ||
+        b.status === "EXPIRED" ||
         new Date(b.eventDate) < new Date()
     );
 
@@ -276,7 +277,7 @@ export default function BookingsListPage() {
                   key={booking.id}
                   booking={booking}
                   onClick={() => router.push(`/customer/bookings/${booking.id}`)}
-                  getStatusBadgeVariant={getStatusBadgeVariant}
+                  router={router}
                 />
               ))}
             </div>
@@ -293,7 +294,7 @@ export default function BookingsListPage() {
                   key={booking.id}
                   booking={booking}
                   onClick={() => router.push(`/customer/bookings/${booking.id}`)}
-                  getStatusBadgeVariant={getStatusBadgeVariant}
+                  router={router}
                 />
               ))}
             </div>
@@ -309,13 +310,26 @@ export default function BookingsListPage() {
 function BookingCard({
   booking,
   onClick,
-  getStatusBadgeVariant,
+  router,
 }: {
   booking: BookingSummary;
   onClick: () => void;
-  getStatusBadgeVariant: (status: BookingStatus) => string;
+  router: any;
 }) {
   const isPast = new Date(booking.eventDate) < new Date();
+  const quickActions = getQuickActions(booking.status, "customer");
+
+  const handleQuickAction = (
+    action: string,
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    e.stopPropagation();
+    if (action === "view_proposal") {
+      router.push(`/customer/bookings/${booking.id}?tab=proposal`);
+    } else if (action === "pay_now") {
+      router.push(`/customer/bookings/${booking.id}?tab=payment`);
+    }
+  };
 
   return (
     <Card
@@ -336,9 +350,11 @@ function BookingCard({
                   {booking.eventType}
                 </Badge>
               </div>
-              <Badge variant={getStatusBadgeVariant(booking.status)}>
-                {booking.status}
-              </Badge>
+              <BookingStatusBadge
+                status={booking.status}
+                viewType="customer"
+                proposalExpiresAt={booking.proposalExpiresAt}
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
@@ -374,14 +390,53 @@ function BookingCard({
             <div className="mt-3 pt-3 border-t border-border flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <DollarSign className="h-4 w-4 text-text-secondary" />
-                <span className="font-semibold text-primary">
-                  ${booking.totalAmount.toFixed(2)}
-                </span>
+                {shouldShowProposalAmount(booking.status) &&
+                booking.proposalAmount ? (
+                  <span className="font-semibold text-primary">
+                    ${booking.proposalAmount.toFixed(2)}
+                    <span className="text-xs text-text-secondary ml-1">
+                      (Proposal)
+                    </span>
+                  </span>
+                ) : (
+                  <span className="font-semibold text-primary">
+                    ${booking.totalAmount.toFixed(2)}
+                  </span>
+                )}
               </div>
               <span className="text-xs text-text-secondary">
                 Booked {format(new Date(booking.createdAt), "MMM d")}
               </span>
             </div>
+
+            {/* Quick Actions */}
+            {quickActions.length > 0 && (
+              <div
+                className="mt-3 pt-3 border-t border-border flex gap-2"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {quickActions.includes("view_proposal") && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={(e) => handleQuickAction("view_proposal", e)}
+                  >
+                    <FileText className="h-4 w-4 mr-1" />
+                    View Proposal
+                  </Button>
+                )}
+                {quickActions.includes("pay_now") && (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={(e) => handleQuickAction("pay_now", e)}
+                  >
+                    <CreditCard className="h-4 w-4 mr-1" />
+                    Pay Now
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Arrow */}
