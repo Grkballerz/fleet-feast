@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { BlogPost } from "@/lib/blog-data";
+import { MainLayout } from "@/components/layout/MainLayout";
 
 interface BlogClientProps {
   posts: BlogPost[];
@@ -12,6 +13,7 @@ export function BlogClient({ posts }: BlogClientProps) {
   const regularPosts = posts.filter((post) => !post.featured);
 
   return (
+    <MainLayout>
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-orange-500 to-orange-600 text-white py-16">
@@ -85,6 +87,7 @@ export function BlogClient({ posts }: BlogClientProps) {
         </div>
       </section>
     </div>
+    </MainLayout>
   );
 }
 

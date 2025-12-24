@@ -5,6 +5,7 @@ import { ArrowLeft, Calendar, Clock, User, Tag } from "lucide-react";
 import { BlogPost } from "@/lib/blog-data";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { MainLayout } from "@/components/layout/MainLayout";
 
 interface BlogPostClientProps {
   post: BlogPost;
@@ -22,6 +23,7 @@ export function BlogPostClient({ post, relatedPosts }: BlogPostClientProps) {
   );
 
   return (
+    <MainLayout>
     <div className="min-h-screen bg-gray-50">
       {/* Back to Blog Link */}
       <div className="bg-white border-b">
@@ -255,6 +257,7 @@ export function BlogPostClient({ post, relatedPosts }: BlogPostClientProps) {
         </div>
       </section>
     </div>
+    </MainLayout>
   );
 }
 
