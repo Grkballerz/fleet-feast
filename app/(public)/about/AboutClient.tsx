@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { TruckIcon, Shield, Star, Clock, Users, Heart, Zap, Award, MapPin } from "lucide-react";
+import { MainLayout } from "@/components/layout/MainLayout";
 
 export function AboutClient() {
   const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
@@ -64,6 +65,7 @@ export function AboutClient() {
   ];
 
   return (
+    <MainLayout>
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
@@ -378,5 +380,6 @@ export function AboutClient() {
         </div>
       </section>
     </div>
+    </MainLayout>
   );
 }
