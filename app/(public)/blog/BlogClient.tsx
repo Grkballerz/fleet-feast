@@ -112,9 +112,10 @@ function BlogCard({ post, featured = false }: BlogCardProps) {
       className="group bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow"
     >
       {/* Featured Image */}
-      <div
-        className="h-48 w-full"
-        style={{ background: post.featuredImage }}
+      <img
+        src={post.featuredImage}
+        alt={post.title}
+        className="h-48 w-full object-cover"
       />
 
       {/* Content */}

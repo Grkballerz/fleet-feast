@@ -41,7 +41,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2024-01-15",
     readTime: 8,
     category: "Event Planning",
-    featuredImage: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    featuredImage: "/images/blog/ultimate-guide-food-truck-catering.png",
     featured: true,
     seo: {
       title: "Ultimate Guide to Food Truck Catering | Fleet Feast",
@@ -277,7 +277,7 @@ Ready to get started? [Browse food trucks on Fleet Feast](/search) and find the 
     publishedAt: "2024-01-10",
     readTime: 7,
     category: "Corporate Events",
-    featuredImage: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+    featuredImage: "/images/blog/corporate-event-food-trucks.png",
     seo: {
       title: "Corporate Event Food Trucks Guide | Fleet Feast",
       description: "Plan successful corporate events with food trucks. Expert advice for HR and event coordinators on vendor selection, budgeting, and logistics.",
@@ -633,7 +633,7 @@ Ready to start planning? [Search for corporate-friendly food trucks on Fleet Fea
     publishedAt: "2024-01-05",
     readTime: 9,
     category: "Weddings",
-    featuredImage: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
+    featuredImage: "/images/blog/wedding-food-truck-ideas.png",
     seo: {
       title: "Wedding Food Truck Ideas & Tips | Fleet Feast",
       description: "Plan your dream wedding with food trucks. Creative ideas, real examples, budget tips, and expert advice for couples choosing mobile catering.",
@@ -1123,7 +1123,7 @@ Ready to explore food trucks for your wedding? [Browse wedding-friendly vendors 
     publishedAt: "2023-12-28",
     readTime: 10,
     category: "Business Guide",
-    featuredImage: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+    featuredImage: "/images/blog/starting-food-truck-business-nyc.png",
     seo: {
       title: "Start a Food Truck Business in NYC | Complete Guide",
       description: "Launch your NYC food truck business with this comprehensive guide covering permits, costs, locations, regulations, and expert tips for success.",
@@ -1701,7 +1701,7 @@ Ready to take the plunge? Start planning today, and when you're ready to expand 
     publishedAt: "2023-12-20",
     readTime: 6,
     category: "Cuisine Guides",
-    featuredImage: "linear-gradient(135deg, #ff6b6b 0%, #feca57 100%)",
+    featuredImage: "/images/blog/top-food-truck-cuisines-events.png",
     seo: {
       title: "Top Food Truck Cuisines for Events 2024 | Fleet Feast",
       description: "Explore the best food truck cuisine types for events: Mexican, BBQ, Asian fusion, gourmet burgers, and more. Menu ideas, pricing, and booking tips.",

@@ -93,9 +93,10 @@ export function BlogPostClient({ post, relatedPosts }: BlogPostClientProps) {
       <section className="bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <div
-              className="w-full h-96 rounded-lg"
-              style={{ background: post.featuredImage }}
+            <img
+              src={post.featuredImage}
+              alt={post.title}
+              className="w-full h-96 rounded-lg object-cover"
             />
           </div>
         </div>
@@ -271,9 +272,10 @@ function RelatedPostCard({ post }: RelatedPostCardProps) {
       href={`/blog/${post.slug}`}
       className="group bg-gray-50 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
     >
-      <div
-        className="h-32 w-full"
-        style={{ background: post.featuredImage }}
+      <img
+        src={post.featuredImage}
+        alt={post.title}
+        className="h-32 w-full object-cover"
       />
       <div className="p-4">
         <span className="text-xs font-semibold text-orange-600">
