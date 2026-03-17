@@ -120,7 +120,7 @@ export function BookingClient() {
   return (
     <div className="container-custom py-8">
       <div className="max-w-4xl mx-auto">
-        {/* Vendor Header */}
+        {/* Vendor Header with Quote Info */}
         <Card className="neo-card-glass neo-shadow rounded-neo mb-6">
           <CardHeader>
             <div className="flex items-center gap-4">
@@ -135,6 +135,11 @@ export function BookingClient() {
               </div>
             </div>
           </CardHeader>
+          <CardBody>
+            <p className="text-text-secondary">
+              Submit your event details below and {vendor.businessName} will review your request and send you a custom proposal with pricing and availability.
+            </p>
+          </CardBody>
         </Card>
 
         {/* Error Alert */}

@@ -100,7 +100,7 @@ export const CTASection: React.FC<CTASectionProps> = ({
               <Button
                 variant="secondary"
                 size="lg"
-                className="w-full sm:w-auto px-10 py-4 text-lg neo-btn bg-white text-primary hover:bg-gray-100 rounded-neo"
+                className="w-full sm:w-auto px-10 py-4 text-lg neo-btn bg-white text-primary hover:bg-gray-100 hover:text-red-600 rounded-neo"
               >
                 <span className="flex items-center gap-2">
                   {ctaText}

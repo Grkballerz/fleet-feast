@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { NavMenu, NavMenuItem } from "@/components/navigation/NavMenu";
-import { MobileDrawer } from "@/components/navigation/MobileDrawer";
 import { UserRole } from "@/types";
 
 export interface MobileNavProps {
@@ -22,7 +21,7 @@ export interface MobileNavProps {
 /**
  * MobileNav Component
  *
- * Mobile-only navigation bar with hamburger menu.
+ * Mobile-only navigation bar with popup menu.
  * Shows at the bottom of the screen for easy thumb access.
  *
  * @example
@@ -34,6 +33,39 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items, className }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { data: session } = useSession();
   const pathname = usePathname();
+  const menuRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        menuRef.current &&
+        buttonRef.current &&
+        !menuRef.current.contains(event.target as Node) &&
+        !buttonRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
+
+  // Close on escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [isOpen]);
 
   return (
     <>
@@ -43,13 +75,13 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items, className }) => {
         aria-label="Mobile bottom navigation"
         className={`lg:hidden fixed bottom-0 left-0 right-0 z-30 neo-glass-header border-t-3 border-black neo-shadow-lg ${className}`}
       >
-        <div className="grid grid-cols-4 gap-1 px-2 py-2">
+        <div className="flex justify-center gap-2 px-4 py-2">
           {/* Home */}
           <Link
             href="/"
             aria-current={pathname === "/" ? "page" : undefined}
             aria-label="Home"
-            className="flex flex-col items-center justify-center py-2 px-3 rounded-neo hover:bg-secondary hover:neo-shadow transition-all active:translate-x-0.5 active:translate-y-0.5"
+            className="flex flex-col items-center justify-center py-2 px-4 rounded-neo hover:bg-secondary hover:neo-shadow transition-all active:translate-x-0.5 active:translate-y-0.5"
           >
             <svg
               className="h-6 w-6 text-text-primary"
@@ -73,7 +105,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items, className }) => {
             href="/search"
             aria-current={pathname === "/search" ? "page" : undefined}
             aria-label="Search food trucks"
-            className="flex flex-col items-center justify-center py-2 px-3 rounded-neo hover:bg-secondary hover:neo-shadow transition-all active:translate-x-0.5 active:translate-y-0.5"
+            className="flex flex-col items-center justify-center py-2 px-4 rounded-neo hover:bg-secondary hover:neo-shadow transition-all active:translate-x-0.5 active:translate-y-0.5"
           >
             <svg
               className="h-6 w-6 text-text-primary"
@@ -102,7 +134,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items, className }) => {
               }
               aria-current={pathname?.includes("/messages") ? "page" : undefined}
               aria-label="Messages"
-              className="flex flex-col items-center justify-center py-2 px-3 rounded-neo hover:bg-secondary hover:neo-shadow transition-all active:translate-x-0.5 active:translate-y-0.5"
+              className="flex flex-col items-center justify-center py-2 px-4 rounded-neo hover:bg-secondary hover:neo-shadow transition-all active:translate-x-0.5 active:translate-y-0.5"
             >
               <svg
                 className="h-6 w-6 text-text-primary"
@@ -122,46 +154,89 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items, className }) => {
             </Link>
           )}
 
-          {/* Menu */}
-          <button
-            onClick={() => setIsOpen(true)}
-            aria-label="Open menu"
-            aria-expanded={isOpen}
-            aria-controls="mobile-menu-drawer"
-            className="flex flex-col items-center justify-center py-2 px-3 rounded-neo hover:bg-secondary hover:neo-shadow transition-all active:translate-x-0.5 active:translate-y-0.5"
-          >
-            <svg
-              className="h-6 w-6 text-text-primary"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2.5}
-              viewBox="0 0 24 24"
-              aria-hidden="true"
+          {/* Menu Button with Popup */}
+          <div className="relative">
+            <button
+              ref={buttonRef}
+              onClick={() => setIsOpen(!isOpen)}
+              aria-label="Open menu"
+              aria-expanded={isOpen}
+              aria-controls="mobile-menu-popup"
+              className={`flex flex-col items-center justify-center py-2 px-4 rounded-neo hover:bg-secondary hover:neo-shadow transition-all active:translate-x-0.5 active:translate-y-0.5 ${isOpen ? 'bg-secondary neo-shadow' : ''}`}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-            <span className="text-xs text-text-secondary mt-1 font-bold">Menu</span>
-          </button>
+              <svg
+                className="h-6 w-6 text-text-primary"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2.5}
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                {isOpen ? (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                ) : (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                )}
+              </svg>
+              <span className="text-xs text-text-secondary mt-1 font-bold">Menu</span>
+            </button>
+
+            {/* Popup Menu */}
+            {isOpen && (
+              <div
+                ref={menuRef}
+                id="mobile-menu-popup"
+                className="absolute bottom-full right-0 mb-2 w-64 bg-white border-3 border-black rounded-neo neo-shadow-lg animate-in fade-in slide-in-from-bottom-2 duration-200"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Navigation menu"
+              >
+                {/* Menu Header */}
+                <div className="flex items-center justify-between p-3 border-b-3 border-black bg-secondary/80">
+                  <h2 className="neo-heading text-sm text-text-primary">Menu</h2>
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    className="p-1 rounded-neo hover:bg-white/50 transition-all"
+                    aria-label="Close menu"
+                  >
+                    <svg
+                      className="h-5 w-5 text-text-primary"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Menu Content */}
+                <div className="p-2">
+                  <NavMenu
+                    items={items}
+                    userRole={session?.user.role}
+                    mobile
+                    onItemClick={() => setIsOpen(false)}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </nav>
-
-      {/* Mobile Drawer */}
-      <MobileDrawer
-        id="mobile-menu-drawer"
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-      >
-        <NavMenu
-          items={items}
-          userRole={session?.user.role}
-          mobile
-          onItemClick={() => setIsOpen(false)}
-        />
-      </MobileDrawer>
     </>
   );
 };

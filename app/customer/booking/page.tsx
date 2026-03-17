@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { BookingClient } from "./BookingClient";
 import { Spinner } from "@/components/ui/Spinner";
+import { MainLayout } from "@/components/layout/MainLayout";
 
 export const dynamic = "force-dynamic";
 
@@ -14,8 +15,10 @@ function BookingLoading() {
 
 export default function BookingPage() {
   return (
-    <Suspense fallback={<BookingLoading />}>
-      <BookingClient />
-    </Suspense>
+    <MainLayout>
+      <Suspense fallback={<BookingLoading />}>
+        <BookingClient />
+      </Suspense>
+    </MainLayout>
   );
 }

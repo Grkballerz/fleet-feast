@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader, CardBody } from "@/components/ui/Card";
 import { Alert } from "@/components/ui/Alert";
+import { AddressAutocomplete } from "@/components/ui/AddressAutocomplete";
 import { Calendar, MapPin, Users, Clock, FileText } from "lucide-react";
 import { CuisineType } from "@/types";
 
@@ -182,11 +183,6 @@ export function InquiryForm({ vendor, onSubmit, isLoading = false }: InquiryForm
 
   return (
     <div className="space-y-6">
-      {/* Info Alert */}
-      <Alert variant="info" title="Request a Quote">
-        Submit your event details below and {vendor.businessName} will review your request and send you a custom proposal with pricing and availability.
-      </Alert>
-
       {/* Success Alert */}
       {submitSuccess && (
         <Alert variant="success" title="Inquiry Submitted!" dismissible onDismiss={() => setSubmitSuccess(false)}>
@@ -239,9 +235,9 @@ export function InquiryForm({ vendor, onSubmit, isLoading = false }: InquiryForm
               <div className="md:col-span-2">
                 <label
                   htmlFor="eventType"
-                  className="mb-2 block text-sm font-bold text-white/90"
+                  className="mb-2 block text-sm font-bold text-text-primary"
                 >
-                  Event Type <span className="ml-1 text-red-400" aria-label="required">*</span>
+                  Event Type <span className="ml-1 text-red-500" aria-label="required">*</span>
                 </label>
                 <select
                   id="eventType"
@@ -263,9 +259,9 @@ export function InquiryForm({ vendor, onSubmit, isLoading = false }: InquiryForm
               <div>
                 <label
                   htmlFor="guestCount"
-                  className="mb-2 block text-sm font-bold text-white/90"
+                  className="mb-2 block text-sm font-bold text-text-primary"
                 >
-                  Guest Count <span className="ml-1 text-red-400" aria-label="required">*</span>
+                  Guest Count <span className="ml-1 text-red-500" aria-label="required">*</span>
                 </label>
                 <div className="relative">
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
@@ -285,7 +281,7 @@ export function InquiryForm({ vendor, onSubmit, isLoading = false }: InquiryForm
                     aria-invalid={!!formErrors.guestCount}
                   />
                 </div>
-                <p id="guestCount-helper" className="mt-1 text-sm text-white/60">
+                <p id="guestCount-helper" className="mt-1 text-sm text-text-secondary">
                   Min: {vendor.capacityMin}, Max: {vendor.capacityMax}
                 </p>
                 {formErrors.guestCount && (
@@ -307,14 +303,15 @@ export function InquiryForm({ vendor, onSubmit, isLoading = false }: InquiryForm
             </div>
           </CardHeader>
           <CardBody>
-            <Input
+            <AddressAutocomplete
               label="Event Address"
               value={formData.location}
-              onChange={(e) => handleFieldChange("location", e.target.value)}
+              onChange={(value) => handleFieldChange("location", value)}
               error={formErrors.location}
               required
-              placeholder="Enter the full event address"
-              helperText="Include street, city, and state"
+              placeholder="Start typing an address..."
+              helperText="Select from suggestions or enter full address"
+              country="us"
             />
           </CardBody>
         </Card>
