@@ -51,7 +51,33 @@ export default function MessagesPage() {
         }
 
         const data = await response.json();
-        setConversations(data.data || []);
+        const rawItems = Array.isArray(data.data) ? data.data : [];
+        // Transform API inbox items to match component expected shape
+        const mapped = rawItems.map((item: any) => ({
+          bookingId: item.bookingId,
+          otherParty: {
+            name: item.booking?.customer?.name || item.booking?.customer?.email || "Customer",
+            avatarUrl: item.booking?.customer?.avatarUrl,
+          },
+          booking: {
+            eventDate: item.booking?.eventDate || "",
+            status: item.booking?.status || "",
+            vendor: {
+              businessName: item.booking?.vendor?.businessName || "",
+            },
+          },
+          lastMessage: item.lastMessage ? {
+            content: item.lastMessage.content || "",
+            createdAt: item.lastMessage.createdAt || item.lastMessageAt || "",
+            isFromMe: false,
+          } : {
+            content: "",
+            createdAt: "",
+            isFromMe: false,
+          },
+          unreadCount: item.unreadCount || 0,
+        }));
+        setConversations(mapped);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load conversations");
       } finally {

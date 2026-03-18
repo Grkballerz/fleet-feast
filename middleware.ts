@@ -11,8 +11,13 @@ export default auth((request) => {
   const { pathname } = request.nextUrl;
 
   // Public routes that don't require authentication
-  const publicRoutes = ["/", "/search", "/vendors", "/about", "/contact", "/vendor/apply"];
-  const authRoutes = ["/login", "/register", "/auth/error"];
+  const publicRoutes = [
+    "/", "/search", "/about", "/contact", "/vendor/apply",
+    "/blog", "/cookies", "/faq", "/for-vendors", "/help",
+    "/how-it-works", "/privacy", "/refunds", "/safety", "/terms",
+    "/unauthorized",
+  ];
+  const authRoutes = ["/login", "/register", "/auth/error", "/forgot-password", "/reset-password", "/verify-email"];
 
   // Allow public routes
   if (
@@ -20,7 +25,9 @@ export default auth((request) => {
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/api/trucks") ||
     pathname.startsWith("/api/test-db") ||
+    pathname.startsWith("/api/health") ||
     pathname.startsWith("/trucks") ||
+    pathname.startsWith("/blog/") ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/static") ||
     pathname.startsWith("/vendor/apply")
@@ -39,11 +46,22 @@ export default auth((request) => {
     return NextResponse.redirect(new URL("/customer/dashboard", request.url));
   }
 
-  // Require authentication for protected routes
-  if (!session) {
-    if (!authRoutes.includes(pathname)) {
-      return NextResponse.redirect(new URL("/login", request.url));
-    }
+  // Only require authentication for known protected route prefixes
+  const protectedPrefixes = ["/admin", "/vendor", "/customer", "/api/admin", "/api/vendor", "/api/bookings", "/api/messages", "/api/payments", "/api/reviews", "/api/disputes", "/api/notifications"];
+  const isProtectedRoute = protectedPrefixes.some((prefix) => pathname.startsWith(prefix));
+
+  // Allow /vendor/apply as public even though it starts with /vendor
+  if (isProtectedRoute && pathname.startsWith("/vendor/apply")) {
+    return NextResponse.next();
+  }
+
+  if (!session && isProtectedRoute) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  // Let unknown paths through to Next.js (will show 404 if no page exists)
+  if (!session && !isProtectedRoute) {
+    return NextResponse.next();
   }
 
   // Role-based access control

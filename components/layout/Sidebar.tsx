@@ -66,8 +66,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Footer Info */}
       <div className="p-4 border-t-3 border-black">
-        <p className="text-xs text-text-secondary text-center font-semibold">
-          © 2024 FleetFeast
+        <p className="text-xs text-text-secondary text-center font-semibold" suppressHydrationWarning>
+          © {new Date().getFullYear()} FleetFeast
         </p>
       </div>
     </aside>

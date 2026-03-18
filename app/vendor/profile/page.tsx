@@ -79,7 +79,7 @@ export default function VendorProfilePage() {
       if (!res.ok) throw new Error("Failed to fetch profile");
 
       const data = await res.json();
-      const profileData = data.data;
+      const profileData = data.data?.profile || data.data;
 
       setProfile(profileData);
       setFormData({
@@ -467,7 +467,7 @@ export default function VendorProfilePage() {
               Truck Photos
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {profile?.truckPhotoUrls.map((url, index) => (
+              {(profile?.truckPhotoUrls || []).map((url, index) => (
                 <div
                   key={index}
                   className="aspect-square bg-background rounded-neo neo-border overflow-hidden"

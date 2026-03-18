@@ -23,10 +23,10 @@ interface Dispute {
 }
 
 interface DisputeStats {
-  total: number;
-  open: number;
-  resolved: number;
-  avgResolutionTime: number;
+  totalDisputes: number;
+  openDisputes: number;
+  resolvedDisputes: number;
+  avgResolutionTimeHours: number;
 }
 
 /**
@@ -133,7 +133,7 @@ export default function DisputesPage() {
                   Total Disputes
                 </p>
                 <p className="text-3xl font-bold text-text-primary">
-                  {stats.total}
+                  {stats.totalDisputes}
                 </p>
               </div>
             </Card>
@@ -142,7 +142,7 @@ export default function DisputesPage() {
                 <p className="text-sm font-medium text-text-secondary">
                   Open Disputes
                 </p>
-                <p className="text-3xl font-bold text-error">{stats.open}</p>
+                <p className="text-3xl font-bold text-error">{stats.openDisputes}</p>
               </div>
             </Card>
             <Card>
@@ -151,7 +151,7 @@ export default function DisputesPage() {
                   Resolved
                 </p>
                 <p className="text-3xl font-bold text-success">
-                  {stats.resolved}
+                  {stats.resolvedDisputes}
                 </p>
               </div>
             </Card>
@@ -161,7 +161,7 @@ export default function DisputesPage() {
                   Avg Resolution
                 </p>
                 <p className="text-3xl font-bold text-text-primary">
-                  {stats.avgResolutionTime}d
+                  {stats.avgResolutionTimeHours}h
                 </p>
               </div>
             </Card>
@@ -174,7 +174,7 @@ export default function DisputesPage() {
             variant={filter === "open" ? "primary" : "outline"}
             onClick={() => setFilter("open")}
           >
-            Open ({stats?.open || 0})
+            Open ({stats?.openDisputes || 0})
           </Button>
           <Button
             variant={filter === "all" ? "primary" : "outline"}
@@ -186,7 +186,7 @@ export default function DisputesPage() {
             variant={filter === "resolved" ? "primary" : "outline"}
             onClick={() => setFilter("resolved")}
           >
-            Resolved ({stats?.resolved || 0})
+            Resolved ({stats?.resolvedDisputes || 0})
           </Button>
         </div>
 

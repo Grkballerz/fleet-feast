@@ -56,7 +56,8 @@ export default function VendorPayoutsPage() {
       const profileRes = await fetch("/api/vendor/profile");
       if (profileRes.ok) {
         const profileData = await profileRes.json();
-        setStripeConnected(!!profileData.data?.stripeAccountId);
+        const profile = profileData.data?.profile || profileData.data;
+        setStripeConnected(!!profile?.stripeAccountId);
       }
 
       // Fetch payouts
@@ -64,7 +65,8 @@ export default function VendorPayoutsPage() {
       if (!payoutsRes.ok) throw new Error("Failed to fetch payouts");
 
       const payoutsData = await payoutsRes.json();
-      const payoutsList = payoutsData.data || [];
+      const rawData = payoutsData.data;
+      const payoutsList = Array.isArray(rawData) ? rawData : Array.isArray(rawData?.payouts) ? rawData.payouts : [];
       setPayouts(payoutsList);
 
       // Calculate summary

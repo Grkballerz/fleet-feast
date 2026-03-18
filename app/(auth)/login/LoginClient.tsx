@@ -61,7 +61,12 @@ export function LoginClient() {
       });
 
       if (result?.error) {
-        setError("Invalid email or password. Please try again.");
+        // Check if the error contains a specific message from authorize()
+        if (result.error === "CredentialsSignin") {
+          setError("Invalid email or password. Please try again.");
+        } else {
+          setError(result.error);
+        }
       } else if (result?.ok) {
         // Fetch session to get user role for redirect
         const sessionRes = await fetch("/api/auth/session");

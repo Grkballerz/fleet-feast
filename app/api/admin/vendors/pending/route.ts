@@ -6,8 +6,8 @@
  * Requires ADMIN role
  */
 
+import { NextResponse } from "next/server";
 import { requireAdmin, type AuthenticatedRequest } from "@/lib/middleware/auth.middleware";
-import { ApiResponses } from "@/lib/api-response";
 import { getPendingApplications } from "@/modules/vendor/vendor.service";
 
 /**
@@ -18,13 +18,13 @@ async function handleGET(req: AuthenticatedRequest) {
     // Get pending applications
     const applications = await getPendingApplications();
 
-    return ApiResponses.ok({
+    return NextResponse.json({
       applications: applications.map((app) => ({
         id: app.id,
         userId: app.userId,
         userEmail: app.user.email,
         businessName: app.businessName,
-        cuisineType: app.cuisineType,
+        cuisineType: [app.cuisineType], // Frontend expects array
         description: app.description,
         priceRange: app.priceRange,
         capacityMin: app.capacityMin,
@@ -45,7 +45,10 @@ async function handleGET(req: AuthenticatedRequest) {
     console.error("[Admin Pending Vendors] Error:", error);
 
     // Handle unexpected errors
-    return ApiResponses.internalError("Failed to fetch pending applications");
+    return NextResponse.json(
+      { error: "Failed to fetch pending applications" },
+      { status: 500 }
+    );
   }
 }
 

@@ -56,11 +56,12 @@ export default function VendorCalendarPage() {
       setError(null);
 
       // Fetch availability
+      let availMap = new Map<string, DayAvailability>();
       const availRes = await fetch("/api/vendor/availability");
       if (availRes.ok) {
         const availData = await availRes.json();
-        const availMap = new Map<string, DayAvailability>();
-        (availData.data || []).forEach((item: any) => {
+        const availList = Array.isArray(availData.data) ? availData.data : Array.isArray(availData.data?.availability) ? availData.data.availability : [];
+        availList.forEach((item: any) => {
           availMap.set(item.date, {
             date: item.date,
             available: item.available,
@@ -74,7 +75,7 @@ export default function VendorCalendarPage() {
       const bookingsRes = await fetch("/api/bookings");
       if (bookingsRes.ok) {
         const bookingsData = await bookingsRes.json();
-        const bookingsList = bookingsData.data || [];
+        const bookingsList = Array.isArray(bookingsData.data) ? bookingsData.data : [];
         setBookings(bookingsList);
 
         // Count bookings per date

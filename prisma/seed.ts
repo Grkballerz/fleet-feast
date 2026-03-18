@@ -527,7 +527,7 @@ async function main() {
         totalAmount,
         platformFee,
         vendorPayout,
-        status: 'PENDING',
+        status: 'INQUIRY',
       },
       payment: {
         amount: totalAmount,
@@ -601,7 +601,7 @@ async function main() {
       totalAmount,
       platformFee,
       vendorPayout,
-      status: 'DISPUTED',
+      status: 'COMPLETED',
       acceptedAt: new Date(eventDate.getTime() - 14 * 24 * 60 * 60 * 1000),
       respondedAt: new Date(eventDate.getTime() - 14 * 24 * 60 * 60 * 1000),
     },

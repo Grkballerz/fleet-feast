@@ -130,7 +130,7 @@ export const authOptions: NextAuthConfig = {
       name: `next-auth.session-token`,
       options: {
         httpOnly: true,
-        sameSite: "strict",
+        sameSite: "lax",
         path: "/",
         secure: process.env.NODE_ENV === "production",
       },

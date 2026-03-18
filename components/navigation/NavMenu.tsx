@@ -106,6 +106,7 @@ export const vendorNavItems: NavMenuItem[] = [
   { label: "Payouts", href: "/vendor/payouts" },
   { label: "Messages", href: "/vendor/messages" },
   { label: "Profile", href: "/vendor/profile" },
+  { label: "Settings", href: "/vendor/settings/payouts" },
 ];
 
 export const adminNavItems: NavMenuItem[] = [
@@ -115,6 +116,7 @@ export const adminNavItems: NavMenuItem[] = [
   { label: "Violations", href: "/admin/violations" },
   { label: "Analytics", href: "/admin/analytics" },
   { label: "Users", href: "/admin/users" },
+  { label: "Payouts", href: "/admin/payouts" },
 ];
 
 export const publicNavItems: NavMenuItem[] = [

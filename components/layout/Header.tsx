@@ -78,12 +78,10 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
               </span>
             </Link>
 
-            {/* Desktop Navigation for non-authenticated users - WCAG 1.3.1, 2.4.1 */}
-            {!session && (
-              <nav className="hidden lg:flex" aria-label="Main navigation">
-                <NavMenu items={navItems} userRole={session?.user.role} />
-              </nav>
-            )}
+            {/* Desktop Navigation - WCAG 1.3.1, 2.4.1 */}
+            <nav className="hidden lg:flex" aria-label="Main navigation">
+              <NavMenu items={navItems} userRole={session?.user.role} />
+            </nav>
           </div>
 
           {/* Center: Search Bar (Desktop) */}

@@ -59,7 +59,7 @@ export default function ViolationsPage() {
       const res = await fetch(`/api/admin/violations?${params.toString()}`);
       if (res.ok) {
         const data = await res.json();
-        setViolations(data.violations || []);
+        setViolations(data.data || []);
       }
     } catch (error) {
       console.error("Failed to load violations:", error);
@@ -98,6 +98,7 @@ export default function ViolationsPage() {
   };
 
   const getSeverityBadge = (severity: string) => {
+    if (!severity) return <Badge variant="neutral">Unknown</Badge>;
     switch (severity.toUpperCase()) {
       case "LOW":
         return <Badge variant="neutral">Low</Badge>;
@@ -117,6 +118,7 @@ export default function ViolationsPage() {
   };
 
   const getStatusBadge = (status: string) => {
+    if (!status) return <Badge variant="neutral">Unknown</Badge>;
     switch (status.toUpperCase()) {
       case "PENDING":
         return <Badge variant="warning">Pending</Badge>;

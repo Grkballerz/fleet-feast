@@ -287,7 +287,7 @@ export function SearchClient() {
             <div className="flex items-center justify-center gap-8 mt-8 animate-fade-in-up delay-300">
               <div className="flex items-center gap-2 text-white/60">
                 <Sparkles className="w-4 h-4 text-primary" />
-                <span className="text-sm">500+ Verified Vendors</span>
+                <span className="text-sm">Verified Vendors</span>
               </div>
               <div className="w-1 h-1 rounded-full bg-white/30" />
               <div className="flex items-center gap-2 text-white/60">

@@ -77,9 +77,7 @@ export const Footer: React.FC<FooterProps> = ({ className }) => {
             {/* Social Media Links */}
             <div className="flex items-center gap-4">
               <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="#"
                 className="p-2 rounded-neo bg-gray-800 hover:bg-primary hover:text-white transition-all hover:-translate-y-0.5 hover:neo-shadow"
                 aria-label="Facebook"
               >
@@ -88,9 +86,7 @@ export const Footer: React.FC<FooterProps> = ({ className }) => {
                 </svg>
               </a>
               <a
-                href="https://twitter.com"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="#"
                 className="p-2 rounded-neo bg-gray-800 hover:bg-primary hover:text-white transition-all hover:-translate-y-0.5 hover:neo-shadow"
                 aria-label="Twitter"
               >
@@ -99,9 +95,7 @@ export const Footer: React.FC<FooterProps> = ({ className }) => {
                 </svg>
               </a>
               <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="#"
                 className="p-2 rounded-neo bg-gray-800 hover:bg-primary hover:text-white transition-all hover:-translate-y-0.5 hover:neo-shadow"
                 aria-label="Instagram"
               >

@@ -1,4 +1,4 @@
-import React from "react";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 
 /**
  * Vendor Settings Layout
@@ -12,10 +12,8 @@ export default function VendorSettingsLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-background py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        {children}
-      </div>
-    </div>
+    <DashboardLayout title="Settings">
+      {children}
+    </DashboardLayout>
   );
 }

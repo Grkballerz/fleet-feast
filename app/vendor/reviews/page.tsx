@@ -64,7 +64,7 @@ export default function VendorReviewsPage() {
       const profileRes = await fetch("/api/vendor/profile");
       if (!profileRes.ok) throw new Error("Failed to fetch vendor profile");
       const profileData = await profileRes.json();
-      const vendorId = profileData.data?.id;
+      const vendorId = profileData.data?.id || profileData.data?.profile?.id;
 
       if (!vendorId) throw new Error("Vendor profile not found");
 

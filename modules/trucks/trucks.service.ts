@@ -141,7 +141,7 @@ export async function searchTrucks(
       ) as rank
     `;
 
-    conditions.push(`
+    whereConditions.push(Prisma.sql`
       to_tsvector('english',
         COALESCE(v.business_name, '') || ' ' ||
         COALESCE(v.description, '') || ' ' ||
@@ -149,7 +149,7 @@ export async function searchTrucks(
                   FROM vendor_menus vm, jsonb_array_elements(vm.items) AS item
                   WHERE vm.vendor_id = v.id), '')
       )
-      @@ plainto_tsquery('english', ${Prisma.sql`${query}`})
+      @@ plainto_tsquery('english', ${query})
     `);
 
     // Default sort by relevance for search

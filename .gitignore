@@ -42,3 +42,7 @@ next-env.d.ts
 # prisma
 prisma/migrations/*_migration.sql
 nul
+
+# Dolt database files (added by bd init)
+.dolt/
+*.db

@@ -43,7 +43,8 @@ interface ConversationData {
     };
     customer: {
       id: string;
-      name: string;
+      name?: string;
+      email?: string;
     };
   };
   messages: Array<{
@@ -91,11 +92,12 @@ export default function MessageThreadPage() {
       }
 
       const data = await response.json();
-      setConversation(data.data);
+      const convoData = data.data || data;
+      setConversation(convoData);
 
       // Set current user ID from the conversation data (vendor in this case)
-      if (data.data?.booking?.vendor?.id) {
-        setCurrentUserId(data.data.booking.vendor.id);
+      if (convoData?.booking?.vendor?.id) {
+        setCurrentUserId(convoData.booking.vendor.id);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load conversation");
@@ -215,7 +217,7 @@ export default function MessageThreadPage() {
         {/* Conversation info */}
         <div className="flex-1 min-w-0">
           <h2 className="font-semibold text-text-primary truncate">
-            {booking?.customer?.name || "Customer"}
+            {booking?.customer?.name || booking?.customer?.email || "Customer"}
           </h2>
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm text-gray-500">

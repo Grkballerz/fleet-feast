@@ -53,6 +53,7 @@ export default function VendorDashboardPage() {
   const [todaysBookings, setTodaysBookings] = useState<BookingSummary[]>([]);
   const [pendingRequests, setPendingRequests] = useState<BookingSummary[]>([]);
   const [recentReviews, setRecentReviews] = useState<RecentReview[]>([]);
+  const [businessName, setBusinessName] = useState<string>("");
 
   useEffect(() => {
     fetchDashboardData();
@@ -100,11 +101,15 @@ export default function VendorDashboardPage() {
       // Fetch vendor profile for rating
       const profileRes = await fetch("/api/vendor/profile");
       const profileData = profileRes.ok ? await profileRes.json() : null;
-      const avgRating = profileData?.data?.averageRating || 0;
+      const vendorProfile = profileData?.data?.profile || profileData?.data;
+      const avgRating = vendorProfile?.averageRating || 0;
+      if (vendorProfile?.businessName) {
+        setBusinessName(vendorProfile.businessName);
+      }
 
       // Fetch recent reviews
-      if (profileData?.data?.id) {
-        const reviewsRes = await fetch(`/api/reviews/vendor/${profileData.data.id}?limit=3`);
+      if (vendorProfile?.id) {
+        const reviewsRes = await fetch(`/api/reviews/vendor/${vendorProfile.id}?limit=3`);
         if (reviewsRes.ok) {
           const reviewsData = await reviewsRes.json();
           setRecentReviews(reviewsData.data?.items || []);
@@ -159,7 +164,7 @@ export default function VendorDashboardPage() {
       {/* Welcome Message */}
       <div>
         <h2 className="text-2xl font-bold text-text-primary neo-heading">
-          Welcome back, {session?.user?.name || "Vendor"}!
+          Welcome back, {businessName || session?.user?.name || "Vendor"}!
         </h2>
         <p className="text-text-secondary mt-1">
           Here's what's happening with your food truck today.
